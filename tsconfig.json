@@ -15,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -39,7 +39,6 @@
   "exclude": [
     "node_modules",
     "legacy-landing",
-    "tailwind.config.ts",
     "postcss.config.js",
     "eslint.config.js"
   ]
