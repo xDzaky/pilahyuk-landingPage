@@ -1,0 +1,852 @@
+// prisma/schema.prisma
+// PilahYuk 2.0 — Full Database Schema
+// All PKs: UUID | Timestamps: UTC | Money & Weight: Decimal
+// Soft-delete ONLY on content & members (NOT transactions/ledger/audit)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ── ENUMS ──────────────────────────────────────────────────────────────────
+
+enum OrgType {
+  community
+  waste_bank
+  collector
+  recycler
+  artisan
+  school
+}
+
+enum OrgStatus {
+  unverified
+  pending_verification
+  verified
+  suspended
+}
+
+enum MemberStatus {
+  pending
+  active
+  revoked
+}
+
+enum CollectionMethod {
+  individual
+  collective
+  dropoff
+}
+
+enum CollectionStatus {
+  draft
+  submitted
+  confirmed
+  assigned
+  on_the_way
+  collected
+  received
+  completed
+  cancelled
+  disputed
+}
+
+enum WeighingStatus {
+  draft
+  confirmed
+  adjusted
+  void
+}
+
+enum SyncStatus {
+  pending
+  synced
+  failed
+  conflict
+}
+
+enum BatchStatus {
+  dibuat
+  diserahkan
+  diterima
+  ditolak
+  diproses
+  dipakai_ulang
+  residu
+  menunggu_bukti
+}
+
+enum BatchEventType {
+  dikumpulkan
+  ditimbang
+  digabung
+  diserahkan
+  diterima
+  ditolak
+  diproses
+  residu
+  dipakai_ulang
+}
+
+enum LedgerEntryType {
+  deposit
+  withdrawal
+  adjustment
+  reversal
+}
+
+enum ContentStatus {
+  draft
+  submitted
+  approved
+  revised
+  restricted
+  rejected
+  withdrawn
+}
+
+enum ContentAccessLevel {
+  publik
+  anggota
+  terbatas
+  privat
+}
+
+enum DisputeCategory {
+  berat
+  harga
+  kualitas
+  layanan
+  konten
+}
+
+enum DisputeStatus {
+  open
+  assigned
+  in_review
+  resolved
+  rejected
+}
+
+enum TaskStatus {
+  belum
+  berjalan
+  selesai
+  terlambat
+}
+
+enum MaterialCategory {
+  plastik_pet
+  plastik_lain
+  kertas
+  kardus
+  logam
+  kaca
+  organik
+  b3
+  lainnya
+}
+
+// ── IDENTITY ───────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String?   @unique
+  phone         String?   @unique
+  password_hash String?
+  status        String    @default("active") // active | suspended
+  created_at    DateTime  @default(now()) @db.Timestamptz
+  updated_at    DateTime  @updatedAt @db.Timestamptz
+
+  profile               UserProfile?
+  organization_members  OrganizationMember[]
+  waste_bank_memberships WasteBankMember[]
+  weighing_transactions WeighingTransaction[] @relation("OperatorTransactions")
+  ledger_entries        LedgerEntry[]         @relation("MemberLedger")
+  audit_logs            AuditLog[]            @relation("ActorLogs")
+  notifications         Notification[]
+  disputes_reported     Dispute[]             @relation("DisputeReporter")
+  content_contributors  ContentContributor[]
+  challenge_participants ChallengeParticipant[]
+  event_registrations   EventRegistration[]
+  tasks_assigned        Task[]                @relation("TaskAssignee")
+  collection_requests   CollectionRequest[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([status])
+  @@map("users")
+}
+
+model UserProfile {
+  id          String   @id @default(uuid())
+  user_id     String   @unique
+  avatar_url  String?
+  area_id     String?
+  preferences Json?
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  user User  @relation(fields: [user_id], references: [id])
+  area Area? @relation(fields: [area_id], references: [id])
+
+  @@map("user_profiles")
+}
+
+// ── ORGANIZATIONS ──────────────────────────────────────────────────────────
+
+model Organization {
+  id                String    @id @default(uuid())
+  name              String
+  type              OrgType
+  status            OrgStatus @default(unverified)
+  status_changed_at DateTime? @db.Timestamptz
+  verified_at       DateTime? @db.Timestamptz
+  area_id           String?
+  geometry          Json?     // PostGIS point stored as GeoJSON
+  created_at        DateTime  @default(now()) @db.Timestamptz
+  updated_at        DateTime  @updatedAt @db.Timestamptz
+  deleted_at        DateTime? @db.Timestamptz // soft-delete for community/member data
+
+  area               Area?                 @relation(fields: [area_id], references: [id])
+  members            OrganizationMember[]
+  waste_bank_members WasteBankMember[]
+  events             Event[]
+  tasks              Task[]
+  material_rules     MaterialRule[]
+  material_prices    MaterialPrice[]
+  collection_requests CollectionRequest[]
+  collection_assignments CollectionAssignment[]
+  weighing_transactions  WeighingTransaction[]
+  batches_origin     MaterialBatch[]       @relation("OriginOrg")
+  cultural_contents  CulturalContent[]
+  handover_from      HandoverRecord[]      @relation("FromOrg")
+  handover_to        HandoverRecord[]      @relation("ToOrg")
+
+  @@index([type])
+  @@index([status])
+  @@index([area_id])
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id              String       @id @default(uuid())
+  organization_id String
+  user_id         String
+  role_id         String
+  status          MemberStatus @default(pending)
+  status_changed_at DateTime?  @db.Timestamptz
+  joined_at       DateTime?    @db.Timestamptz
+  created_at      DateTime     @default(now()) @db.Timestamptz
+  deleted_at      DateTime?    @db.Timestamptz // soft-delete
+
+  organization Organization @relation(fields: [organization_id], references: [id])
+  user         User         @relation(fields: [user_id], references: [id])
+  role         Role         @relation(fields: [role_id], references: [id])
+
+  @@unique([organization_id, user_id, role_id])
+  @@index([organization_id])
+  @@index([user_id])
+  @@index([status])
+  @@map("organization_members")
+}
+
+model Role {
+  id             String   @id @default(uuid())
+  name           String   @unique
+  description    String?
+  created_at     DateTime @default(now()) @db.Timestamptz
+
+  permissions    Permission[]
+  members        OrganizationMember[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id             String   @id @default(uuid())
+  role_id        String
+  permission_key String
+  scope          String?  // "own_org" | "global" | specific scope
+  created_at     DateTime @default(now()) @db.Timestamptz
+
+  role Role @relation(fields: [role_id], references: [id])
+
+  @@unique([role_id, permission_key, scope])
+  @@map("permissions")
+}
+
+// ── GEOGRAPHY ──────────────────────────────────────────────────────────────
+
+model Area {
+  id        String   @id @default(uuid())
+  name      String
+  parent_id String?
+  geometry  Json?    // PostGIS polygon as GeoJSON
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  parent         Area?         @relation("AreaHierarchy", fields: [parent_id], references: [id])
+  children       Area[]        @relation("AreaHierarchy")
+  organizations  Organization[]
+  user_profiles  UserProfile[]
+  collection_requests CollectionRequest[]
+
+  @@map("areas")
+}
+
+// ── EVENTS & TASKS ─────────────────────────────────────────────────────────
+
+model Event {
+  id              String   @id @default(uuid())
+  organization_id String
+  title           String
+  description     String?
+  start_at        DateTime @db.Timestamptz
+  end_at          DateTime? @db.Timestamptz
+  location        String?
+  capacity        Int?
+  status          String   @default("upcoming") // upcoming | ongoing | done | cancelled
+  created_at      DateTime @default(now()) @db.Timestamptz
+
+  organization  Organization       @relation(fields: [organization_id], references: [id])
+  registrations EventRegistration[]
+
+  @@index([organization_id])
+  @@index([start_at])
+  @@index([status])
+  @@map("events")
+}
+
+model EventRegistration {
+  id           String    @id @default(uuid())
+  event_id     String
+  user_id      String
+  status       String    @default("registered") // registered | attended | cancelled
+  checked_in_at DateTime? @db.Timestamptz
+  created_at   DateTime  @default(now()) @db.Timestamptz
+
+  event Event @relation(fields: [event_id], references: [id])
+  user  User  @relation(fields: [user_id], references: [id])
+
+  @@unique([event_id, user_id])
+  @@map("event_registrations")
+}
+
+model Task {
+  id              String     @id @default(uuid())
+  organization_id String
+  title           String
+  description     String?
+  assignee_id     String?
+  pic_id          String?
+  due_at          DateTime?  @db.Timestamptz
+  status          TaskStatus @default(belum)
+  status_changed_at DateTime? @db.Timestamptz
+  evidence_url    String?
+  created_at      DateTime   @default(now()) @db.Timestamptz
+  updated_at      DateTime   @updatedAt @db.Timestamptz
+
+  organization Organization @relation(fields: [organization_id], references: [id])
+  assignee     User?        @relation("TaskAssignee", fields: [assignee_id], references: [id])
+
+  @@index([organization_id])
+  @@index([status])
+  @@index([due_at])
+  @@map("tasks")
+}
+
+// ── MATERIALS ──────────────────────────────────────────────────────────────
+
+model Material {
+  id          String           @id @default(uuid())
+  name        String
+  category    MaterialCategory
+  description String?
+  prep_guide  String?
+  created_at  DateTime         @default(now()) @db.Timestamptz
+
+  rules         MaterialRule[]
+  prices        MaterialPrice[]
+  collection_items CollectionItem[]
+  weighing_items   WeighingItem[]
+  batches          MaterialBatch[]
+
+  @@index([category])
+  @@map("materials")
+}
+
+model MaterialRule {
+  id              String    @id @default(uuid())
+  organization_id String
+  material_id     String
+  accepted        Boolean   @default(true)
+  conditions      String?
+  valid_from      DateTime  @db.Timestamptz
+  valid_to        DateTime? @db.Timestamptz
+  created_at      DateTime  @default(now()) @db.Timestamptz
+
+  organization Organization @relation(fields: [organization_id], references: [id])
+  material     Material     @relation(fields: [material_id], references: [id])
+
+  @@index([organization_id])
+  @@index([material_id])
+  @@map("material_rules")
+}
+
+model MaterialPrice {
+  id              String    @id @default(uuid())
+  organization_id String
+  material_id     String
+  price           Decimal   @db.Decimal(12, 2)
+  unit            String    @default("kg")
+  valid_from      DateTime  @db.Timestamptz
+  valid_to        DateTime? @db.Timestamptz
+  created_at      DateTime  @default(now()) @db.Timestamptz
+
+  organization Organization @relation(fields: [organization_id], references: [id])
+  material     Material     @relation(fields: [material_id], references: [id])
+
+  @@index([organization_id, material_id, valid_from])
+  @@map("material_prices")
+}
+
+// ── COLLECTIONS ────────────────────────────────────────────────────────────
+
+model CollectionRequest {
+  id              String           @id @default(uuid())
+  requester_id    String
+  organization_id String
+  method          CollectionMethod
+  area_id         String?
+  status          CollectionStatus @default(draft)
+  status_changed_at DateTime?      @db.Timestamptz
+  requested_at    DateTime         @default(now()) @db.Timestamptz
+  slot_start      DateTime?        @db.Timestamptz
+  slot_end        DateTime?        @db.Timestamptz
+  notes           String?
+  created_at      DateTime         @default(now()) @db.Timestamptz
+  updated_at      DateTime         @updatedAt @db.Timestamptz
+
+  requester    User         @relation(fields: [requester_id], references: [id])
+  organization Organization @relation(fields: [organization_id], references: [id])
+  area         Area?        @relation(fields: [area_id], references: [id])
+  items        CollectionItem[]
+  assignments  CollectionAssignment[]
+  handovers    HandoverRecord[]
+  disputes     Dispute[]
+
+  @@index([requester_id])
+  @@index([organization_id])
+  @@index([status])
+  @@index([requested_at])
+  @@map("collection_requests")
+}
+
+model CollectionItem {
+  id                   String   @id @default(uuid())
+  collection_request_id String
+  material_id          String
+  estimated_quantity   Decimal? @db.Decimal(10, 3)
+  actual_quantity      Decimal? @db.Decimal(10, 3)
+
+  collection_request CollectionRequest @relation(fields: [collection_request_id], references: [id])
+  material           Material          @relation(fields: [material_id], references: [id])
+
+  @@map("collection_items")
+}
+
+model CollectionAssignment {
+  id                   String   @id @default(uuid())
+  collection_request_id String
+  collector_id         String
+  assigned_at          DateTime @default(now()) @db.Timestamptz
+  status               String   @default("assigned")
+
+  collection_request CollectionRequest @relation(fields: [collection_request_id], references: [id])
+  collector          Organization      @relation(fields: [collector_id], references: [id])
+
+  @@map("collection_assignments")
+}
+
+model HandoverRecord {
+  id                   String   @id @default(uuid())
+  collection_request_id String?
+  batch_id             String?
+  from_org_id          String
+  to_org_id            String
+  quantity             Decimal  @db.Decimal(10, 3)
+  confirmed_by         String?
+  confirmed_at         DateTime? @db.Timestamptz
+  evidence_id          String?
+  party_confirmations  Json?
+  created_at           DateTime @default(now()) @db.Timestamptz
+
+  collection_request CollectionRequest? @relation(fields: [collection_request_id], references: [id])
+  batch              MaterialBatch?     @relation(fields: [batch_id], references: [id])
+  from_org           Organization       @relation("FromOrg", fields: [from_org_id], references: [id])
+  to_org             Organization       @relation("ToOrg", fields: [to_org_id], references: [id])
+
+  @@map("handover_records")
+}
+
+// ── WASTE BANK ─────────────────────────────────────────────────────────────
+
+model WasteBankMember {
+  id              String   @id @default(uuid())
+  organization_id String
+  user_id         String
+  member_code     String?
+  status          String   @default("active")
+  joined_at       DateTime @default(now()) @db.Timestamptz
+  deleted_at      DateTime? @db.Timestamptz
+
+  organization Organization @relation(fields: [organization_id], references: [id])
+  user         User         @relation(fields: [user_id], references: [id])
+
+  @@unique([organization_id, user_id])
+  @@map("waste_bank_members")
+}
+
+model WeighingTransaction {
+  id                String         @id @default(uuid())
+  organization_id   String
+  member_id         String
+  operator_id       String
+  transaction_at    DateTime       @default(now()) @db.Timestamptz
+  status            WeighingStatus @default(draft)
+  status_changed_at DateTime?      @db.Timestamptz
+  device_id         String?
+  is_offline_created Boolean       @default(false)
+  sync_status       SyncStatus?    @default(pending)
+  created_at        DateTime       @default(now()) @db.Timestamptz
+  updated_at        DateTime       @updatedAt @db.Timestamptz
+  // NOTE: No deletable — corrections via adjustments only
+
+  organization Organization          @relation(fields: [organization_id], references: [id])
+  member       User                  @relation("OperatorTransactions", fields: [operator_id], references: [id])
+  items        WeighingItem[]
+  adjustments  TransactionAdjustment[]
+  ledger_entries LedgerEntry[]
+
+  @@index([organization_id])
+  @@index([member_id])
+  @@index([status])
+  @@index([transaction_at])
+  @@index([sync_status])
+  @@map("weighing_transactions")
+}
+
+model WeighingItem {
+  id             String  @id @default(uuid())
+  transaction_id String
+  material_id    String
+  gross          Decimal @db.Decimal(10, 3)
+  tare           Decimal @db.Decimal(10, 3)
+  net            Decimal @db.Decimal(10, 3)  // gross - tare, server-computed
+  price_snapshot Decimal @db.Decimal(12, 2)   // price at time of transaction — IMMUTABLE
+  price_valid_from DateTime? @db.Timestamptz
+  value          Decimal @db.Decimal(14, 2)   // net * price_snapshot
+
+  transaction WeighingTransaction @relation(fields: [transaction_id], references: [id])
+  material    Material             @relation(fields: [material_id], references: [id])
+
+  @@map("weighing_items")
+}
+
+// ── LEDGER ─────────────────────────────────────────────────────────────────
+
+model LedgerEntry {
+  id             String          @id @default(uuid())
+  member_id      String
+  transaction_id String?
+  adjustment_id  String?
+  entry_type     LedgerEntryType
+  amount         Decimal         @db.Decimal(14, 2)
+  balance_after  Decimal         @db.Decimal(14, 2) // Always computed from SUM(ledger), never editable
+  created_at     DateTime        @default(now()) @db.Timestamptz
+  actor_id       String?
+  // APPEND-ONLY — no update/delete
+
+  member      User                   @relation("MemberLedger", fields: [member_id], references: [id])
+  transaction WeighingTransaction?   @relation(fields: [transaction_id], references: [id])
+  adjustment  TransactionAdjustment? @relation(fields: [adjustment_id], references: [id])
+
+  @@index([member_id])
+  @@index([transaction_id])
+  @@index([created_at])
+  @@map("ledger_entries")
+}
+
+model TransactionAdjustment {
+  id                      String   @id @default(uuid())
+  original_transaction_id String   // Always references original — NEVER deletes it
+  reason                  String
+  actor_id                String
+  created_at              DateTime @default(now()) @db.Timestamptz
+
+  original_transaction WeighingTransaction @relation(fields: [original_transaction_id], references: [id])
+  ledger_entries       LedgerEntry[]
+
+  @@map("transaction_adjustments")
+}
+
+// ── TRACEABILITY ───────────────────────────────────────────────────────────
+
+model MaterialBatch {
+  id            String      @id @default(uuid())
+  code          String      @unique // PY-YYYYMMDD-ORG-seq
+  qr_token      String?     @unique
+  origin_org_id String
+  material_id   String
+  quantity      Decimal     @db.Decimal(10, 3)
+  status        BatchStatus @default(dibuat)
+  status_changed_at DateTime? @db.Timestamptz
+  created_at    DateTime    @default(now()) @db.Timestamptz
+  updated_at    DateTime    @updatedAt @db.Timestamptz
+
+  origin_org  Organization   @relation("OriginOrg", fields: [origin_org_id], references: [id])
+  material    Material        @relation(fields: [material_id], references: [id])
+  events      BatchEvent[]
+  handovers   HandoverRecord[]
+
+  @@index([origin_org_id])
+  @@index([material_id])
+  @@index([status])
+  @@map("material_batches")
+}
+
+model BatchEvent {
+  id           String         @id @default(uuid())
+  batch_id     String
+  event_type   BatchEventType
+  actor_org_id String?
+  actor_user_id String?
+  occurred_at  DateTime       @default(now()) @db.Timestamptz
+  evidence_id  String?
+  payload      Json?          // weight, quality, notes, etc.
+  // APPEND-ONLY — no update/delete
+
+  batch MaterialBatch @relation(fields: [batch_id], references: [id])
+
+  @@index([batch_id])
+  @@index([occurred_at])
+  @@map("batch_events")
+}
+
+// ── CULTURAL CONTENT ───────────────────────────────────────────────────────
+
+model CulturalContent {
+  id              String             @id @default(uuid())
+  organization_id String
+  title           String
+  body            String?
+  media           Json?
+  access_level    ContentAccessLevel @default(publik)
+  status          ContentStatus      @default(draft)
+  status_changed_at DateTime?        @db.Timestamptz
+  review_notes    String?
+  created_at      DateTime           @default(now()) @db.Timestamptz
+  updated_at      DateTime           @updatedAt @db.Timestamptz
+  deleted_at      DateTime?          @db.Timestamptz // soft-delete
+
+  organization  Organization         @relation(fields: [organization_id], references: [id])
+  contributors  ContentContributor[]
+  consents      ContentConsent[]
+
+  @@index([organization_id])
+  @@index([status])
+  @@map("cultural_contents")
+}
+
+model ContentContributor {
+  id                     String   @id @default(uuid())
+  content_id             String
+  user_id                String?
+  name                   String
+  attribution_preference String?
+  created_at             DateTime @default(now()) @db.Timestamptz
+
+  content CulturalContent @relation(fields: [content_id], references: [id])
+  user    User?           @relation(fields: [user_id], references: [id])
+
+  @@map("content_contributors")
+}
+
+model ContentConsent {
+  id           String    @id @default(uuid())
+  content_id   String
+  consent_type String
+  scope        String?
+  granted_at   DateTime  @default(now()) @db.Timestamptz
+  revoked_at   DateTime? @db.Timestamptz
+
+  content CulturalContent @relation(fields: [content_id], references: [id])
+
+  @@map("content_consents")
+}
+
+// ── LEARNING & CHALLENGES ──────────────────────────────────────────────────
+
+model LearningModule {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  content     Json?
+  status      String   @default("draft")
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  progress LearningProgress[]
+
+  @@map("learning_modules")
+}
+
+model LearningProgress {
+  id        String   @id @default(uuid())
+  module_id String
+  user_id   String
+  completed_at DateTime? @db.Timestamptz
+  score     Int?
+
+  module LearningModule @relation(fields: [module_id], references: [id])
+
+  @@unique([module_id, user_id])
+  @@map("learning_progress")
+}
+
+model Challenge {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  start_at    DateTime @db.Timestamptz
+  end_at      DateTime @db.Timestamptz
+  status      String   @default("active")
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  participants ChallengeParticipant[]
+
+  @@map("challenges")
+}
+
+model ChallengeParticipant {
+  id           String   @id @default(uuid())
+  challenge_id String
+  user_id      String
+  score        Int      @default(0)
+  joined_at    DateTime @default(now()) @db.Timestamptz
+
+  challenge Challenge @relation(fields: [challenge_id], references: [id])
+  user      User      @relation(fields: [user_id], references: [id])
+
+  @@unique([challenge_id, user_id])
+  @@map("challenge_participants")
+}
+
+// ── DISPUTES ───────────────────────────────────────────────────────────────
+
+model Dispute {
+  id                   String          @id @default(uuid())
+  reporter_id          String
+  related_type         String          // collection | transaction | batch | content | user
+  related_id           String
+  collection_request_id String?
+  reason               String
+  category             DisputeCategory
+  status               DisputeStatus   @default(open)
+  status_changed_at    DateTime?       @db.Timestamptz
+  assigned_to          String?
+  resolution           String?
+  created_at           DateTime        @default(now()) @db.Timestamptz
+  resolved_at          DateTime?       @db.Timestamptz
+
+  reporter           User               @relation("DisputeReporter", fields: [reporter_id], references: [id])
+  collection_request CollectionRequest? @relation(fields: [collection_request_id], references: [id])
+
+  @@index([reporter_id])
+  @@index([status])
+  @@index([category])
+  @@map("disputes")
+}
+
+// ── NOTIFICATIONS ──────────────────────────────────────────────────────────
+
+model Notification {
+  id         String    @id @default(uuid())
+  user_id    String
+  type       String
+  payload    Json?
+  read_at    DateTime? @db.Timestamptz
+  created_at DateTime  @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@index([read_at])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id         String   @id @default(uuid())
+  user_id    String   @unique
+  preferences Json
+  updated_at DateTime @updatedAt @db.Timestamptz
+
+  @@map("notification_preferences")
+}
+
+// ── AUDIT (APPEND-ONLY) ────────────────────────────────────────────────────
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actor_id    String?
+  action      String
+  entity_type String
+  entity_id   String
+  before      Json?
+  after       Json?
+  ip          String?
+  device      String?
+  occurred_at DateTime @default(now()) @db.Timestamptz
+  // NEVER update or delete this table
+
+  actor User? @relation("ActorLogs", fields: [actor_id], references: [id])
+
+  @@index([actor_id])
+  @@index([entity_type, entity_id])
+  @@index([occurred_at])
+  @@map("audit_logs")
+}
+
+// ── SYNC & IDEMPOTENCY ─────────────────────────────────────────────────────
+
+model SyncIdempotencyKey {
+  id                String   @id @default(uuid())
+  key               String   @unique
+  user_id           String?
+  endpoint          String
+  response_reference String?
+  processed_at      DateTime @default(now()) @db.Timestamptz
+
+  @@index([key])
+  @@index([user_id])
+  @@map("sync_idempotency_keys")
+}
+
+// ── MEDIA ASSETS ───────────────────────────────────────────────────────────
+
+model MediaAsset {
+  id          String   @id @default(uuid())
+  owner_id    String
+  storage_key String   @unique
+  visibility  String   @default("private")
+  mime_type   String
+  size_bytes  Int?
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  @@index([owner_id])
+  @@map("media_assets")
+}

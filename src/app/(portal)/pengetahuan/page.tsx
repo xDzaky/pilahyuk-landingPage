@@ -1,0 +1,9 @@
+// src/app/(portal)/pengetahuan/page.tsx
+export default function PengetahuanPage() {
+  return (
+    <div className="rounded-[16px] bg-white border border-[#E1E8E3] p-8 text-center">
+      <h1 className="text-xl font-bold text-[#1E2925] mb-2">Pengetahuan Budaya</h1>
+      <p className="text-[#66736D]">Kelola konten budaya lokal, review, persetujuan, dan hak atribusi kontributor.</p>
+    </div>
+  )
+}

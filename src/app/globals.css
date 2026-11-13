@@ -1,26 +1,186 @@
+/* Design tokens & globals — PilahYuk 2.0 */
+/* Plus Jakarta Sans loaded via layout.tsx <link> */
+
 @import "tailwindcss";
 
+/* ── Custom Tailwind Theme Tokens (Tailwind v4 syntax) ── */
+@theme {
+  --color-brand-900: #173F35;
+  --color-brand-700: #246B56;
+  --color-brand-500: #3D9274;
+  --color-teal-100:  #DDF3EC;
+  --color-canvas:    #F6F8F5;
+  --color-surface:   #FFFFFF;
+  --color-ink:       #1E2925;
+  --color-muted:     #66736D;
+  --color-border:    #E1E8E3;
+  --color-warning-bg:   #FBF1DF;
+  --color-warning-text: #A86712;
+  --color-danger-bg:    #FCEBEB;
+  --color-danger-text:  #B54747;
+  --color-info-bg:      #EBF3F9;
+  --color-info-text:    #286A9B;
+  --color-accent:       #E7A34B;
+
+  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+  --radius-card:    16px;
+  --radius-control: 12px;
+  --radius-pill:    9999px;
+}
+
+/* ── CSS Custom Properties ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand Palette */
+  --brand-900: #173F35;
+  --brand-700: #246B56;
+  --brand-500: #3D9274;
+  --teal-100:  #DDF3EC;
+
+  /* Surface & Canvas */
+  --canvas:    #F6F8F5;
+  --surface:   #FFFFFF;
+
+  /* Text */
+  --ink:       #1E2925;
+  --muted:     #66736D;
+
+  /* Borders */
+  --border:    #E1E8E3;
+
+  /* Semantic */
+  --warning-bg:   #FBF1DF;
+  --warning-text: #A86712;
+  --danger-bg:    #FCEBEB;
+  --danger-text:  #B54747;
+  --info-bg:      #EBF3F9;
+  --info-text:    #286A9B;
+  --accent:       #E7A34B;
+
+  /* Radius */
+  --radius-card:    16px;
+  --radius-control: 12px;
+  --radius-pill:    9999px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--canvas);
+  color: var(--ink);
 }
+
+/* Focus ring (accessible) */
+:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--brand-900);
+  color: white;
+  border-radius: var(--radius-control);
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Circular motif overlay for dark brand surfaces */
+.brand-motif {
+  position: relative;
+  overflow: hidden;
+}
+.brand-motif::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='100' cy='100' r='90' stroke='%23FFFFFF' stroke-width='1' fill='none' opacity='0.06'/%3E%3Ccircle cx='100' cy='100' r='70' stroke='%23FFFFFF' stroke-width='1' fill='none' opacity='0.06'/%3E%3Ccircle cx='100' cy='100' r='50' stroke='%23FFFFFF' stroke-width='1' fill='none' opacity='0.06'/%3E%3Ccircle cx='100' cy='100' r='30' stroke='%23FFFFFF' stroke-width='1' fill='none' opacity='0.06'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: 0;
+}
+.brand-motif > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Pulse animation for skeleton */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.skeleton {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background: var(--border);
+  border-radius: 4px;
+}
+
+/* Blinking dot for pending sync */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.sync-blink {
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton, .sync-blink {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Dashed border for "Perkiraan" (Estimated) */
+.estimated-border {
+  border: 2px dashed var(--muted);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* === PilahYuk UI polish === */
+/* Card hover — no shadow, translate only */
+.card-hover { transition: transform 0.1s ease; }
+.card-hover:hover { transform: translateY(-1px); }
+
+/* Faster row transitions */
+tbody tr { transition: background-color 0.1s; }
+
+/* Sidebar search input */
+.sidebar-search { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); }
