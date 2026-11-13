@@ -140,16 +140,19 @@ export function KpiCard({
         )}
       </div>
 
-      {/* Source / updated — single line, full text on hover */}
+      {/* Source / updated — source truncates, timestamp always visible */}
       {metaText && (
         <div
           title={metaText}
           className={cn(
-            "mt-2 truncate text-[11px] leading-snug",
+            "mt-2 flex items-baseline justify-between gap-2 text-[11px] leading-snug",
             dark ? "text-[#DDF3EC]/40" : "text-[#66736D]/60"
           )}
         >
-          {metaText}
+          <span className="truncate">{source}</span>
+          {updatedAt && (
+            <span className="shrink-0 tabular-nums">· {updatedAt}</span>
+          )}
         </div>
       )}
 
