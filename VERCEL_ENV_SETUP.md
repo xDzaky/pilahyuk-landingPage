@@ -66,8 +66,8 @@ openssl rand -base64 32
 | Key | Value |
 |-----|-------|
 | `CLOUDFLARE_R2_ENDPOINT` | `https://7d3bffb8f9d8c378e5ab1c8c85e90f9e.r2.cloudflarestorage.com` |
-| `CLOUDFLARE_R2_ACCESS_KEY` | `51dff263bfba22d168eb52f5855a912a` |
-| `CLOUDFLARE_R2_SECRET_KEY` | `f370bdcd360418dad8fd35552b9156beb6a6f741f18aa1e347e3ed8a7d3f50a9` |
+| `CLOUDFLARE_R2_ACCESS_KEY` | `[isi Access Key dari dashboard Cloudflare R2]` |
+| `CLOUDFLARE_R2_SECRET_KEY` | `[isi Secret Key dari dashboard Cloudflare R2]` |
 | `CLOUDFLARE_R2_BUCKET` | `pilahyuk-assets` |
 
 ---
@@ -76,8 +76,8 @@ openssl rand -base64 32
 
 | Key | Value |
 |-----|-------|
-| `SENTRY_DSN` | `https://a40e2665538cde378d66b700bf9ce8ee@o4512424423718912.ingest.us.sentry.io/4512424473264128` |
-| `NEXT_PUBLIC_SENTRY_DSN` | `https://a40e2665538cde378d66b700bf9ce8ee@o4512424423718912.ingest.us.sentry.io/4512424473264128` |
+| `SENTRY_DSN` | `[isi DSN dari project Sentry kamu]` |
+| `NEXT_PUBLIC_SENTRY_DSN` | `[sama dengan SENTRY_DSN]` |
 
 ---
 
@@ -85,7 +85,7 @@ openssl rand -base64 32
 
 | Key | Value |
 |-----|-------|
-| `NEXT_PUBLIC_GEOAPIFY_KEY` | `b737bf8a30354b318f927fd71739237c` |
+| `NEXT_PUBLIC_GEOAPIFY_KEY` | `[isi API key Geoapify kamu]` |
 
 ---
 
@@ -93,7 +93,7 @@ openssl rand -base64 32
 
 | Key | Value |
 |-----|-------|
-| `FONNTE_TOKEN` | `c6MRW9jtedV37WBcfg84uNbWFjsWNHGv5nFhKxAS` |
+| `FONNTE_TOKEN` | `[isi token device Fonnte kamu]` |
 
 ---
 
