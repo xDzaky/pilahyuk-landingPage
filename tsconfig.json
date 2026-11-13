@@ -38,29 +38,9 @@
   ],
   "exclude": [
     "node_modules",
-    "vite.config.ts",
+    "legacy-landing",
     "tailwind.config.ts",
     "postcss.config.js",
-    "eslint.config.js",
-    "src/App.tsx",
-    "src/App.css",
-    "src/main.tsx",
-    "src/index.css",
-    "src/vite-env.d.ts",
-    "src/pages",
-    "src/assets",
-    "src/hooks/use-toast.ts",
-    "src/hooks/use-mobile.tsx",
-    "src/components/CTA.tsx",
-    "src/components/Features.tsx",
-    "src/components/Footer.tsx",
-    "src/components/Hero.tsx",
-    "src/components/HowItWorks.tsx",
-    "src/components/Impact.tsx",
-    "src/components/NavLink.tsx",
-    "src/components/Navbar.tsx",
-    "src/components/Pricing.tsx",
-    "src/components/WasteEducation.tsx",
-    "src/components/ui"
+    "eslint.config.js"
   ]
 }
