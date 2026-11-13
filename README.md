@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PilahYuk 2.0 — Dashboard (Portal Mitra + Super Admin)
 
-## Getting Started
+Dashboard web + REST API untuk platform ekonomi sirkular PilahYuk 2.0. Satu proyek Next.js berisi portal mitra, console super admin, dan API yang dipakai aplikasi mobile.
 
-First, run the development server:
+**Production:** https://pilahyuk-dashboard.vercel.app
+
+## Tech stack
+
+| Lapisan | Teknologi |
+|---|---|
+| Framework | Next.js 16 (App Router) + TypeScript strict |
+| UI | Tailwind CSS 4 (CSS-first `@theme`), komponen custom, Lucide |
+| Chart | Recharts (`src/components/charts`) |
+| Server state | TanStack Query |
+| Database | PostgreSQL + Prisma (`prisma/schema.prisma`, belum terhubung ke runtime) |
+| Auth | JWT 8 jam (`jose`), cookie `pilahyuk_token` / Bearer token |
+
+## Menjalankan lokal
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # isi DATABASE_URL, JWT_SECRET, dll.
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Akun demo:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Role | Email | Password |
+|---|---|---|
+| Super Admin | `admin@pilahyuk.id` | `admin123` |
+| Operator Bank Sampah | `operator@banksampah.id` | `operator123` |
+| Pengurus Komunitas | `pengurus@komunitas.id` | `pengurus123` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Perintah
 
-## Learn More
+```bash
+npm run dev        # dev server
+npm run build      # production build
+npm run lint       # eslint (Next flat config)
+npm run db:push    # prisma db push
+npm run db:seed    # seed data awal
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Struktur
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/
+│   ├── (auth)/login
+│   ├── (portal)/          # dashboard mitra: dashboard, komunitas, bank-sampah, batch, dampak, ...
+│   ├── (admin)/admin/     # console super admin: overview, users, organisasi, verifikasi, audit, ...
+│   └── api/v1/            # REST API untuk portal + mobile app
+├── components/
+│   ├── charts/            # TrendChart, CategoryBarChart, StatusDonutChart, ProgressBar
+│   └── dashboard/         # KpiCard, AnswerBanner, DataTable, Timeline, BreakdownCard, ...
+├── lib/                   # api client/hooks, auth rbac, mock data, utils
+└── types/                 # DTO API
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Dokumentasi
 
-## Deploy on Vercel
+- [`docs/API.md`](docs/API.md) — panduan lengkap API untuk tim mobile: autentikasi, semua endpoint, contoh request/response, aturan bisnis, alur offline sync.
+- [`docs/IMPLEMENTASI-CHECKLIST.md`](docs/IMPLEMENTASI-CHECKLIST.md) — audit kesesuaian implementasi terhadap `PilahYuk_Dashboard_AI_Agent_Prompts.md` (Prompt 0–14) beserta prioritas perbaikan.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Status data
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Route API saat ini membaca `src/lib/mock-data.ts`; `POST` belum persisten. Skema Prisma sudah lengkap tetapi belum dipakai. Langkah migrasi ada di bagian akhir `docs/API.md`.
+
+## Deploy
+
+Project Vercel terhubung ke branch `main` (framework Next.js). Environment variables diatur di dashboard Vercel — jangan pernah commit nilai secret ke repo.

@@ -269,9 +269,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* ── MAIN CONTENT AREA ── */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="sticky top-0 z-20 shrink-0 bg-[#0D2920] border-b border-white/10 h-14 flex items-center px-4 sm:px-6 gap-4">
+        <header className="sticky top-0 z-20 shrink-0 bg-white border-b border-[#E1E8E3] h-16 flex items-center px-4 sm:px-6 gap-4">
           <button
-            className="lg:hidden text-white/60 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+            className="lg:hidden text-[#1E2925] hover:bg-[#F6F8F5] p-2 rounded-[12px] transition-colors"
             onClick={() => setMobileOpen(true)}
             aria-label="Buka navigasi admin"
           >
@@ -279,8 +279,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
 
           <div className="flex items-center gap-2">
-            <span className="text-white font-semibold text-sm">Console Super Admin</span>
-            <span className="hidden sm:inline-block px-2 py-0.5 bg-white/10 rounded-full text-[10px] text-white/70 font-mono">
+            <span className="text-[#1E2925] font-semibold text-sm">Console Super Admin</span>
+            <span className="hidden sm:inline-block px-2 py-0.5 bg-[#F6F8F5] border border-[#E1E8E3] rounded-full text-[10px] text-[#66736D] font-mono">
               v2.0-stable
             </span>
           </div>
@@ -292,14 +292,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 onClick={() => { setNotifOpen(prev => !prev); setProfileOpen(false) }}
                 className={cn(
                   "relative p-2 rounded-lg transition-colors focus:outline-none",
-                  notifOpen ? "bg-white/20 text-white" : "text-white/60 hover:text-white hover:bg-white/10"
+                  notifOpen ? "bg-[#DDF3EC] text-[#173F35]" : "text-[#66736D] hover:text-[#1E2925] hover:bg-[#F6F8F5]"
                 )}
                 aria-label={`Alert sistem (${unreadCount} belum dibaca)`}
                 aria-expanded={notifOpen}
               >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-[#0D2920]">
+                  <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
                     {unreadCount}
                   </span>
                 )}
@@ -308,12 +308,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {/* Admin Notification Panel */}
               {notifOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-[#122B22] border border-white/15 rounded-[16px] shadow-2xl overflow-hidden z-50 text-white"
-                  style={{ boxShadow: "0 10px 32px rgba(0,0,0,0.4)" }}
+                  className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-[#E1E8E3] rounded-[16px] overflow-hidden z-50 text-[#1E2925]"
+                  style={{ boxShadow: "0 10px 32px rgba(23,63,53,0.12)" }}
                 >
-                  <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+                  <div className="px-4 py-3 border-b border-[#E1E8E3] flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-white">System Alerts</span>
+                      <span className="text-sm font-bold text-[#1E2925]">System Alerts</span>
                       {unreadCount > 0 && (
                         <span className="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">
                           {unreadCount} baru
@@ -323,7 +323,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     {unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllRead}
-                        className="text-xs text-[#DDF3EC]/70 hover:text-white font-medium transition-colors"
+                        className="text-xs text-[#246B56] hover:text-[#173F35] font-semibold transition-colors"
                       >
                         Tandai semua dibaca
                       </button>
@@ -331,12 +331,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </div>
 
                   {/* Filter Tabs */}
-                  <div className="flex border-b border-white/10 bg-black/20 px-3 pt-1">
+                  <div className="flex border-b border-[#E1E8E3] bg-[#F6F8F5] px-3 pt-1">
                     <button
                       onClick={() => setNotifFilter("all")}
                       className={cn(
                         "px-3 py-1.5 text-xs font-medium border-b-2 transition-colors",
-                        notifFilter === "all" ? "border-white text-white font-bold" : "border-transparent text-white/50 hover:text-white"
+                        notifFilter === "all" ? "border-[#173F35] text-[#173F35] font-bold" : "border-transparent text-[#66736D] hover:text-[#1E2925]"
                       )}
                     >
                       Semua ({notifications.length})
@@ -345,7 +345,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       onClick={() => setNotifFilter("unread")}
                       className={cn(
                         "px-3 py-1.5 text-xs font-medium border-b-2 transition-colors",
-                        notifFilter === "unread" ? "border-white text-white font-bold" : "border-transparent text-white/50 hover:text-white"
+                        notifFilter === "unread" ? "border-[#173F35] text-[#173F35] font-bold" : "border-transparent text-[#66736D] hover:text-[#1E2925]"
                       )}
                     >
                       Belum Dibaca ({unreadCount})
@@ -353,7 +353,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </div>
 
                   {/* Notifications List */}
-                  <div className="max-h-72 overflow-y-auto divide-y divide-white/5">
+                  <div className="max-h-72 overflow-y-auto divide-y divide-[#E1E8E3]">
                     {filteredNotifs.length > 0 ? (
                       filteredNotifs.map(n => {
                         const icon =
@@ -368,18 +368,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             onClick={() => handleNotificationClick(n.id, n.link)}
                             className={cn(
                               "w-full flex items-start gap-3 px-4 py-3 text-left transition-colors cursor-pointer group",
-                              n.read ? "hover:bg-white/5 opacity-60" : "bg-white/5 hover:bg-white/10"
+                              n.read ? "bg-white hover:bg-[#F6F8F5]" : "bg-[#F4FAF7] hover:bg-[#EDF7F2]"
                             )}
                           >
                             <div className="mt-0.5 shrink-0">{icon}</div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-xs font-semibold text-white group-hover:text-[#DDF3EC] transition-colors truncate">
+                              <div className="text-xs font-semibold text-[#1E2925] group-hover:text-[#246B56] transition-colors truncate">
                                 {n.title}
                               </div>
-                              <div className="text-[11px] text-white/50 mt-0.5 leading-snug line-clamp-2">
+                              <div className="text-[11px] text-[#66736D] mt-0.5 leading-snug line-clamp-2">
                                 {n.desc}
                               </div>
-                              <div className="text-[10px] text-white/30 mt-1">{n.time}</div>
+                              <div className="text-[10px] text-[#66736D]/70 mt-1">{n.time}</div>
                             </div>
                             {!n.read && (
                               <div className="w-2 h-2 rounded-full bg-red-400 mt-1 shrink-0" />
@@ -388,17 +388,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         )
                       })
                     ) : (
-                      <div className="py-6 text-center text-xs text-white/40">
+                      <div className="py-8 text-center text-xs text-[#66736D]">
                         Tidak ada log alert
                       </div>
                     )}
                   </div>
 
-                  <div className="px-4 py-2 border-t border-white/10 bg-black/20 text-center">
+                  <div className="px-4 py-2.5 border-t border-[#E1E8E3] bg-[#F6F8F5] text-center">
                     <Link
                       href="/admin/audit"
                       onClick={() => setNotifOpen(false)}
-                      className="text-xs font-medium text-[#DDF3EC]/70 hover:text-white transition-colors"
+                      className="text-xs font-semibold text-[#246B56] hover:text-[#173F35] transition-colors"
                     >
                       Buka Audit Trail Lengkap →
                     </Link>
@@ -413,31 +413,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 onClick={() => { setProfileOpen(prev => !prev); setNotifOpen(false) }}
                 className={cn(
                   "flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors focus:outline-none group",
-                  profileOpen ? "bg-white/15" : "hover:bg-white/10"
+                  profileOpen ? "bg-[#DDF3EC]" : "hover:bg-[#F6F8F5]"
                 )}
                 aria-label="Menu akun Super Admin"
                 aria-expanded={profileOpen}
               >
-                <div className="w-7 h-7 bg-red-500/20 border border-red-500/30 rounded-full flex items-center justify-center shrink-0">
-                  <span className="text-red-300 text-xs font-bold">SA</span>
+                <div className="w-8 h-8 bg-[#173F35] border border-[#246B56] rounded-full flex items-center justify-center shrink-0">
+                  <span className="text-white text-xs font-bold">SA</span>
                 </div>
-                <span className="hidden sm:block text-xs font-medium text-white/90">Super Admin</span>
+                <span className="hidden sm:block text-xs font-semibold text-[#1E2925]">Super Admin</span>
                 <ChevronDown className={cn(
-                  "w-3.5 h-3.5 text-white/50 transition-transform duration-200 group-hover:text-white",
-                  profileOpen && "rotate-180 text-white"
+                  "w-3.5 h-3.5 text-[#66736D] transition-transform duration-200 group-hover:text-[#1E2925]",
+                  profileOpen && "rotate-180 text-[#173F35]"
                 )} />
               </button>
 
               {/* Dropdown Menu */}
               {profileOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2 w-56 bg-[#122B22] border border-white/15 rounded-[16px] shadow-2xl overflow-hidden z-50 text-white"
-                  style={{ boxShadow: "0 10px 32px rgba(0,0,0,0.4)" }}
+                  className="absolute right-0 top-full mt-2 w-56 bg-white border border-[#E1E8E3] rounded-[16px] overflow-hidden z-50 text-[#1E2925]"
+                  style={{ boxShadow: "0 10px 32px rgba(23,63,53,0.12)" }}
                 >
-                  <div className="p-3.5 border-b border-white/10 bg-black/20">
-                    <div className="text-xs font-bold text-white">Ahmad Fauzan</div>
-                    <div className="text-[11px] text-white/50">admin@pilahyuk.id</div>
-                    <div className="mt-1 inline-block px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 text-[10px] font-mono">
+                  <div className="p-3.5 border-b border-[#E1E8E3] bg-[#F6F8F5]">
+                    <div className="text-xs font-bold text-[#1E2925]">Ahmad Fauzan</div>
+                    <div className="text-[11px] text-[#66736D]">admin@pilahyuk.id</div>
+                    <div className="mt-1 inline-block px-1.5 py-0.5 rounded bg-[#FCEBEB] text-[#B54747] text-[10px] font-mono">
                       Role: super_admin
                     </div>
                   </div>
@@ -446,7 +446,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Link
                       href="/admin/users"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-white/70 hover:text-white hover:bg-white/10 rounded-[8px] transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#1E2925] hover:bg-[#F6F8F5] rounded-[8px] transition-colors"
                     >
                       <Users className="w-3.5 h-3.5" />
                       <span>Manajemen Pengguna</span>
@@ -454,7 +454,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Link
                       href="/admin/konfigurasi"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-white/70 hover:text-white hover:bg-white/10 rounded-[8px] transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#1E2925] hover:bg-[#F6F8F5] rounded-[8px] transition-colors"
                     >
                       <Settings className="w-3.5 h-3.5" />
                       <span>Konfigurasi Sistem</span>
@@ -462,17 +462,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Link
                       href="/admin/audit"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-white/70 hover:text-white hover:bg-white/10 rounded-[8px] transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#1E2925] hover:bg-[#F6F8F5] rounded-[8px] transition-colors"
                     >
                       <ScrollText className="w-3.5 h-3.5" />
                       <span>Log Audit</span>
                     </Link>
                   </div>
 
-                  <div className="border-t border-white/10 p-1.5">
+                  <div className="border-t border-[#E1E8E3] p-1.5">
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-[8px] transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#B54747] hover:bg-[#FCEBEB] rounded-[8px] transition-colors text-left"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Keluar dari Admin</span>

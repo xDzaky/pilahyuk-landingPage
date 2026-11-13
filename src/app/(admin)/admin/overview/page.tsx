@@ -22,7 +22,6 @@ import {
 const pendingVerif = MOCK_ORGANIZATIONS.filter(o => o.status === "pending_verification").length
 const activeDisputes = MOCK_DISPUTES.filter(d => ["open","assigned","in_review"].includes(d.status)).length
 const verifiedOrgs = MOCK_ORGANIZATIONS.filter(o => o.status === "verified").length
-const draftOrgs = MOCK_ORGANIZATIONS.filter(o => o.status === "unverified").length
 
 const ORG_TYPE_SEGMENTS = [
   { key: "waste_bank", label: "Bank Sampah", colorClass: "bg-[#173F35]" },
@@ -268,38 +267,15 @@ export default function AdminOverviewPage() {
         />
       </div>
 
-      {/* ── BREAKDOWN + TABS ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-4 lg:self-start lg:sticky lg:top-20">
-          <BreakdownCard
-            title="Komposisi Organisasi"
-            unit="organisasi"
-            segments={ORG_TYPE_SEGMENTS}
-            footer={
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px]">
-                <span className="inline-flex items-center gap-1.5 font-semibold text-[#246B56]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#246B56]" />
-                  {verifiedOrgs} terverifikasi
-                </span>
-                {pendingVerif > 0 && (
-                  <span className="inline-flex items-center gap-1.5 font-semibold text-[#A86712]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#E7A34B]" />
-                    {pendingVerif} menunggu
-                  </span>
-                )}
-                {draftOrgs > 0 && (
-                  <span className="inline-flex items-center gap-1.5 text-[#66736D]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#E1E8E3]" />
-                    {draftOrgs} draft
-                  </span>
-                )}
-              </div>
-            }
-          />
-        </div>
+      {/* ── KOMPOSISI ORGANISASI ── */}
+      <BreakdownCard
+        layout="inline"
+        title="Komposisi Organisasi"
+        unit="organisasi"
+        segments={ORG_TYPE_SEGMENTS}
+      />
 
-        <div className="lg:col-span-8">
-      {/* ── TABS ── */}
+      {/* ── TABS + TABEL ── */}
       <div>
         <div className="flex gap-1 border-b border-[#E1E8E3] mb-6">
           {([
@@ -384,8 +360,6 @@ export default function AdminOverviewPage() {
             />
           </div>
         )}
-      </div>
-        </div>
       </div>
     </div>
   )

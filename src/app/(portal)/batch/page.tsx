@@ -205,7 +205,7 @@ function BatchDetailDrawer({
               <div className="rounded-[12px] bg-[#FBF1DF] border border-[#F3DFBD] p-3 mb-4 flex gap-2">
                 <AlertTriangle className="w-4 h-4 text-[#A86712] shrink-0 mt-0.5" />
                 <p className="text-xs text-[#A86712]">
-                  <strong>Perhatian:</strong> Status "sudah didaur ulang" hanya akan ditampilkan
+                  <strong>Perhatian:</strong> Status &ldquo;sudah didaur ulang&rdquo; hanya akan ditampilkan
                   setelah bukti pemrosesan diunggah. Status saat ini: menunggu bukti.
                 </p>
               </div>

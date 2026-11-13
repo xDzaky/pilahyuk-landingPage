@@ -288,7 +288,7 @@ export default function KomunitasPage() {
                         {new Date(req.submitted_at).toLocaleDateString("id-ID", { day: "numeric", month: "long" })}
                       </div>
                       {req.message && (
-                        <div className="text-[11px] text-[#66736D] mt-1 italic truncate">"{req.message}"</div>
+                        <div className="text-[11px] text-[#66736D] mt-1 italic truncate">&ldquo;{req.message}&rdquo;</div>
                       )}
                       <div className="flex gap-2 mt-2">
                         <button

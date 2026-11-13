@@ -53,11 +53,13 @@ export function KpiCard({
     : null
 
   const isClickable = !!(href || onClick)
+  const metaText = [source, updatedAt && `diperbarui ${updatedAt}`].filter(Boolean).join(" · ")
 
   const content = (
     <div
       className={cn(
-        "relative rounded-[16px] p-5 border group",
+        // rigid vertical rhythm so every KPI card in a row lines up
+        "relative flex h-full flex-col rounded-[16px] p-5 border group",
         dark
           ? "bg-[#173F35] border-transparent text-white brand-motif"
           : "bg-white border-[#E1E8E3]",
@@ -67,89 +69,115 @@ export function KpiCard({
       )}
       onClick={onClick}
     >
-      {/* Label row */}
-      <div className="flex items-center justify-between mb-3">
-        <div className={cn(
-          "text-xs font-semibold uppercase tracking-wide",
-          dark ? "text-[#DDF3EC]/70" : "text-[#66736D]"
-        )}>
+      {/* Label row — fixed two-line height */}
+      <div className="flex items-start justify-between gap-2">
+        <div
+          className={cn(
+            "min-h-[32px] text-xs font-semibold uppercase leading-snug tracking-wide",
+            dark ? "text-[#DDF3EC]/70" : "text-[#66736D]"
+          )}
+        >
           {label}
         </div>
         {Icon && (
-          <div className={cn(
-            "p-1.5 rounded-xl",
-            dark ? "bg-white/10" : "bg-[#F6F8F5]"
-          )}>
-            <Icon className={cn(
-              "w-4 h-4",
-              dark ? "text-[#DDF3EC]" : "text-[#3D9274]"
-            )} />
+          <div
+            className={cn(
+              "shrink-0 rounded-xl p-1.5",
+              dark ? "bg-white/10" : "bg-[#F6F8F5]"
+            )}
+          >
+            <Icon
+              className={cn("h-4 w-4", dark ? "text-[#DDF3EC]" : "text-[#3D9274]")}
+            />
           </div>
         )}
       </div>
 
-      {/* Value */}
-      <div className="flex items-baseline gap-1.5 mb-2">
-        <span className={cn(
-          "font-black leading-none",
-          emphasis ? "text-3xl" : "text-2xl",
-          dark ? "text-white" : "text-[#1E2925]"
-        )}>
+      {/* Value — fixed line height across all cards */}
+      <div className="mt-3 flex h-9 items-baseline gap-1.5">
+        <span
+          className={cn(
+            "text-3xl font-black leading-none",
+            dark ? "text-white" : "text-[#1E2925]"
+          )}
+        >
           {typeof value === "number" ? value.toLocaleString("id-ID") : value}
         </span>
         {unit && (
-          <span className={cn(
-            "text-sm font-medium",
-            dark ? "text-[#DDF3EC]/80" : "text-[#66736D]"
-          )}>
+          <span
+            className={cn(
+              "text-sm font-medium",
+              dark ? "text-[#DDF3EC]/80" : "text-[#66736D]"
+            )}
+          >
             {unit}
           </span>
         )}
       </div>
 
-      {/* Trend row */}
-      {trend && TrendIcon && (
-        <div className={cn(
-          "flex items-center gap-1 text-xs font-medium mb-1",
+      {/* Trend — slot always reserved so cards without a trend stay aligned */}
+      <div
+        className={cn(
+          "mt-2 flex min-h-[16px] items-center gap-1 text-xs font-medium",
           trendPositive === true && (dark ? "text-[#DDF3EC]" : "text-[#246B56]"),
           trendPositive === false && "text-[#B54747]",
-          trendPositive === null && (dark ? "text-[#DDF3EC]/60" : "text-[#66736D]"),
-        )}>
-          <TrendIcon className="w-3 h-3" />
-          <span>{trend.direction === "up" ? "+" : trend.direction === "down" ? "-" : ""}{trend.value}%</span>
-          <span className={cn("font-normal", dark ? "text-[#DDF3EC]/50" : "text-[#66736D]")}>{trend.period}</span>
+          trendPositive === null && (dark ? "text-[#DDF3EC]/60" : "text-[#66736D]")
+        )}
+      >
+        {trend && TrendIcon && (
+          <>
+            <TrendIcon className="h-3 w-3" />
+            <span>
+              {trend.direction === "up" ? "+" : trend.direction === "down" ? "-" : ""}
+              {trend.value}%
+            </span>
+            <span
+              className={cn("font-normal", dark ? "text-[#DDF3EC]/50" : "text-[#66736D]")}
+            >
+              {trend.period}
+            </span>
+          </>
+        )}
+      </div>
+
+      {/* Source / updated — single line, full text on hover */}
+      {metaText && (
+        <div
+          title={metaText}
+          className={cn(
+            "mt-2 truncate text-[11px] leading-snug",
+            dark ? "text-[#DDF3EC]/40" : "text-[#66736D]/60"
+          )}
+        >
+          {metaText}
         </div>
       )}
 
-      {/* Source / updated */}
-      {(source || updatedAt) && (
-        <div className={cn(
-          "text-[11px] mt-auto",
-          dark ? "text-[#DDF3EC]/40" : "text-[#66736D]/60"
-        )}>
-          {source}{updatedAt && ` · diperbarui ${updatedAt}`}
-        </div>
-      )}
-
-      {/* Footer */}
-      {footer && (
-        <div className="mt-2 pt-2 border-t border-current/10">
-          {footer}
-        </div>
-      )}
+      {/* Footer — height is reserved even when empty */}
+      <div
+        className={cn(
+          "mt-auto pt-3",
+          footer && "border-t border-current/10",
+          !metaText && "min-h-[16px]"
+        )}
+      >
+        {footer ?? <div className="h-[16px]" aria-hidden />}
+      </div>
 
       {/* Navigate arrow */}
       {isClickable && (
-        <ArrowRight className={cn(
-          "absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-0 group-hover:opacity-40 transition-opacity",
-          dark ? "text-white" : "text-[#1E2925]"
-        )} />
+        <ArrowRight
+          className={cn(
+            "absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-40",
+            dark ? "text-white" : "text-[#1E2925]"
+          )}
+        />
       )}
     </div>
   )
 
   if (href) {
-    return <Link href={href} className="block">{content}</Link>
+    return <Link href={href} className="block h-full">{content}</Link>
   }
   return content
 }
