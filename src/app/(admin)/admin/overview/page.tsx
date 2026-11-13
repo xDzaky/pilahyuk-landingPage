@@ -8,7 +8,7 @@ import { KpiCard } from "@/components/dashboard/KpiCard"
 import { StatusBadge } from "@/components/dashboard/StatusBadge"
 import { DataTable, Column } from "@/components/dashboard/DataTable"
 import { FilterBar } from "@/components/dashboard/FilterBar"
-import { MetricList } from "@/components/dashboard/MetricList"
+import { BreakdownCard } from "@/components/dashboard/BreakdownCard"
 import { formatDateTime, timeAgo } from "@/lib/utils"
 import {
   MOCK_ORGANIZATIONS, MOCK_DISPUTES, MOCK_AUDIT_LOGS
@@ -22,6 +22,19 @@ import {
 const pendingVerif = MOCK_ORGANIZATIONS.filter(o => o.status === "pending_verification").length
 const activeDisputes = MOCK_DISPUTES.filter(d => ["open","assigned","in_review"].includes(d.status)).length
 const verifiedOrgs = MOCK_ORGANIZATIONS.filter(o => o.status === "verified").length
+const draftOrgs = MOCK_ORGANIZATIONS.filter(o => o.status === "unverified").length
+
+const ORG_TYPE_SEGMENTS = [
+  { key: "waste_bank", label: "Bank Sampah", colorClass: "bg-[#173F35]" },
+  { key: "community",  label: "Komunitas",   colorClass: "bg-[#2E7F66]" },
+  { key: "recycler",   label: "Pengolah",    colorClass: "bg-[#4FA089]" },
+  { key: "collector",  label: "Pengumpul",   colorClass: "bg-[#8BC4B2]" },
+  { key: "artisan",    label: "Perajin",     colorClass: "bg-[#D8ECE4]" },
+].map(t => ({
+  label: t.label,
+  colorClass: t.colorClass,
+  value: MOCK_ORGANIZATIONS.filter(o => o.type === t.key).length,
+}))
 
 type Org = Organization
 const ORG_COLUMNS: Column<Org>[] = [
@@ -257,19 +270,32 @@ export default function AdminOverviewPage() {
 
       {/* ── BREAKDOWN + TABS ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-4">
-          <div className="bg-white border border-[#E1E8E3] rounded-[16px] p-5 h-full">
-            <MetricList
-              title="Jenis Organisasi"
-              items={[
-                { label: "Bank Sampah", value: MOCK_ORGANIZATIONS.filter(o => o.type === "waste_bank").length, highlight: true },
-                { label: "Komunitas", value: MOCK_ORGANIZATIONS.filter(o => o.type === "community").length },
-                { label: "Terverifikasi", value: verifiedOrgs, trend: "up" },
-                { label: "Menunggu Verifikasi", value: pendingVerif, trend: pendingVerif > 0 ? "down" : "flat" },
-                { label: "Sengketa Aktif", value: activeDisputes, trend: activeDisputes > 0 ? "down" : "flat" },
-              ]}
-            />
-          </div>
+        <div className="lg:col-span-4 lg:self-start lg:sticky lg:top-20">
+          <BreakdownCard
+            title="Komposisi Organisasi"
+            unit="organisasi"
+            segments={ORG_TYPE_SEGMENTS}
+            footer={
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px]">
+                <span className="inline-flex items-center gap-1.5 font-semibold text-[#246B56]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#246B56]" />
+                  {verifiedOrgs} terverifikasi
+                </span>
+                {pendingVerif > 0 && (
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-[#A86712]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#E7A34B]" />
+                    {pendingVerif} menunggu
+                  </span>
+                )}
+                {draftOrgs > 0 && (
+                  <span className="inline-flex items-center gap-1.5 text-[#66736D]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#E1E8E3]" />
+                    {draftOrgs} draft
+                  </span>
+                )}
+              </div>
+            }
+          />
         </div>
 
         <div className="lg:col-span-8">
