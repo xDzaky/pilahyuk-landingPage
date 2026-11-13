@@ -6,19 +6,6 @@ const SECRET = new TextEncoder().encode(
 );
 
 const PUBLIC_PATHS = ["/login", "/api/v1/auth/login"];
-const ADMIN_PATHS = ["/admin"];
-const PORTAL_PATHS = [
-  "/dashboard",
-  "/komunitas",
-  "/bank-sampah",
-  "/batch",
-  "/dampak",
-  "/material",
-  "/pengumpulan",
-  "/pengetahuan",
-  "/bantuan",
-  "/pengaturan",
-];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -55,17 +42,18 @@ export async function proxy(req: NextRequest) {
   try {
     const { payload } = await jwtVerify(token, SECRET);
 
-    // Admin route protection
-    if (pathname.startsWith("/admin")) {
-      if (payload.role !== "super_admin") {
-        if (pathname.startsWith("/api/")) {
-          return NextResponse.json(
-            { error: { code: "FORBIDDEN", message: "Akses ditolak" } },
-            { status: 403 }
-          );
-        }
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+    // Admin protection — applies to both admin pages and admin API routes
+    const isAdminApi = pathname.startsWith("/api/v1/admin");
+    const isAdminPage = pathname.startsWith("/admin");
+
+    if ((isAdminApi || isAdminPage) && payload.role !== "super_admin") {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json(
+          { error: { code: "FORBIDDEN", message: "Akses ditolak" } },
+          { status: 403 }
+        );
       }
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
     // Inject user info to headers for downstream
