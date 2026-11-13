@@ -175,7 +175,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Navigation Links */}
           <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
             {ADMIN_NAV.map(item => {
-              const active = pathname === item.href || (item.href !== "/admin/overview" && pathname.startsWith(item.href))
+              const active = pathname === item.href || (item.href !== "/admin/overview" && (pathname ?? "").startsWith(item.href))
               const Icon = item.icon
               return (
                 <Link

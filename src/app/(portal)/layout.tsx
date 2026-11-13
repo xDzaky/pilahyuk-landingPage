@@ -316,7 +316,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                   </div>
                 )}
                 {group.items.map(item => {
-                  const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
+                  const active = pathname === item.href || (item.href !== "/dashboard" && (pathname ?? "").startsWith(item.href))
                   const Icon = item.icon
                   return (
                     <Link
