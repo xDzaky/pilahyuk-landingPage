@@ -1,38 +1,31 @@
-// src/app/api/v1/auth/otp/request/route.ts
-import { NextRequest, NextResponse } from "next/server"
-import { createOtp } from "@/server/auth/otp-store"
-import { normalizePhone } from "@/server/auth/user-store"
+import { NextRequest } from "next/server";
+import { route, readJson, ok, HttpError, getIp } from "@/server/http";
+import { enforceRateLimit } from "@/server/rate-limit";
+import { createOtp, isDevAuth, normalizePhone } from "@/server/auth/otp";
 
-export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({}))
-  const raw = typeof body.phone === "string" ? body.phone.trim() : ""
+export const POST = route(async (req: NextRequest) => {
+  const body = await readJson<{ phone?: unknown }>(req);
+  const raw = typeof body.phone === "string" ? body.phone.trim() : "";
+  if (!raw) throw new HttpError(400, "VALIDATION_ERROR", "Nomor WhatsApp wajib diisi", { phone: ["Wajib diisi"] });
 
-  if (!raw) {
-    return NextResponse.json(
-      { error: { code: "VALIDATION_ERROR", message: "Nomor WhatsApp wajib diisi", details: { phone: ["Wajib diisi"] } } },
-      { status: 400 }
-    )
+  const phone = normalizePhone(raw);
+  if (!/^08[1-9][0-9]{6,11}$/.test(phone)) {
+    throw new HttpError(400, "VALIDATION_ERROR", "Format nomor WhatsApp tidak valid", { phone: ["Contoh: 08123456789"] });
   }
 
-  const phone = normalizePhone(raw)
-  if (phone.length < 10) {
-    return NextResponse.json(
-      { error: { code: "VALIDATION_ERROR", message: "Format nomor WhatsApp tidak valid", details: { phone: ["Contoh: 08123456789"] } } },
-      { status: 400 }
-    )
-  }
+  await enforceRateLimit(`otp:ip:${getIp(req)}`, 30, 600);
+  await enforceRateLimit(`otp:phone:${phone}`, 5, 600);
 
-  const otp = createOtp(phone)
-
-  // Demo: WhatsApp gateway (Fonnte) belum aktif — kode dikembalikan agar bisa diuji.
-  return NextResponse.json({
-    data: {
+  try {
+    const otp = await createOtp(phone, "contact_verify");
+    return ok({
       sent: true,
       channel: "whatsapp",
       phone,
-      expires_in: otp.expires_in,
-      dev_code: otp.code,
-      note: "Kode OTP dikembalikan di dev_code sampai gateway WhatsApp aktif.",
-    },
-  })
-}
+      expires_in: otp.expiresIn,
+      ...(isDevAuth() ? { dev_code: otp.code } : {}),
+    });
+  } catch {
+    throw new HttpError(502, "GATEWAY_UNAVAILABLE", "Gateway WhatsApp belum siap. Coba lagi beberapa saat.");
+  }
+});

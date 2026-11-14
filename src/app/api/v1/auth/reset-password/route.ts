@@ -1,43 +1,54 @@
-// src/app/api/v1/auth/reset-password/route.ts
-import { NextRequest, NextResponse } from "next/server"
-import { consumeResetToken } from "@/server/auth/otp-store"
-import { findById, setPassword } from "@/server/auth/user-store"
+import { NextRequest } from "next/server";
+import { prisma } from "@/server/db";
+import { route, readJson, ok, HttpError, getIp } from "@/server/http";
+import { enforceRateLimit } from "@/server/rate-limit";
+import { hashPassword } from "@/server/auth/password";
+import { consumePasswordResetToken, normalizePhone, verifyOtpRecord } from "@/server/auth/otp";
+import { revokeAllUserTokens } from "@/server/auth/session";
+import { writeAudit } from "@/server/audit";
 
-export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({}))
-  const token = typeof body.token === "string" ? body.token.trim() : ""
-  const password = typeof body.password === "string" ? body.password : ""
+export const POST = route(async (req: NextRequest) => {
+  const body = await readJson<{ token?: unknown; identifier?: unknown; code?: unknown; password?: unknown }>(req);
+  const token = typeof body.token === "string" ? body.token.trim() : "";
+  const identifier = typeof body.identifier === "string" ? body.identifier.trim() : "";
+  const code = typeof body.code === "string" ? body.code.trim() : "";
+  const password = typeof body.password === "string" ? body.password : "";
 
-  const details: Record<string, string[]> = {}
-  if (!token) details.token = ["Token pemulihan wajib diisi"]
-  if (password.length < 8) details.password = ["Kata sandi minimal 8 karakter"]
-
-  if (Object.keys(details).length > 0) {
-    return NextResponse.json(
-      { error: { code: "VALIDATION_ERROR", message: "Data tidak valid", details } },
-      { status: 400 }
-    )
+  if (password.length < 8) {
+    throw new HttpError(400, "VALIDATION_ERROR", "Kata sandi minimal 8 karakter", { password: ["Minimal 8 karakter"] });
+  }
+  if (!token && !(identifier && code)) {
+    throw new HttpError(400, "VALIDATION_ERROR", "Kirim token, atau identifier + kode OTP");
   }
 
-  const reset = consumeResetToken(token)
-  if (!reset.ok) {
-    return NextResponse.json(
-      { error: { code: "INVALID_TOKEN", message: "Tautan pemulihan tidak valid atau sudah kedaluwarsa" } },
-      { status: 400 }
-    )
+  await enforceRateLimit(`reset:ip:${getIp(req)}`, 20, 900);
+  if (identifier) await enforceRateLimit(`reset:id:${identifier.toLowerCase()}`, 10, 900);
+
+  let userId: string | null = null;
+  if (token) {
+    userId = await consumePasswordResetToken(token);
+  } else {
+    const isEmail = identifier.includes("@");
+    const phone = isEmail ? identifier : normalizePhone(identifier);
+    const verified = await verifyOtpRecord(isEmail ? identifier.toLowerCase() : phone, code, "password_reset");
+    if (!verified.ok) throw new HttpError(400, verified.code, verified.message);
+    const user = await prisma.user.findFirst({
+      where: isEmail ? { email: identifier.toLowerCase() } : { phone },
+      select: { id: true },
+    });
+    userId = user?.id ?? null;
   }
 
-  const user = findById(reset.user_id)
-  if (!user) {
-    return NextResponse.json(
-      { error: { code: "NOT_FOUND", message: "Pengguna tidak ditemukan" } },
-      { status: 404 }
-    )
+  if (!userId) {
+    throw new HttpError(400, "INVALID_TOKEN", "Tautan atau kode pemulihan tidak valid atau sudah kedaluwarsa");
   }
 
-  setPassword(user, password)
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password_hash: await hashPassword(password) },
+  });
+  await revokeAllUserTokens(userId);
+  await writeAudit({ actorId: userId, action: "RESET_PASSWORD", entityType: "user", entityId: userId, req });
 
-  return NextResponse.json({
-    data: { reset: true, message: "Kata sandi berhasil diubah. Silakan masuk." },
-  })
-}
+  return ok({ reset: true, message: "Kata sandi berhasil diubah. Silakan masuk." });
+});

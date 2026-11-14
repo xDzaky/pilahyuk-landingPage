@@ -1,37 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { prisma } from "@/server/db";
+import { route, ok, num } from "@/server/http";
+import { requireAuth } from "@/server/auth/current-user";
+import { assertLedgerAccess } from "@/server/services/waste-bank";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const requesterId = req.headers.get("x-user-id");
-  const requesterRole = req.headers.get("x-user-role");
+export const GET = route(async (req: NextRequest, context) => {
+  const user = await requireAuth(req);
+  const { id } = await (context.params ?? Promise.resolve({ id: "" }));
+  await assertLedgerAccess(user, id);
 
-  const canView =
-    requesterId === id ||
-    ["operator_bank_sampah", "super_admin"].includes(requesterRole || "");
-
-  if (!canView) {
-    return NextResponse.json({ error: { code: "FORBIDDEN" } }, { status: 403 });
-  }
-
-  // Balance is ALWAYS computed from ledger SUM — never stored directly
-  const MOCK_BALANCES: Record<string, { credit: number; debit: number }> = {
-    "user-member-001": { credit: 19700, debit: 15000 },
-    "user-member-002": { credit: 45200, debit: 20000 },
-  };
-
-  const data = MOCK_BALANCES[id] || { credit: 0, debit: 0 };
-  const balance = data.credit - data.debit;
-
-  return NextResponse.json({
-    data: {
-      member_id: id,
-      total_credit_idr: data.credit,
-      total_debit_idr: data.debit,
-      computed_balance_idr: balance,
-      note: "Saldo dihitung dari akumulasi ledger, bukan field tersimpan",
-    },
+  const aggregate = await prisma.ledgerEntry.aggregate({
+    where: { member_id: id },
+    _sum: { amount: true },
+    _max: { created_at: true },
   });
-}
+
+  return ok({
+    member_id: id,
+    balance_idr: num(aggregate._sum.amount),
+    computed_from: "SUM(ledger_entries.amount)",
+    last_entry_at: aggregate._max.created_at,
+    currency: "IDR",
+  });
+});

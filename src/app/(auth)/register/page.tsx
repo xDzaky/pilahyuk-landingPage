@@ -72,12 +72,11 @@ export default function RegisterPage() {
         return
       }
 
-      localStorage.setItem("pilahyuk_token", data.data.token)
       localStorage.setItem("pilahyuk_user", JSON.stringify(data.data.user))
 
-      if (data.data.next_step === "verify_contact" && data.data.otp) {
+      if (data.data.next_step === "verify_contact") {
         setPhone(data.data.user.phone ?? "")
-        setDevCode(data.data.otp.dev_code ?? "")
+        setDevCode(data.data.otp?.dev_code ?? "")
         setStep("otp")
         return
       }

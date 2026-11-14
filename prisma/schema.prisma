@@ -155,28 +155,36 @@ enum MaterialCategory {
 // ── IDENTITY ───────────────────────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(uuid())
-  name          String
-  email         String?   @unique
-  phone         String?   @unique
-  password_hash String?
-  status        String    @default("active") // active | suspended
-  created_at    DateTime  @default(now()) @db.Timestamptz
-  updated_at    DateTime  @updatedAt @db.Timestamptz
+  id               String    @id @default(uuid())
+  name             String
+  email            String?   @unique
+  phone            String?   @unique
+  password_hash    String?
+  status           String    @default("active") // active | suspended
+  // Primary role & org (denormalized for mobile contract; source of truth tetap organization_members)
+  role             String    @default("resident") // resident | volunteer | super_admin | operator_bank_sampah | pengurus_komunitas | collector | recycler | curator
+  org_id           String?
+  contact_verified Boolean   @default(false)
+  last_login_at    DateTime? @db.Timestamptz
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  updated_at       DateTime  @updatedAt @db.Timestamptz
 
-  profile               UserProfile?
-  organization_members  OrganizationMember[]
+  profile                UserProfile?
+  organization_members   OrganizationMember[]
   waste_bank_memberships WasteBankMember[]
-  weighing_transactions WeighingTransaction[] @relation("OperatorTransactions")
-  ledger_entries        LedgerEntry[]         @relation("MemberLedger")
-  audit_logs            AuditLog[]            @relation("ActorLogs")
-  notifications         Notification[]
-  disputes_reported     Dispute[]             @relation("DisputeReporter")
-  content_contributors  ContentContributor[]
+  weighing_transactions  WeighingTransaction[]  @relation("OperatorTransactions")
+  member_transactions    WeighingTransaction[]  @relation("MemberTransactions")
+  ledger_entries         LedgerEntry[]          @relation("MemberLedger")
+  audit_logs             AuditLog[]             @relation("ActorLogs")
+  notifications          Notification[]
+  disputes_reported      Dispute[]              @relation("DisputeReporter")
+  content_contributors   ContentContributor[]
   challenge_participants ChallengeParticipant[]
-  event_registrations   EventRegistration[]
-  tasks_assigned        Task[]                @relation("TaskAssignee")
-  collection_requests   CollectionRequest[]
+  event_registrations    EventRegistration[]
+  tasks_assigned         Task[]                 @relation("TaskAssignee")
+  collection_requests    CollectionRequest[]
+  refresh_tokens         RefreshToken[]
+  password_resets        PasswordResetToken[]
 
   @@index([email])
   @@index([phone])
@@ -189,6 +197,9 @@ model UserProfile {
   user_id     String   @unique
   avatar_url  String?
   area_id     String?
+  district    String?
+  village     String?
+  rw          String?
   preferences Json?
   created_at  DateTime @default(now()) @db.Timestamptz
 
@@ -208,25 +219,25 @@ model Organization {
   status_changed_at DateTime? @db.Timestamptz
   verified_at       DateTime? @db.Timestamptz
   area_id           String?
-  geometry          Json?     // PostGIS point stored as GeoJSON
+  geometry          Json? // PostGIS point stored as GeoJSON
   created_at        DateTime  @default(now()) @db.Timestamptz
   updated_at        DateTime  @updatedAt @db.Timestamptz
   deleted_at        DateTime? @db.Timestamptz // soft-delete for community/member data
 
-  area               Area?                 @relation(fields: [area_id], references: [id])
-  members            OrganizationMember[]
-  waste_bank_members WasteBankMember[]
-  events             Event[]
-  tasks              Task[]
-  material_rules     MaterialRule[]
-  material_prices    MaterialPrice[]
-  collection_requests CollectionRequest[]
+  area                   Area?                  @relation(fields: [area_id], references: [id])
+  members                OrganizationMember[]
+  waste_bank_members     WasteBankMember[]
+  events                 Event[]
+  tasks                  Task[]
+  material_rules         MaterialRule[]
+  material_prices        MaterialPrice[]
+  collection_requests    CollectionRequest[]
   collection_assignments CollectionAssignment[]
   weighing_transactions  WeighingTransaction[]
-  batches_origin     MaterialBatch[]       @relation("OriginOrg")
-  cultural_contents  CulturalContent[]
-  handover_from      HandoverRecord[]      @relation("FromOrg")
-  handover_to        HandoverRecord[]      @relation("ToOrg")
+  batches_origin         MaterialBatch[]        @relation("OriginOrg")
+  cultural_contents      CulturalContent[]
+  handover_from          HandoverRecord[]       @relation("FromOrg")
+  handover_to            HandoverRecord[]       @relation("ToOrg")
 
   @@index([type])
   @@index([status])
@@ -235,15 +246,15 @@ model Organization {
 }
 
 model OrganizationMember {
-  id              String       @id @default(uuid())
-  organization_id String
-  user_id         String
-  role_id         String
-  status          MemberStatus @default(pending)
-  status_changed_at DateTime?  @db.Timestamptz
-  joined_at       DateTime?    @db.Timestamptz
-  created_at      DateTime     @default(now()) @db.Timestamptz
-  deleted_at      DateTime?    @db.Timestamptz // soft-delete
+  id                String       @id @default(uuid())
+  organization_id   String
+  user_id           String
+  role_id           String
+  status            MemberStatus @default(pending)
+  status_changed_at DateTime?    @db.Timestamptz
+  joined_at         DateTime?    @db.Timestamptz
+  created_at        DateTime     @default(now()) @db.Timestamptz
+  deleted_at        DateTime?    @db.Timestamptz // soft-delete
 
   organization Organization @relation(fields: [organization_id], references: [id])
   user         User         @relation(fields: [user_id], references: [id])
@@ -257,13 +268,13 @@ model OrganizationMember {
 }
 
 model Role {
-  id             String   @id @default(uuid())
-  name           String   @unique
-  description    String?
-  created_at     DateTime @default(now()) @db.Timestamptz
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  created_at  DateTime @default(now()) @db.Timestamptz
 
-  permissions    Permission[]
-  members        OrganizationMember[]
+  permissions Permission[]
+  members     OrganizationMember[]
 
   @@map("roles")
 }
@@ -272,7 +283,7 @@ model Permission {
   id             String   @id @default(uuid())
   role_id        String
   permission_key String
-  scope          String?  // "own_org" | "global" | specific scope
+  scope          String? // "own_org" | "global" | specific scope
   created_at     DateTime @default(now()) @db.Timestamptz
 
   role Role @relation(fields: [role_id], references: [id])
@@ -284,16 +295,16 @@ model Permission {
 // ── GEOGRAPHY ──────────────────────────────────────────────────────────────
 
 model Area {
-  id        String   @id @default(uuid())
-  name      String
-  parent_id String?
-  geometry  Json?    // PostGIS polygon as GeoJSON
+  id         String   @id @default(uuid())
+  name       String
+  parent_id  String?
+  geometry   Json? // PostGIS polygon as GeoJSON
   created_at DateTime @default(now()) @db.Timestamptz
 
-  parent         Area?         @relation("AreaHierarchy", fields: [parent_id], references: [id])
-  children       Area[]        @relation("AreaHierarchy")
-  organizations  Organization[]
-  user_profiles  UserProfile[]
+  parent              Area?               @relation("AreaHierarchy", fields: [parent_id], references: [id])
+  children            Area[]              @relation("AreaHierarchy")
+  organizations       Organization[]
+  user_profiles       UserProfile[]
   collection_requests CollectionRequest[]
 
   @@map("areas")
@@ -302,18 +313,18 @@ model Area {
 // ── EVENTS & TASKS ─────────────────────────────────────────────────────────
 
 model Event {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   organization_id String
   title           String
   description     String?
-  start_at        DateTime @db.Timestamptz
+  start_at        DateTime  @db.Timestamptz
   end_at          DateTime? @db.Timestamptz
   location        String?
   capacity        Int?
-  status          String   @default("upcoming") // upcoming | ongoing | done | cancelled
-  created_at      DateTime @default(now()) @db.Timestamptz
+  status          String    @default("upcoming") // upcoming | ongoing | done | cancelled
+  created_at      DateTime  @default(now()) @db.Timestamptz
 
-  organization  Organization       @relation(fields: [organization_id], references: [id])
+  organization  Organization        @relation(fields: [organization_id], references: [id])
   registrations EventRegistration[]
 
   @@index([organization_id])
@@ -323,12 +334,12 @@ model Event {
 }
 
 model EventRegistration {
-  id           String    @id @default(uuid())
-  event_id     String
-  user_id      String
-  status       String    @default("registered") // registered | attended | cancelled
+  id            String    @id @default(uuid())
+  event_id      String
+  user_id       String
+  status        String    @default("registered") // registered | attended | cancelled
   checked_in_at DateTime? @db.Timestamptz
-  created_at   DateTime  @default(now()) @db.Timestamptz
+  created_at    DateTime  @default(now()) @db.Timestamptz
 
   event Event @relation(fields: [event_id], references: [id])
   user  User  @relation(fields: [user_id], references: [id])
@@ -338,18 +349,18 @@ model EventRegistration {
 }
 
 model Task {
-  id              String     @id @default(uuid())
-  organization_id String
-  title           String
-  description     String?
-  assignee_id     String?
-  pic_id          String?
-  due_at          DateTime?  @db.Timestamptz
-  status          TaskStatus @default(belum)
-  status_changed_at DateTime? @db.Timestamptz
-  evidence_url    String?
-  created_at      DateTime   @default(now()) @db.Timestamptz
-  updated_at      DateTime   @updatedAt @db.Timestamptz
+  id                String     @id @default(uuid())
+  organization_id   String
+  title             String
+  description       String?
+  assignee_id       String?
+  pic_id            String?
+  due_at            DateTime?  @db.Timestamptz
+  status            TaskStatus @default(belum)
+  status_changed_at DateTime?  @db.Timestamptz
+  evidence_url      String?
+  created_at        DateTime   @default(now()) @db.Timestamptz
+  updated_at        DateTime   @updatedAt @db.Timestamptz
 
   organization Organization @relation(fields: [organization_id], references: [id])
   assignee     User?        @relation("TaskAssignee", fields: [assignee_id], references: [id])
@@ -370,8 +381,8 @@ model Material {
   prep_guide  String?
   created_at  DateTime         @default(now()) @db.Timestamptz
 
-  rules         MaterialRule[]
-  prices        MaterialPrice[]
+  rules            MaterialRule[]
+  prices           MaterialPrice[]
   collection_items CollectionItem[]
   weighing_items   WeighingItem[]
   batches          MaterialBatch[]
@@ -418,23 +429,26 @@ model MaterialPrice {
 // ── COLLECTIONS ────────────────────────────────────────────────────────────
 
 model CollectionRequest {
-  id              String           @id @default(uuid())
-  requester_id    String
-  organization_id String
-  method          CollectionMethod
-  area_id         String?
-  status          CollectionStatus @default(draft)
-  status_changed_at DateTime?      @db.Timestamptz
-  requested_at    DateTime         @default(now()) @db.Timestamptz
-  slot_start      DateTime?        @db.Timestamptz
-  slot_end        DateTime?        @db.Timestamptz
-  notes           String?
-  created_at      DateTime         @default(now()) @db.Timestamptz
-  updated_at      DateTime         @updatedAt @db.Timestamptz
+  id                String           @id @default(uuid())
+  requester_id      String
+  organization_id   String
+  method            CollectionMethod
+  area_id           String?
+  status            CollectionStatus @default(draft)
+  status_changed_at DateTime?        @db.Timestamptz
+  requested_at      DateTime         @default(now()) @db.Timestamptz
+  slot_start        DateTime?        @db.Timestamptz
+  slot_end          DateTime?        @db.Timestamptz
+  notes             String?
+  address           String? // alamat lengkap; NEVER tampil publik
+  latitude          Decimal?         @db.Decimal(10, 7)
+  longitude         Decimal?         @db.Decimal(10, 7)
+  created_at        DateTime         @default(now()) @db.Timestamptz
+  updated_at        DateTime         @updatedAt @db.Timestamptz
 
-  requester    User         @relation(fields: [requester_id], references: [id])
-  organization Organization @relation(fields: [organization_id], references: [id])
-  area         Area?        @relation(fields: [area_id], references: [id])
+  requester    User                   @relation(fields: [requester_id], references: [id])
+  organization Organization           @relation(fields: [organization_id], references: [id])
+  area         Area?                  @relation(fields: [area_id], references: [id])
   items        CollectionItem[]
   assignments  CollectionAssignment[]
   handovers    HandoverRecord[]
@@ -448,11 +462,11 @@ model CollectionRequest {
 }
 
 model CollectionItem {
-  id                   String   @id @default(uuid())
+  id                    String   @id @default(uuid())
   collection_request_id String
-  material_id          String
-  estimated_quantity   Decimal? @db.Decimal(10, 3)
-  actual_quantity      Decimal? @db.Decimal(10, 3)
+  material_id           String
+  estimated_quantity    Decimal? @db.Decimal(10, 3)
+  actual_quantity       Decimal? @db.Decimal(10, 3)
 
   collection_request CollectionRequest @relation(fields: [collection_request_id], references: [id])
   material           Material          @relation(fields: [material_id], references: [id])
@@ -461,11 +475,11 @@ model CollectionItem {
 }
 
 model CollectionAssignment {
-  id                   String   @id @default(uuid())
+  id                    String   @id @default(uuid())
   collection_request_id String
-  collector_id         String
-  assigned_at          DateTime @default(now()) @db.Timestamptz
-  status               String   @default("assigned")
+  collector_id          String
+  assigned_at           DateTime @default(now()) @db.Timestamptz
+  status                String   @default("assigned")
 
   collection_request CollectionRequest @relation(fields: [collection_request_id], references: [id])
   collector          Organization      @relation(fields: [collector_id], references: [id])
@@ -474,17 +488,17 @@ model CollectionAssignment {
 }
 
 model HandoverRecord {
-  id                   String   @id @default(uuid())
+  id                    String    @id @default(uuid())
   collection_request_id String?
-  batch_id             String?
-  from_org_id          String
-  to_org_id            String
-  quantity             Decimal  @db.Decimal(10, 3)
-  confirmed_by         String?
-  confirmed_at         DateTime? @db.Timestamptz
-  evidence_id          String?
-  party_confirmations  Json?
-  created_at           DateTime @default(now()) @db.Timestamptz
+  batch_id              String?
+  from_org_id           String
+  to_org_id             String
+  quantity              Decimal   @db.Decimal(10, 3)
+  confirmed_by          String?
+  confirmed_at          DateTime? @db.Timestamptz
+  evidence_id           String?
+  party_confirmations   Json?
+  created_at            DateTime  @default(now()) @db.Timestamptz
 
   collection_request CollectionRequest? @relation(fields: [collection_request_id], references: [id])
   batch              MaterialBatch?     @relation(fields: [batch_id], references: [id])
@@ -497,12 +511,12 @@ model HandoverRecord {
 // ── WASTE BANK ─────────────────────────────────────────────────────────────
 
 model WasteBankMember {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   organization_id String
   user_id         String
   member_code     String?
-  status          String   @default("active")
-  joined_at       DateTime @default(now()) @db.Timestamptz
+  status          String    @default("active")
+  joined_at       DateTime  @default(now()) @db.Timestamptz
   deleted_at      DateTime? @db.Timestamptz
 
   organization Organization @relation(fields: [organization_id], references: [id])
@@ -513,24 +527,25 @@ model WasteBankMember {
 }
 
 model WeighingTransaction {
-  id                String         @id @default(uuid())
-  organization_id   String
-  member_id         String
-  operator_id       String
-  transaction_at    DateTime       @default(now()) @db.Timestamptz
-  status            WeighingStatus @default(draft)
-  status_changed_at DateTime?      @db.Timestamptz
-  device_id         String?
-  is_offline_created Boolean       @default(false)
-  sync_status       SyncStatus?    @default(pending)
-  created_at        DateTime       @default(now()) @db.Timestamptz
-  updated_at        DateTime       @updatedAt @db.Timestamptz
+  id                 String         @id @default(uuid())
+  organization_id    String
+  member_id          String
+  operator_id        String
+  transaction_at     DateTime       @default(now()) @db.Timestamptz
+  status             WeighingStatus @default(draft)
+  status_changed_at  DateTime?      @db.Timestamptz
+  device_id          String?
+  is_offline_created Boolean        @default(false)
+  sync_status        SyncStatus?    @default(pending)
+  created_at         DateTime       @default(now()) @db.Timestamptz
+  updated_at         DateTime       @updatedAt @db.Timestamptz
   // NOTE: No deletable — corrections via adjustments only
 
-  organization Organization          @relation(fields: [organization_id], references: [id])
-  member       User                  @relation("OperatorTransactions", fields: [operator_id], references: [id])
-  items        WeighingItem[]
-  adjustments  TransactionAdjustment[]
+  organization   Organization            @relation(fields: [organization_id], references: [id])
+  operator       User                    @relation("OperatorTransactions", fields: [operator_id], references: [id])
+  member         User                    @relation("MemberTransactions", fields: [member_id], references: [id])
+  items          WeighingItem[]
+  adjustments    TransactionAdjustment[]
   ledger_entries LedgerEntry[]
 
   @@index([organization_id])
@@ -542,18 +557,18 @@ model WeighingTransaction {
 }
 
 model WeighingItem {
-  id             String  @id @default(uuid())
-  transaction_id String
-  material_id    String
-  gross          Decimal @db.Decimal(10, 3)
-  tare           Decimal @db.Decimal(10, 3)
-  net            Decimal @db.Decimal(10, 3)  // gross - tare, server-computed
-  price_snapshot Decimal @db.Decimal(12, 2)   // price at time of transaction — IMMUTABLE
+  id               String    @id @default(uuid())
+  transaction_id   String
+  material_id      String
+  gross            Decimal   @db.Decimal(10, 3)
+  tare             Decimal   @db.Decimal(10, 3)
+  net              Decimal   @db.Decimal(10, 3) // gross - tare, server-computed
+  price_snapshot   Decimal   @db.Decimal(12, 2) // price at time of transaction — IMMUTABLE
   price_valid_from DateTime? @db.Timestamptz
-  value          Decimal @db.Decimal(14, 2)   // net * price_snapshot
+  value            Decimal   @db.Decimal(14, 2) // net * price_snapshot
 
   transaction WeighingTransaction @relation(fields: [transaction_id], references: [id])
-  material    Material             @relation(fields: [material_id], references: [id])
+  material    Material            @relation(fields: [material_id], references: [id])
 
   @@map("weighing_items")
 }
@@ -584,7 +599,7 @@ model LedgerEntry {
 
 model TransactionAdjustment {
   id                      String   @id @default(uuid())
-  original_transaction_id String   // Always references original — NEVER deletes it
+  original_transaction_id String // Always references original — NEVER deletes it
   reason                  String
   actor_id                String
   created_at              DateTime @default(now()) @db.Timestamptz
@@ -598,21 +613,21 @@ model TransactionAdjustment {
 // ── TRACEABILITY ───────────────────────────────────────────────────────────
 
 model MaterialBatch {
-  id            String      @id @default(uuid())
-  code          String      @unique // PY-YYYYMMDD-ORG-seq
-  qr_token      String?     @unique
-  origin_org_id String
-  material_id   String
-  quantity      Decimal     @db.Decimal(10, 3)
-  status        BatchStatus @default(dibuat)
-  status_changed_at DateTime? @db.Timestamptz
-  created_at    DateTime    @default(now()) @db.Timestamptz
-  updated_at    DateTime    @updatedAt @db.Timestamptz
+  id                String      @id @default(uuid())
+  code              String      @unique // PY-YYYYMMDD-ORG-seq
+  qr_token          String?     @unique
+  origin_org_id     String
+  material_id       String
+  quantity          Decimal     @db.Decimal(10, 3)
+  status            BatchStatus @default(dibuat)
+  status_changed_at DateTime?   @db.Timestamptz
+  created_at        DateTime    @default(now()) @db.Timestamptz
+  updated_at        DateTime    @updatedAt @db.Timestamptz
 
-  origin_org  Organization   @relation("OriginOrg", fields: [origin_org_id], references: [id])
-  material    Material        @relation(fields: [material_id], references: [id])
-  events      BatchEvent[]
-  handovers   HandoverRecord[]
+  origin_org Organization     @relation("OriginOrg", fields: [origin_org_id], references: [id])
+  material   Material         @relation(fields: [material_id], references: [id])
+  events     BatchEvent[]
+  handovers  HandoverRecord[]
 
   @@index([origin_org_id])
   @@index([material_id])
@@ -621,14 +636,14 @@ model MaterialBatch {
 }
 
 model BatchEvent {
-  id           String         @id @default(uuid())
-  batch_id     String
-  event_type   BatchEventType
-  actor_org_id String?
+  id            String         @id @default(uuid())
+  batch_id      String
+  event_type    BatchEventType
+  actor_org_id  String?
   actor_user_id String?
-  occurred_at  DateTime       @default(now()) @db.Timestamptz
-  evidence_id  String?
-  payload      Json?          // weight, quality, notes, etc.
+  occurred_at   DateTime       @default(now()) @db.Timestamptz
+  evidence_id   String?
+  payload       Json? // weight, quality, notes, etc.
   // APPEND-ONLY — no update/delete
 
   batch MaterialBatch @relation(fields: [batch_id], references: [id])
@@ -641,22 +656,22 @@ model BatchEvent {
 // ── CULTURAL CONTENT ───────────────────────────────────────────────────────
 
 model CulturalContent {
-  id              String             @id @default(uuid())
-  organization_id String
-  title           String
-  body            String?
-  media           Json?
-  access_level    ContentAccessLevel @default(publik)
-  status          ContentStatus      @default(draft)
-  status_changed_at DateTime?        @db.Timestamptz
-  review_notes    String?
-  created_at      DateTime           @default(now()) @db.Timestamptz
-  updated_at      DateTime           @updatedAt @db.Timestamptz
-  deleted_at      DateTime?          @db.Timestamptz // soft-delete
+  id                String             @id @default(uuid())
+  organization_id   String
+  title             String
+  body              String?
+  media             Json?
+  access_level      ContentAccessLevel @default(publik)
+  status            ContentStatus      @default(draft)
+  status_changed_at DateTime?          @db.Timestamptz
+  review_notes      String?
+  created_at        DateTime           @default(now()) @db.Timestamptz
+  updated_at        DateTime           @updatedAt @db.Timestamptz
+  deleted_at        DateTime?          @db.Timestamptz // soft-delete
 
-  organization  Organization         @relation(fields: [organization_id], references: [id])
-  contributors  ContentContributor[]
-  consents      ContentConsent[]
+  organization Organization         @relation(fields: [organization_id], references: [id])
+  contributors ContentContributor[]
+  consents     ContentConsent[]
 
   @@index([organization_id])
   @@index([status])
@@ -706,11 +721,11 @@ model LearningModule {
 }
 
 model LearningProgress {
-  id        String   @id @default(uuid())
-  module_id String
-  user_id   String
+  id           String    @id @default(uuid())
+  module_id    String
+  user_id      String
   completed_at DateTime? @db.Timestamptz
-  score     Int?
+  score        Int?
 
   module LearningModule @relation(fields: [module_id], references: [id])
 
@@ -749,19 +764,19 @@ model ChallengeParticipant {
 // ── DISPUTES ───────────────────────────────────────────────────────────────
 
 model Dispute {
-  id                   String          @id @default(uuid())
-  reporter_id          String
-  related_type         String          // collection | transaction | batch | content | user
-  related_id           String
+  id                    String          @id @default(uuid())
+  reporter_id           String
+  related_type          String // collection | transaction | batch | content | user
+  related_id            String
   collection_request_id String?
-  reason               String
-  category             DisputeCategory
-  status               DisputeStatus   @default(open)
-  status_changed_at    DateTime?       @db.Timestamptz
-  assigned_to          String?
-  resolution           String?
-  created_at           DateTime        @default(now()) @db.Timestamptz
-  resolved_at          DateTime?       @db.Timestamptz
+  reason                String
+  category              DisputeCategory
+  status                DisputeStatus   @default(open)
+  status_changed_at     DateTime?       @db.Timestamptz
+  assigned_to           String?
+  resolution            String?
+  created_at            DateTime        @default(now()) @db.Timestamptz
+  resolved_at           DateTime?       @db.Timestamptz
 
   reporter           User               @relation("DisputeReporter", fields: [reporter_id], references: [id])
   collection_request CollectionRequest? @relation(fields: [collection_request_id], references: [id])
@@ -790,10 +805,10 @@ model Notification {
 }
 
 model NotificationPreference {
-  id         String   @id @default(uuid())
-  user_id    String   @unique
+  id          String   @id @default(uuid())
+  user_id     String   @unique
   preferences Json
-  updated_at DateTime @updatedAt @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
 
   @@map("notification_preferences")
 }
@@ -824,16 +839,75 @@ model AuditLog {
 // ── SYNC & IDEMPOTENCY ─────────────────────────────────────────────────────
 
 model SyncIdempotencyKey {
-  id                String   @id @default(uuid())
-  key               String   @unique
-  user_id           String?
-  endpoint          String
+  id                 String   @id @default(uuid())
+  key                String   @unique
+  user_id            String?
+  endpoint           String
   response_reference String?
-  processed_at      DateTime @default(now()) @db.Timestamptz
+  result             Json?
+  processed_at       DateTime @default(now()) @db.Timestamptz
 
   @@index([key])
   @@index([user_id])
   @@map("sync_idempotency_keys")
+}
+
+// ── AUTH SESSIONS, OTP, RATE LIMIT ─────────────────────────────────────────
+
+model RefreshToken {
+  id         String    @id @default(uuid())
+  user_id    String
+  token_hash String    @unique
+  user_agent String?
+  ip         String?
+  expires_at DateTime  @db.Timestamptz
+  revoked_at DateTime? @db.Timestamptz
+  created_at DateTime  @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([expires_at])
+  @@map("refresh_tokens")
+}
+
+model OtpCode {
+  id          String    @id @default(uuid())
+  identifier  String // nomor HP ternormalisasi atau email
+  code_hash   String
+  purpose     String    @default("contact_verify") // contact_verify | password_reset
+  attempts    Int       @default(0)
+  expires_at  DateTime  @db.Timestamptz
+  consumed_at DateTime? @db.Timestamptz
+  created_at  DateTime  @default(now()) @db.Timestamptz
+
+  @@index([identifier, purpose])
+  @@index([expires_at])
+  @@map("otp_codes")
+}
+
+model PasswordResetToken {
+  id          String    @id @default(uuid())
+  user_id     String
+  token_hash  String    @unique
+  expires_at  DateTime  @db.Timestamptz
+  consumed_at DateTime? @db.Timestamptz
+  created_at  DateTime  @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("password_reset_tokens")
+}
+
+model RateLimit {
+  key        String   @id
+  count      Int      @default(0)
+  expires_at DateTime @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
+
+  @@index([expires_at])
+  @@map("rate_limits")
 }
 
 // ── MEDIA ASSETS ───────────────────────────────────────────────────────────

@@ -37,15 +37,19 @@ export default function LoginPage() {
         return
       }
 
-      // Store token in localStorage as fallback (httpOnly cookie set by server)
-      localStorage.setItem("pilahyuk_token", data.data.token)
+      // Cookie httpOnly sudah dipasang server; hanya profil non-sensitif untuk UI.
       localStorage.setItem("pilahyuk_user", JSON.stringify(data.data.user))
 
-      // Redirect based on role
-      const role = data.data.user.role
-      if (role === "super_admin") router.push("/admin/overview")
-      else if (role === "resident" || role === "volunteer") router.push("/dampak")
-      else router.push("/dashboard")
+      // Redirect sesuai role (sama dengan aturan proxy)
+      const role: string = data.data.user.role
+      const home =
+        role === "super_admin" ? "/admin/overview"
+        : role === "resident" || role === "volunteer" ? "/dampak"
+        : role === "collector" ? "/pengumpulan"
+        : role === "recycler" ? "/batch"
+        : role === "curator" ? "/pengetahuan"
+        : "/dashboard"
+      router.push(home)
     } catch {
       setError("Terjadi kesalahan. Coba lagi.")
     } finally {

@@ -15,6 +15,9 @@ Semua akun bisa dipakai di **dashboard web** maupun **API** (mobile memakai endp
 | Operator Bank Sampah | Budi Santoso | `operator@banksampah.id` | `081200000002` | `operator123` | `/dashboard` |
 | Pengurus Komunitas | Siti Rahayu | `pengurus@komunitas.id` | `081200000003` | `pengurus123` | `/dashboard` |
 | Warga (resident) | Dewi Lestari | `warga@pilahyuk.id` | `081200000004` | `warga123` | `/dampak` |
+| Pengumpul (collector) | Joko Prasetyo | `collector@pilahyuk.id` | `081200000007` | `collector123` | `/pengumpulan` |
+| Mitra pengolah (recycler) | Hendra Gunawan | `recycler@pilahyuk.id` | `081200000008` | `recycler123` | `/batch` |
+| Kurator budaya | Maya Anggraini | `kurator@pilahyuk.id` | `081200000009` | `kurator123` | `/pengetahuan` |
 
 Login menerima **email atau nomor HP** di kolom yang sama:
 
@@ -70,14 +73,16 @@ Jika hanya mendaftar dengan email, `otp` bernilai `null` dan `next_step` = `comp
 ### 2.3 Kode OTP
 
 - Panjang **4 digit**, berlaku **5 menit**, maksimal 5 percobaan.
-- Gateway WhatsApp (Fonnte) belum aktif, jadi kode dikembalikan di field `dev_code` (demo).
+- Di produksi, kode dikirim ke WhatsApp pemilik nomor melalui Fonnte; `dev_code` **tidak** dikembalikan.
+- Di lokal (`AUTH_DEV_MODE=true`), kode dikembalikan di `dev_code` untuk pengujian.
 - Minta ulang: `POST /api/v1/auth/otp/request { phone }`.
 
 ### 2.4 Lupa password
 
 ```
-POST /auth/forgot-password { identifier }   → selalu 200, dev_reset_token (demo)
+POST /auth/forgot-password { identifier }   → selalu 200; di produksi token dikirim via WhatsApp
 POST /auth/reset-password { token, password } → 200 jika token valid (15 menit)
+# Alternatif mobile: POST /auth/reset-password { identifier, code, password }
 ```
 
 ---
@@ -94,7 +99,9 @@ Mobile memakai akun yang sama. Untuk pengujian cepat di HP:
 
 Atau daftar akun baru langsung dari aplikasi.
 
-> Catatan teknis: akun hasil registrasi disimpan **in-memory** (bertahan selama instance server hidup). Setelah database Prisma tersambung, akun akan persisten. Sampai saat itu, gunakan akun demo di atas untuk uji berulang.
+> Catatan teknis: akun, OTP, refresh token, dan rate limit sekarang disimpan di **PostgreSQL (Neon)** melalui Prisma. Akun hasil registrasi persisten dan dipakai bersama oleh web + mobile.
+
+> Wilayah seed: **Kota Probolinggo (Jawa Timur)**, **Jakarta Selatan**, dan **Kota Bandung**. Akun demo berada di Probolinggo; akun warga Jakarta/Bandung tersedia untuk uji multi-daerah (`rina@example.com` / `asep@example.com`, password `warga123`).
 
 ---
 

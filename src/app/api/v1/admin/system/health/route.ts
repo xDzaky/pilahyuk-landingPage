@@ -1,30 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { prisma } from "@/server/db";
+import { route, ok } from "@/server/http";
+import { requireAuth, requireRole } from "@/server/auth/current-user";
+import { ADMIN_ROLES } from "@/server/rbac";
 
-// Mock admin health data
-export async function GET(req: NextRequest) {
-  const role = req.headers.get("x-user-role");
-  if (role !== "super_admin") {
-    return NextResponse.json(
-      { error: { code: "FORBIDDEN", message: "Akses ditolak" } },
-      { status: 403 }
-    );
-  }
+export const GET = route(async (req: NextRequest) => {
+  const user = await requireAuth(req);
+  requireRole(user, ADMIN_ROLES);
 
-  return NextResponse.json({
-    data: {
-      status: "healthy",
-      timestamp: new Date().toISOString(),
-      services: {
-        database: { status: "up", latency_ms: 12 },
-        redis: { status: "up", latency_ms: 2 },
-        storage: { status: "up", latency_ms: 45 },
-      },
-      stats: {
-        total_users: 847,
-        active_orgs: 23,
-        transactions_today: 156,
-        batches_this_month: 42,
-      },
-    },
+  const started = Date.now();
+  await prisma.$queryRaw`SELECT 1`;
+  const latency = Date.now() - started;
+  const monthStart = new Date();
+  monthStart.setUTCDate(1);
+  monthStart.setUTCHours(0, 0, 0, 0);
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+
+  const [users, orgs, transactionsToday, batchesMonth] = await Promise.all([
+    prisma.user.count(),
+    prisma.organization.count({ where: { deleted_at: null } }),
+    prisma.weighingTransaction.count({ where: { transaction_at: { gte: todayStart } } }),
+    prisma.materialBatch.count({ where: { created_at: { gte: monthStart } } }),
+  ]);
+
+  return ok({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    services: { database: { status: "up", latency_ms: latency }, storage: { status: process.env.CLOUDFLARE_R2_BUCKET ? "configured" : "not_configured" } },
+    stats: { total_users: users, active_orgs: orgs, transactions_today: transactionsToday, batches_this_month: batchesMonth },
   });
-}
+});

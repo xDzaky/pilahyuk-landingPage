@@ -1,83 +1,157 @@
-// src/app/api/v1/sync/batch/route.ts
-// CRITICAL: Offline sync endpoint — idempotent, no last-write-wins for financial data
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server";
+import { prisma } from "@/server/db";
+import { route, readJson, ok, HttpError, num } from "@/server/http";
+import { requireAuth, requireOrgAccess } from "@/server/auth/current-user";
+import { enforceRateLimit } from "@/server/rate-limit";
+import { createWeighingTransaction, currentPrice, serializeTransaction } from "@/server/services/waste-bank";
+import { writeAudit } from "@/server/audit";
 
-const processedKeys = new Map<string, {
-  key: string
-  status: "synced" | "failed" | "conflict"
-  server_id?: string
-  reason?: string
-}>()
+interface SyncItem {
+  key: string;
+  type: string;
+  payload: Record<string, unknown>;
+  client_created_at?: string;
+}
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { items } = body
+interface SyncResult {
+  key: string;
+  status: "synced" | "failed" | "conflict";
+  server_id?: string;
+  reason?: string;
+}
 
-    if (!items || !Array.isArray(items)) {
-      return NextResponse.json(
-        { error: { code: "VALIDATION_ERROR", message: "items array wajib diisi" } },
-        { status: 400 }
-      )
+export const POST = route(async (req: NextRequest) => {
+  const user = await requireAuth(req);
+  await enforceRateLimit(`sync:user:${user.id}`, 60, 600);
+
+  const body = await readJson<{ items?: unknown }>(req);
+  const rawItems = Array.isArray(body.items) ? body.items : [];
+  if (rawItems.length === 0 || rawItems.length > 100) {
+    throw new HttpError(400, "VALIDATION_ERROR", "items harus 1–100 baris");
+  }
+
+  const results: SyncResult[] = [];
+
+  for (const raw of rawItems) {
+    if (!raw || typeof raw !== "object") {
+      results.push({ key: "", status: "failed", reason: "Item tidak valid" });
+      continue;
+    }
+    const item = raw as unknown as SyncItem;
+    const key = String(item.key ?? "");
+    if (!key) {
+      results.push({ key: "", status: "failed", reason: "key idempotency wajib diisi" });
+      continue;
     }
 
-    const results = []
-
-    for (const item of items) {
-      const { key, type, payload, client_created_at } = item
-
-      // ── IDEMPOTENCY CHECK ──
-      if (processedKeys.has(key)) {
-        results.push(processedKeys.get(key))
-        continue
+    const existing = await prisma.syncIdempotencyKey.findUnique({ where: { key } });
+    if (existing) {
+      if (existing.user_id && existing.user_id !== user.id) {
+        results.push({ key, status: "conflict", reason: "Key sudah dipakai pengguna lain" });
+      } else if (existing.result) {
+        results.push(existing.result as unknown as SyncResult);
+      } else {
+        results.push({ key, status: "conflict", reason: "Item dengan key ini sedang diproses" });
       }
+      continue;
+    }
 
-      // ── PROCESS BASED ON TYPE ──
-      let result: { key: string; status: "synced" | "failed" | "conflict"; server_id?: string; reason?: string }
+    let result: SyncResult;
+    let reference: string | null = null;
 
-      if (type === "weighing_transaction") {
-        // Check for financial data conflicts — NEVER last-write-wins
-        const { member_id, items: txnItems } = payload as {
-          member_id: string
-          items: Array<{ material_id: string; gross: number; tare: number; price_snapshot: number }>
+    try {
+      if (item.type === "weighing_transaction") {
+        if (!["operator_bank_sampah", "super_admin"].includes(user.role)) {
+          throw new HttpError(403, "FORBIDDEN", "Hanya operator yang dapat menyinkronkan penimbangan");
         }
+        const payload = item.payload ?? {};
+        const organizationId = String(payload.organization_id ?? user.org_id ?? "");
+        const memberId = String(payload.member_id ?? "");
+        const items = Array.isArray(payload.items) ? payload.items : [];
+        if (!organizationId || !memberId || items.length === 0) throw new HttpError(400, "VALIDATION_ERROR", "organization_id, member_id, items wajib diisi");
+        await requireOrgAccess(user, organizationId);
 
-        // Validate references exist
-        if (!member_id) {
-          result = { key, status: "failed", reason: "member_id tidak valid" }
-        } else {
-          // Check if price snapshot matches current price
-          // In production: query DB for current price at client_created_at time
-          const hasConflict = false // simplified; real check needed in production
-
-          if (hasConflict) {
-            result = {
-              key,
-              status: "conflict",
-              reason: "Harga material sudah berubah — perlu penyesuaian",
+        const at = item.client_created_at ? new Date(item.client_created_at) : new Date();
+        for (const rawItem of items) {
+          const entry = rawItem as Record<string, unknown>;
+          const materialId = String(entry.material_id ?? "");
+          const clientPrice = entry.price_snapshot !== undefined ? Number(entry.price_snapshot) : null;
+          if (materialId && clientPrice !== null && Number.isFinite(clientPrice)) {
+            const price = await currentPrice(organizationId, materialId, at);
+            if (price && Math.abs(num(price.price) - clientPrice) > 0.01) {
+              throw new HttpError(409, "PRICE_CHANGED", "Harga material sudah berubah — perlu penyesuaian");
             }
-          } else {
-            const serverId = `wtx-sync-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
-            result = { key, status: "synced", server_id: serverId }
           }
         }
-      } else if (type === "collection_request") {
-        const serverId = `col-sync-${Date.now()}`
-        result = { key, status: "synced", server_id: serverId }
-      } else {
-        result = { key, status: "failed", reason: `Tipe tidak didukung: ${type}` }
-      }
 
-      // Store result for idempotency
-      processedKeys.set(key, result)
-      results.push(result)
+        const trx = await createWeighingTransaction({
+          organizationId, memberId, operatorId: user.id,
+          items: items.map((rawItem) => {
+            const entry = rawItem as Record<string, unknown>;
+            return { material_id: String(entry.material_id ?? ""), gross: Number(entry.gross ?? 0), tare: Number(entry.tare ?? 0) };
+          }),
+          deviceId: payload.device_id ? String(payload.device_id) : null,
+          isOfflineCreated: true,
+          transactionAt: at,
+        });
+        result = { key, status: "synced", server_id: trx.id };
+        reference = trx.id;
+      } else if (item.type === "collection_request") {
+        if (!["resident", "volunteer"].includes(user.role)) {
+          throw new HttpError(403, "FORBIDDEN", "Hanya warga yang dapat menyinkronkan permintaan penjemputan");
+        }
+        const payload = item.payload ?? {};
+        const organizationId = String(payload.organization_id ?? "");
+        const items = Array.isArray(payload.items) ? payload.items : [];
+        if (!organizationId || items.length === 0) throw new HttpError(400, "VALIDATION_ERROR", "organization_id dan items wajib diisi");
+        const org = await prisma.organization.findFirst({ where: { id: organizationId, status: "verified", deleted_at: null } });
+        if (!org) throw new HttpError(404, "NOT_FOUND", "Organisasi tidak ditemukan");
+        const collection = await prisma.collectionRequest.create({
+          data: {
+            requester_id: user.id,
+            organization_id: organizationId,
+            method: (String(payload.method ?? "individual") as "individual" | "collective" | "dropoff"),
+            area_id: payload.area_id ? String(payload.area_id) : null,
+            address: payload.address ? String(payload.address) : null,
+            notes: payload.notes ? String(payload.notes) : null,
+            slot_start: payload.slot_start ? new Date(String(payload.slot_start)) : null,
+            slot_end: payload.slot_end ? new Date(String(payload.slot_end)) : null,
+            status: "submitted",
+            status_changed_at: new Date(),
+            items: {
+              create: items.map((rawItem) => {
+                const entry = rawItem as Record<string, unknown>;
+                return { material_id: String(entry.material_id ?? ""), estimated_quantity: Number(entry.estimated_quantity ?? entry.quantity ?? 0) };
+              }),
+            },
+          },
+        });
+        result = { key, status: "synced", server_id: collection.id };
+        reference = collection.id;
+      } else {
+        result = { key, status: "failed", reason: `Tipe tidak didukung: ${item.type}` };
+      }
+    } catch (error) {
+      if (error instanceof HttpError) {
+        result = { key, status: error.status === 409 ? "conflict" : "failed", reason: error.message };
+      } else {
+        result = { key, status: "failed", reason: "Gagal memproses item" };
+      }
     }
 
-    return NextResponse.json({ data: results })
-  } catch {
-    return NextResponse.json(
-      { error: { code: "INTERNAL_ERROR", message: "Terjadi kesalahan saat sinkronisasi" } },
-      { status: 500 }
-    )
+    await prisma.syncIdempotencyKey.create({
+      data: {
+        key,
+        user_id: user.id,
+        endpoint: "POST /sync/batch",
+        response_reference: reference,
+        result: result as unknown as object,
+      },
+    }).catch(() => undefined);
+
+    await writeAudit({ actorId: user.id, action: "SYNC_ITEM", entityType: "sync", entityId: key, after: result as unknown as object, req });
+    results.push(result);
   }
-}
+
+  return ok(results, { total: results.length, synced: results.filter((r) => r.status === "synced").length });
+});

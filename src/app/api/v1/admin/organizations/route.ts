@@ -1,54 +1,37 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { OrgStatus, OrgType, Prisma } from "@prisma/client";
+import { prisma } from "@/server/db";
+import { route, ok, HttpError, parsePagination, meta } from "@/server/http";
+import { requireAuth, requireRole } from "@/server/auth/current-user";
+import { ADMIN_ROLES } from "@/server/rbac";
 
-const MOCK_ORGS = [
-  {
-    id: "org-001",
-    name: "Bank Sampah Berkah Jaya",
-    type: "bank_sampah",
-    status: "verified",
-    city: "Jakarta Selatan",
-    member_count: 234,
-    created_at: "2024-01-15T07:00:00Z",
-    contact_email: "admin@berkah.id",
-  },
-  {
-    id: "org-002",
-    name: "Komunitas Hijau Nusantara",
-    type: "komunitas",
-    status: "verified",
-    city: "Bandung",
-    member_count: 89,
-    created_at: "2024-02-20T08:00:00Z",
-    contact_email: "info@hijaunusantara.id",
-  },
-  {
-    id: "org-003",
-    name: "EcoWarriors Surabaya",
-    type: "komunitas",
-    status: "pending_review",
-    city: "Surabaya",
-    member_count: 12,
-    created_at: "2024-11-10T09:00:00Z",
-    contact_email: "ecowarriors@surabaya.id",
-  },
-];
-
-export async function GET(req: NextRequest) {
-  const role = req.headers.get("x-user-role");
-  if (role !== "super_admin") {
-    return NextResponse.json({ error: { code: "FORBIDDEN" } }, { status: 403 });
-  }
-
+export const GET = route(async (req: NextRequest) => {
+  const user = await requireAuth(req);
+  requireRole(user, ADMIN_ROLES);
   const { searchParams } = new URL(req.url);
+  const { page, perPage, skip } = parsePagination(searchParams);
   const status = searchParams.get("status");
-  const q = searchParams.get("q")?.toLowerCase();
+  const type = searchParams.get("type");
+  const q = searchParams.get("q")?.trim();
 
-  let orgs = [...MOCK_ORGS];
-  if (status) orgs = orgs.filter((o) => o.status === status);
-  if (q) orgs = orgs.filter((o) => o.name.toLowerCase().includes(q));
+  const where: Prisma.OrganizationWhereInput = {
+    deleted_at: null,
+    ...(status && Object.values(OrgStatus).includes(status as OrgStatus) ? { status: status as OrgStatus } : {}),
+    ...(type && Object.values(OrgType).includes(type as OrgType) ? { type: type as OrgType } : {}),
+    ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
+  };
 
-  return NextResponse.json({
-    data: orgs,
-    meta: { total: orgs.length, page: 1, per_page: 20 },
-  });
-}
+  const [total, rows] = await prisma.$transaction([
+    prisma.organization.count({ where }),
+    prisma.organization.findMany({
+      where, include: { area: true, _count: { select: { members: { where: { status: "active" } } } } },
+      orderBy: { created_at: "desc" }, skip, take: perPage,
+    }),
+  ]);
+
+  return ok(rows.map((o) => ({
+    id: o.id, name: o.name, type: o.type, status: o.status,
+    area_id: o.area_id, area_name: o.area?.name ?? null,
+    member_count: o._count.members, created_at: o.created_at, verified_at: o.verified_at,
+  })), meta(page, perPage, total));
+});

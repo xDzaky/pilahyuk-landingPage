@@ -1,21 +1,49 @@
-// src/app/api/v1/communities/route.ts
-import { NextRequest, NextResponse } from "next/server"
-import { MOCK_ORGANIZATIONS } from "@/lib/mock-data"
+import { NextRequest } from "next/server";
+import { prisma } from "@/server/db";
+import { route, ok, parsePagination, meta } from "@/server/http";
+import { areaIdsWithDescendants } from "@/server/services/areas";
+import { getAuthUser } from "@/server/auth/current-user";
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const page = parseInt(searchParams.get("page") ?? "1")
-  const perPage = Math.min(parseInt(searchParams.get("per_page") ?? "10"), 100)
-  const status = searchParams.get("status")
+export const GET = route(async (req: NextRequest) => {
+  const { searchParams } = new URL(req.url);
+  const { page, perPage, skip } = parsePagination(searchParams);
+  const q = searchParams.get("q")?.trim();
+  const areaIdParam = searchParams.get("area_id")?.trim();
+  const auth = areaIdParam ? null : await getAuthUser(req);
+  const areaId = areaIdParam || auth?.profile?.area_id || null;
 
-  let data = MOCK_ORGANIZATIONS.filter(o => o.type === "community")
-  if (status) data = data.filter(o => o.status === status)
+  const areaIds = areaId ? await areaIdsWithDescendants(areaId) : null;
+  const where = {
+    type: "community" as const,
+    deleted_at: null,
+    status: "verified" as const,
+    ...(areaIds ? { area_id: { in: areaIds } } : {}),
+    ...(q ? { name: { contains: q, mode: "insensitive" as const } } : {}),
+  };
 
-  const total = data.length
-  const sliced = data.slice((page - 1) * perPage, page * perPage)
+  const [total, rows] = await prisma.$transaction([
+    prisma.organization.count({ where }),
+    prisma.organization.findMany({
+      where,
+      include: { area: true, _count: { select: { members: { where: { status: "active" } } } } },
+      orderBy: { name: "asc" },
+      skip,
+      take: perPage,
+    }),
+  ]);
 
-  return NextResponse.json({
-    data: sliced,
-    meta: { page, per_page: perPage, total, total_pages: Math.ceil(total / perPage) },
-  })
-}
+  return ok(
+    rows.map((o) => ({
+      id: o.id,
+      name: o.name,
+      type: o.type,
+      status: o.status,
+      area_id: o.area_id,
+      area_name: o.area?.name ?? null,
+      member_count: o._count.members,
+      verified_at: o.verified_at,
+      created_at: o.created_at,
+    })),
+    meta(page, perPage, total)
+  );
+});

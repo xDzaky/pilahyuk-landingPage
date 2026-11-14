@@ -1,90 +1,74 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { BatchEventType } from "@prisma/client";
+import { prisma } from "@/server/db";
+import { route, readJson, ok, HttpError } from "@/server/http";
+import { requireAuth } from "@/server/auth/current-user";
+import { loadBatch, batchInclude, canAddBatchEvent, EVENT_STATUS, ORIGIN_EVENTS, RECEIVER_EVENTS } from "@/server/services/batches";
+import { writeAudit } from "@/server/audit";
 
-const MOCK_EVENTS: Record<string, Array<{
-  id: string; batch_id: string; event_type: string;
-  actor_id: string; actor_name: string; notes: string;
-  evidence_url?: string; created_at: string;
-}>> = {
-  "batch-001": [
-    {
-      id: "evt-001", batch_id: "batch-001", event_type: "batch_created",
-      actor_id: "user-operator-001", actor_name: "Budi Santoso",
-      notes: "Batch dibuat dari 23 transaksi timbang",
-      created_at: "2024-11-01T08:00:00Z",
-    },
-    {
-      id: "evt-002", batch_id: "batch-001", event_type: "material_sorted",
-      actor_id: "user-operator-001", actor_name: "Budi Santoso",
-      notes: "Sortasi selesai: 45.2 kg kertas, 23.8 kg plastik, 12.1 kg logam",
-      created_at: "2024-11-02T10:30:00Z",
-    },
-    {
-      id: "evt-003", batch_id: "batch-001", event_type: "pickup_scheduled",
-      actor_id: "user-operator-001", actor_name: "Budi Santoso",
-      notes: "Penjemputan dijadwalkan: 5 Nov 2024 09:00",
-      created_at: "2024-11-03T14:00:00Z",
-    },
-    {
-      id: "evt-004", batch_id: "batch-001", event_type: "batch_validated",
-      actor_id: "user-superadmin-001", actor_name: "Super Admin",
-      notes: "Batch divalidasi. Berat aktual sesuai laporan.",
-      evidence_url: "https://r2.example.com/evidence/batch-001-validation.jpg",
-      created_at: "2024-11-05T11:15:00Z",
-    },
-    {
-      id: "evt-005", batch_id: "batch-001", event_type: "batch_completed",
-      actor_id: "user-superadmin-001", actor_name: "Super Admin",
-      notes: "Batch selesai. Pembayaran telah ditransfer.",
-      created_at: "2024-11-06T09:00:00Z",
-    },
-  ],
-};
+export const GET = route(async (req: NextRequest, context) => {
+  await requireAuth(req);
+  const { id } = await (context.params ?? Promise.resolve({ id: "" }));
+  const batch = await loadBatch(id);
+  return ok(batch.events, { total: batch.events.length, batch_id: batch.id });
+});
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const events = MOCK_EVENTS[id] || [];
-  return NextResponse.json({
-    data: events,
-    meta: { total: events.length, batch_id: id },
-  });
-}
+export const POST = route(async (req: NextRequest, context) => {
+  const user = await requireAuth(req);
+  const { id } = await (context.params ?? Promise.resolve({ id: "" }));
+  const body = await readJson<Record<string, unknown>>(req);
+  const eventType = String(body.event_type ?? "");
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const body = await req.json();
-  const { event_type, notes, evidence_url } = body;
-
-  const allowedEvents = [
-    "material_sorted", "pickup_scheduled", "batch_validated",
-    "batch_completed", "dispute_raised", "note_added",
-  ];
-
-  if (!allowedEvents.includes(event_type)) {
-    return NextResponse.json(
-      { error: { code: "VALIDATION_ERROR", message: "Tipe event tidak valid" } },
-      { status: 400 }
-    );
+  if (!Object.values(BatchEventType).includes(eventType as BatchEventType)) {
+    throw new HttpError(400, "VALIDATION_ERROR", "event_type tidak valid", {
+      allowed: [...ORIGIN_EVENTS, ...RECEIVER_EVENTS],
+    });
+  }
+  const batch = await loadBatch(id);
+  if (!canAddBatchEvent(user, batch, eventType)) {
+    throw new HttpError(403, "FORBIDDEN", "Peran Anda tidak berhak menambahkan event ini pada batch tersebut");
+  }
+  if (batch.status === "ditolak" && eventType === "diterima") {
+    throw new HttpError(409, "CONFLICT", "Batch sudah ditolak");
   }
 
-  const newEvent = {
-    id: `evt-${Date.now()}`,
-    batch_id: id,
-    event_type,
-    actor_id: req.headers.get("x-user-id") || "unknown",
-    actor_name: "Pengguna",
-    notes: notes || "",
-    evidence_url: evidence_url || undefined,
-    created_at: new Date().toISOString(),
+  const payload = {
+    ...(body.weight !== undefined ? { weight: Number(body.weight) } : {}),
+    ...(body.quality !== undefined ? { quality: String(body.quality) } : {}),
+    ...(body.notes !== undefined ? { notes: String(body.notes) } : {}),
+    ...(body.to_org_id !== undefined ? { to_org_id: String(body.to_org_id) } : {}),
+    ...(body.residu_kg !== undefined ? { residu_kg: Number(body.residu_kg) } : {}),
   };
+  const nextStatus = EVENT_STATUS[eventType];
 
-  if (!MOCK_EVENTS[id]) MOCK_EVENTS[id] = [];
-  MOCK_EVENTS[id].push(newEvent);
+  const result = await prisma.$transaction(async (tx) => {
+    const event = await tx.batchEvent.create({
+      data: {
+        batch_id: batch.id,
+        event_type: eventType as BatchEventType,
+        actor_org_id: user.org_id,
+        actor_user_id: user.id,
+        evidence_id: body.evidence_url ? String(body.evidence_url) : null,
+        payload,
+      },
+    });
+    if (nextStatus) {
+      await tx.materialBatch.update({
+        where: { id: batch.id },
+        data: { status: nextStatus as never, status_changed_at: new Date() },
+      });
+    }
+    return event;
+  });
 
-  return NextResponse.json({ data: newEvent }, { status: 201 });
-}
+  const updated = await prisma.materialBatch.findUniqueOrThrow({ where: { id: batch.id }, include: batchInclude });
+  await writeAudit({ actorId: user.id, action: "ADD_BATCH_EVENT", entityType: "material_batch", entityId: batch.id, before: { status: batch.status }, after: { event_type: eventType, status: updated.status }, req });
+
+  return ok({
+    event: {
+      id: result.id, event_type: result.event_type, occurred_at: result.occurred_at,
+      actor_org_id: result.actor_org_id, actor_user_id: result.actor_user_id, payload: result.payload,
+    },
+    batch: { id: updated.id, code: updated.code, status: updated.status },
+  }, undefined, 201);
+});

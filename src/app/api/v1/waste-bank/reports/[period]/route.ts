@@ -1,46 +1,60 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { prisma } from "@/server/db";
+import { route, ok, HttpError, num } from "@/server/http";
+import { requireAuth } from "@/server/auth/current-user";
+import { requireOrgAccess } from "@/server/auth/current-user";
+import { periodRange } from "@/server/services/waste-bank";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ period: string }> }
-) {
-  const { period } = await params;
-  const role = req.headers.get("x-user-role");
-  const orgId = req.headers.get("x-user-org");
-
-  if (!["operator_bank_sampah", "super_admin"].includes(role || "")) {
-    return NextResponse.json({ error: { code: "FORBIDDEN" } }, { status: 403 });
+export const GET = route(async (req: NextRequest, context) => {
+  const user = await requireAuth(req);
+  if (!["operator_bank_sampah", "super_admin"].includes(user.role)) {
+    throw new HttpError(403, "FORBIDDEN", "Hanya operator bank sampah yang dapat melihat laporan");
   }
+  const { period } = await (context.params ?? Promise.resolve({ period: "" }));
+  const { searchParams } = new URL(req.url);
+  const organizationId = searchParams.get("organization_id") || user.org_id || "";
+  if (!organizationId) throw new HttpError(400, "VALIDATION_ERROR", "organization_id wajib diisi");
+  await requireOrgAccess(user, organizationId);
 
-  // period: "2024-11" (monthly) or "2024-11-13" (daily)
-  const isDaily = period.length === 10;
-  const isMonthly = period.length === 7;
-
-  if (!isDaily && !isMonthly) {
-    return NextResponse.json(
-      { error: { code: "VALIDATION_ERROR", message: "Format period: YYYY-MM atau YYYY-MM-DD" } },
-      { status: 400 }
-    );
-  }
-
-  const mockReport = {
-    period,
-    org_id: orgId,
-    period_type: isDaily ? "daily" : "monthly",
-    summary: {
-      total_transactions: isDaily ? 8 : 156,
-      total_weight_kg: isDaily ? 42.3 : 1240.5,
-      total_value_idr: isDaily ? 84600 : 2481000,
-      unique_members: isDaily ? 6 : 47,
+  const { start, end, type } = periodRange(period);
+  const transactions = await prisma.weighingTransaction.findMany({
+    where: {
+      organization_id: organizationId,
+      transaction_at: { gte: start, lt: end },
+      status: { in: ["confirmed", "adjusted"] },
     },
-    by_material: [
-      { material: "Kertas HVS", weight_kg: isDaily ? 18.2 : 520.4, value_idr: isDaily ? 36400 : 1040800 },
-      { material: "Plastik PET", weight_kg: isDaily ? 12.1 : 380.1, value_idr: isDaily ? 36300 : 1140300 },
-      { material: "Logam Campuran", weight_kg: isDaily ? 8.5 : 220.0, value_idr: isDaily ? 8500 : 220000 },
-      { material: "Kardus", weight_kg: isDaily ? 3.5 : 120.0, value_idr: isDaily ? 3400 : 79900 },
-    ],
-    generated_at: new Date().toISOString(),
-  };
+    include: { items: { include: { material: true } } },
+  });
 
-  return NextResponse.json({ data: mockReport });
-}
+  const byMaterial = new Map<string, { material: string; weight_kg: number; value_idr: number }>();
+  let totalWeight = 0;
+  let totalValue = 0;
+  const members = new Set<string>();
+  for (const trx of transactions) {
+    members.add(trx.member_id);
+    for (const item of trx.items) {
+      const key = item.material_id;
+      const entry = byMaterial.get(key) ?? { material: item.material.name, weight_kg: 0, value_idr: 0 };
+      entry.weight_kg += num(item.net);
+      entry.value_idr += num(item.value);
+      totalWeight += num(item.net);
+      totalValue += num(item.value);
+      byMaterial.set(key, entry);
+    }
+  }
+
+  return ok({
+    period,
+    period_type: type,
+    org_id: organizationId,
+    summary: {
+      total_transactions: transactions.length,
+      total_weight_kg: Number(totalWeight.toFixed(3)),
+      total_value_idr: Number(totalValue.toFixed(2)),
+      unique_members: members.size,
+    },
+    by_material: [...byMaterial.values()].sort((a, b) => b.weight_kg - a.weight_kg),
+    generated_at: new Date().toISOString(),
+    source: "weighing_transactions (confirmed/adjusted)",
+  });
+});

@@ -1,23 +1,34 @@
-// src/app/api/v1/admin/audit-logs/route.ts
-import { NextRequest, NextResponse } from "next/server"
-import { MOCK_AUDIT_LOGS } from "@/lib/mock-data"
+import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/server/db";
+import { route, ok, parsePagination, meta } from "@/server/http";
+import { requireAuth, requireRole } from "@/server/auth/current-user";
+import { ADMIN_ROLES } from "@/server/rbac";
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const page = parseInt(searchParams.get("page") ?? "1")
-  const perPage = Math.min(parseInt(searchParams.get("per_page") ?? "50"), 100)
-  const actorId = searchParams.get("actor_id")
-  const entityType = searchParams.get("entity_type")
+export const GET = route(async (req: NextRequest) => {
+  const user = await requireAuth(req);
+  requireRole(user, ADMIN_ROLES);
+  const { searchParams } = new URL(req.url);
+  const { page, perPage, skip } = parsePagination(searchParams);
+  const actorId = searchParams.get("actor_id");
+  const entityType = searchParams.get("entity_type");
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
 
-  let data = [...MOCK_AUDIT_LOGS]
-  if (actorId) data = data.filter(l => l.actor_id === actorId)
-  if (entityType) data = data.filter(l => l.entity_type === entityType)
+  const where: Prisma.AuditLogWhereInput = {
+    ...(actorId ? { actor_id: actorId } : {}),
+    ...(entityType ? { entity_type: entityType } : {}),
+    ...(from || to ? { occurred_at: { ...(from ? { gte: new Date(from) } : {}), ...(to ? { lte: new Date(to) } : {}) } } : {}),
+  };
 
-  data.sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
+  const [total, rows] = await prisma.$transaction([
+    prisma.auditLog.count({ where }),
+    prisma.auditLog.findMany({ where, include: { actor: { select: { id: true, name: true } } }, orderBy: { occurred_at: "desc" }, skip, take: perPage }),
+  ]);
 
-  const total = data.length
-  return NextResponse.json({
-    data: data.slice((page - 1) * perPage, page * perPage),
-    meta: { page, per_page: perPage, total, total_pages: Math.ceil(total / perPage) },
-  })
-}
+  return ok(rows.map((log) => ({
+    id: log.id, actor_id: log.actor_id, actor_name: log.actor?.name ?? null,
+    action: log.action, entity_type: log.entity_type, entity_id: log.entity_id,
+    before: log.before, after: log.after, ip: log.ip, device: log.device, occurred_at: log.occurred_at,
+  })), meta(page, perPage, total));
+});

@@ -1,30 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { prisma } from "@/server/db";
+import { route, readJson, ok, HttpError } from "@/server/http";
+import { requireAuth, requireRole } from "@/server/auth/current-user";
+import { ADMIN_ROLES } from "@/server/rbac";
+import { writeAudit } from "@/server/audit";
 
-// Org verify endpoint
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const role = req.headers.get("x-user-role");
-  if (role !== "super_admin") {
-    return NextResponse.json({ error: { code: "FORBIDDEN" } }, { status: 403 });
-  }
-  const body = await req.json();
-  const { action, reason } = body; // action: "approve" | "reject"
+export const POST = route(async (req: NextRequest, context) => {
+  const user = await requireAuth(req);
+  requireRole(user, ADMIN_ROLES);
+  const { id } = await (context.params ?? Promise.resolve({ id: "" }));
+  const body = await readJson<{ action?: unknown; reason?: unknown }>(req);
+  const action = String(body.action ?? "");
   if (!["approve", "reject"].includes(action)) {
-    return NextResponse.json(
-      { error: { code: "VALIDATION_ERROR", message: "action harus approve atau reject" } },
-      { status: 400 }
-    );
+    throw new HttpError(400, "VALIDATION_ERROR", "action harus approve atau reject");
   }
-  return NextResponse.json({
+  if (action === "reject" && !String(body.reason ?? "").trim()) {
+    throw new HttpError(400, "VALIDATION_ERROR", "reason wajib diisi saat menolak");
+  }
+
+  const org = await prisma.organization.findUnique({ where: { id } });
+  if (!org) throw new HttpError(404, "NOT_FOUND", "Organisasi tidak ditemukan");
+
+  const updated = await prisma.organization.update({
+    where: { id },
     data: {
-      org_id: id,
-      status: action === "approve" ? "verified" : "rejected",
-      reason: reason || null,
-      verified_at: action === "approve" ? new Date().toISOString() : null,
-      verified_by: req.headers.get("x-user-id"),
+      status: action === "approve" ? "verified" : "unverified",
+      verified_at: action === "approve" ? new Date() : null,
+      status_changed_at: new Date(),
     },
   });
-}
+  await writeAudit({ actorId: user.id, action: "VERIFY_ORGANIZATION", entityType: "organization", entityId: id, before: { status: org.status }, after: { status: updated.status, reason: body.reason ?? null }, req });
+  return ok({ org_id: updated.id, status: updated.status, verified_at: updated.verified_at, reason: body.reason ?? null });
+});

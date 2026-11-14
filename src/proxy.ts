@@ -1,52 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
-
-// Berkas statis yang boleh diakses tanpa login (landing page)
-const PUBLIC_FILE =
-  /\.(?:svg|png|jpe?g|webp|avif|gif|ico|mp4|webm|woff2?|ttf|otf|apk|txt|xml|json|webmanifest)$/i;
-
-const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "pilahyuk-secret-dev-only"
-);
+import { verifyAccessToken } from "@/server/auth/jwt";
 
 const PUBLIC_PATHS = [
+  "/",
   "/login",
   "/register",
   "/forgot-password",
-  "/api/v1/auth/login",
-  "/api/v1/auth/register",
-  "/api/v1/auth/otp",
-  "/api/v1/auth/forgot-password",
-  "/api/v1/auth/reset-password",
+  "/akses-ditolak",
+  "/api/v1/auth/",
+  "/api/v1/areas",
+  "/api/v1/communities",
+  "/api/v1/materials",
+  "/api/v1/health",
 ];
+
+const PAGE_ROLES: Array<{ prefix: string; roles: string[] }> = [
+  { prefix: "/admin", roles: ["super_admin"] },
+  { prefix: "/bank-sampah", roles: ["super_admin", "operator_bank_sampah"] },
+  { prefix: "/material", roles: ["super_admin", "operator_bank_sampah", "pengurus_komunitas"] },
+  { prefix: "/pengumpulan", roles: ["super_admin", "operator_bank_sampah", "pengurus_komunitas", "collector"] },
+  { prefix: "/batch", roles: ["super_admin", "operator_bank_sampah", "pengurus_komunitas", "recycler"] },
+  { prefix: "/komunitas", roles: ["super_admin", "pengurus_komunitas"] },
+  { prefix: "/pengetahuan", roles: ["super_admin", "pengurus_komunitas", "curator"] },
+  { prefix: "/dashboard", roles: ["super_admin", "operator_bank_sampah", "pengurus_komunitas", "collector", "recycler"] },
+  { prefix: "/dampak", roles: ["super_admin", "resident", "volunteer"] },
+];
+
+function isStaticAsset(pathname: string): boolean {
+  if (pathname.startsWith("/_next") || pathname.startsWith("/icons")) return true;
+  if (/^\/(?:img|screens|download|fonts)\//.test(pathname)) return true;
+  if (["/favicon.ico", "/robots.txt", "/sitemap.xml", "/og.png"].includes(pathname)) return true;
+  return /\.(?:svg|png|jpe?g|webp|avif|gif|ico|woff2?|ttf|otf|apk|webmanifest)$/i.test(pathname);
+}
+
+function isPublic(pathname: string): boolean {
+  return PUBLIC_PATHS.some((p) => (p === "/" ? pathname === "/" : pathname === p || pathname.startsWith(p)));
+}
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Landing page (root) + berkas statis publik
-  const isPublicFile = PUBLIC_FILE.test(pathname);
-  if (pathname === "/" || isPublicFile) {
+  if (isStaticAsset(pathname) || isPublic(pathname)) {
     return NextResponse.next();
   }
 
-  // Allow public paths
-  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
-    return NextResponse.next();
-  }
-
-  // Allow static files
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon") ||
-    pathname.startsWith("/icons")
-  ) {
-    return NextResponse.next();
-  }
-
-  // Get token from cookie or Authorization header
   const token =
     req.cookies.get("pilahyuk_token")?.value ||
-    req.headers.get("authorization")?.replace("Bearer ", "");
+    req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
 
   if (!token) {
     if (pathname.startsWith("/api/")) {
@@ -55,33 +55,40 @@ export async function proxy(req: NextRequest) {
         { status: 401 }
       );
     }
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(pathname)}`, req.url));
   }
 
   try {
-    const { payload } = await jwtVerify(token, SECRET);
+    const payload = await verifyAccessToken(token);
+    const role = String(payload.role ?? "");
 
-    // Admin protection — applies to both admin pages and admin API routes
-    const isAdminApi = pathname.startsWith("/api/v1/admin");
-    const isAdminPage = pathname.startsWith("/admin");
+    if (pathname.startsWith("/api/v1/admin") && role !== "super_admin") {
+      return NextResponse.json(
+        { error: { code: "FORBIDDEN", message: "Akses ditolak" } },
+        { status: 403 }
+      );
+    }
 
-    if ((isAdminApi || isAdminPage) && payload.role !== "super_admin") {
+    const rule = PAGE_ROLES.find((entry) => pathname === entry.prefix || pathname.startsWith(`${entry.prefix}/`));
+    if (rule && !rule.roles.includes(role)) {
       if (pathname.startsWith("/api/")) {
         return NextResponse.json(
-          { error: { code: "FORBIDDEN", message: "Akses ditolak" } },
+          { error: { code: "FORBIDDEN", message: "Peran Anda tidak memiliki akses" } },
           { status: 403 }
         );
       }
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      return NextResponse.redirect(
+        new URL(`/akses-ditolak?from=${encodeURIComponent(pathname)}`, req.url)
+      );
     }
 
-    // Inject user info to headers for downstream
-    const requestHeaders = new Headers(req.headers);
-    requestHeaders.set("x-user-id", payload.sub as string);
-    requestHeaders.set("x-user-role", payload.role as string);
-    requestHeaders.set("x-user-org", (payload.org_id as string) || "");
-
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    const headers = new Headers(req.headers);
+    headers.set("x-user-id", String(payload.sub ?? ""));
+    headers.set("x-user-role", role);
+    headers.set("x-user-org", String(payload.org_id ?? ""));
+    headers.set("x-user-name", String(payload.name ?? ""));
+    headers.set("x-user-email", String(payload.email ?? ""));
+    return NextResponse.next({ request: { headers } });
   } catch {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
@@ -89,14 +96,15 @@ export async function proxy(req: NextRequest) {
         { status: 401 }
       );
     }
-    const response = NextResponse.redirect(new URL("/login", req.url));
+    const response = NextResponse.redirect(
+      new URL(`/login?next=${encodeURIComponent(pathname)}`, req.url)
+    );
     response.cookies.delete("pilahyuk_token");
+    response.cookies.delete("pilahyuk_refresh");
     return response;
   }
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icons/).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icons/).*)"],
 };

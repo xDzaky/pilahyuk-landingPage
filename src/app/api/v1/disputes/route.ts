@@ -1,56 +1,94 @@
-// src/app/api/v1/disputes/route.ts
-import { NextRequest, NextResponse } from "next/server"
-import { MOCK_DISPUTES } from "@/lib/mock-data"
+import { NextRequest } from "next/server";
+import { DisputeCategory, DisputeStatus, Prisma } from "@prisma/client";
+import { prisma } from "@/server/db";
+import { route, readJson, ok, HttpError, parsePagination, meta } from "@/server/http";
+import { requireAuth } from "@/server/auth/current-user";
+import { disputeInclude, serializeDispute } from "@/server/services/disputes";
+import { writeAudit } from "@/server/audit";
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const page = parseInt(searchParams.get("page") ?? "1")
-  const perPage = Math.min(parseInt(searchParams.get("per_page") ?? "10"), 100)
-  const status = searchParams.get("status")
-  const category = searchParams.get("category")
+export const GET = route(async (req: NextRequest) => {
+  const user = await requireAuth(req);
+  const { searchParams } = new URL(req.url);
+  const { page, perPage, skip } = parsePagination(searchParams);
+  const status = searchParams.get("status");
+  const category = searchParams.get("category");
 
-  let data = [...MOCK_DISPUTES]
-  if (status) data = data.filter(d => d.status === status)
-  if (category) data = data.filter(d => d.category === category)
+  const where: Prisma.DisputeWhereInput = {};
+  if (user.role === "super_admin") {
+    // all
+  } else if (user.role === "resident" || user.role === "volunteer") {
+    where.reporter_id = user.id;
+  } else if (["operator_bank_sampah", "pengurus_komunitas"].includes(user.role)) {
+    const memberIds = (await prisma.organizationMember.findMany({
+      where: { organization_id: user.org_id ?? "__none__", status: "active" },
+      select: { user_id: true },
+    })).map((m) => m.user_id);
+    where.OR = [
+      { reporter_id: { in: memberIds.length ? memberIds : ["__none__"] } },
+      { collection_request: { organization_id: user.org_id ?? "__none__" } },
+    ];
+  } else {
+    where.reporter_id = user.id;
+  }
+  if (status && Object.values(DisputeStatus).includes(status as DisputeStatus)) where.status = status as DisputeStatus;
+  if (category && Object.values(DisputeCategory).includes(category as DisputeCategory)) where.category = category as DisputeCategory;
 
-  data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  const [total, rows] = await prisma.$transaction([
+    prisma.dispute.count({ where }),
+    prisma.dispute.findMany({ where, include: disputeInclude, orderBy: { created_at: "desc" }, skip, take: perPage }),
+  ]);
+  return ok(rows.map(serializeDispute), meta(page, perPage, total));
+});
 
-  const total = data.length
-  return NextResponse.json({
-    data: data.slice((page - 1) * perPage, page * perPage),
-    meta: { page, per_page: perPage, total, total_pages: Math.ceil(total / perPage) },
-  })
-}
+export const POST = route(async (req: NextRequest) => {
+  const user = await requireAuth(req);
+  const body = await readJson<Record<string, unknown>>(req);
+  const relatedType = String(body.related_type ?? "");
+  const relatedId = String(body.related_id ?? "");
+  const reason = String(body.reason ?? "").trim();
+  const category = String(body.category ?? "") as DisputeCategory;
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { reporter_id, related_type, related_id, reason, category } = body
+  if (!["collection", "transaction", "batch", "content", "user"].includes(relatedType)) {
+    throw new HttpError(400, "VALIDATION_ERROR", "related_type tidak valid");
+  }
+  if (!relatedId || reason.length < 5) throw new HttpError(400, "VALIDATION_ERROR", "related_id dan alasan (min 5 karakter) wajib diisi");
+  if (!Object.values(DisputeCategory).includes(category)) throw new HttpError(400, "VALIDATION_ERROR", "category tidak valid");
 
-    if (!reporter_id || !related_type || !related_id || !reason || !category) {
-      return NextResponse.json(
-        { error: { code: "VALIDATION_ERROR", message: "Semua field wajib diisi" } },
-        { status: 400 }
-      )
+  let collectionId: string | null = null;
+  if (relatedType === "collection") {
+    const collection = await prisma.collectionRequest.findUnique({ where: { id: relatedId } });
+    if (!collection) throw new HttpError(404, "NOT_FOUND", "Permintaan tidak ditemukan");
+    if (["resident", "volunteer"].includes(user.role) && collection.requester_id !== user.id) {
+      throw new HttpError(403, "FORBIDDEN", "Anda hanya dapat menyengketakan permintaan sendiri");
     }
+    collectionId = collection.id;
+  } else if (relatedType === "transaction") {
+    const trx = await prisma.weighingTransaction.findUnique({ where: { id: relatedId } });
+    if (!trx) throw new HttpError(404, "NOT_FOUND", "Transaksi tidak ditemukan");
+    if (["resident", "volunteer"].includes(user.role) && trx.member_id !== user.id) {
+      throw new HttpError(403, "FORBIDDEN", "Anda hanya dapat menyengketakan transaksi sendiri");
+    }
+  } else if (relatedType === "batch") {
+    const batch = await prisma.materialBatch.findUnique({ where: { id: relatedId } });
+    if (!batch) throw new HttpError(404, "NOT_FOUND", "Batch tidak ditemukan");
+  } else if (relatedType === "content") {
+    const content = await prisma.culturalContent.findUnique({ where: { id: relatedId } });
+    if (!content) throw new HttpError(404, "NOT_FOUND", "Konten tidak ditemukan");
+  }
 
-    const dispute = {
-      id: `dis-${Date.now()}`,
-      reporter_id,
-      reporter_name: "Pengguna",
-      related_type,
-      related_id,
+  const dispute = await prisma.dispute.create({
+    data: {
+      reporter_id: user.id,
+      related_type: relatedType,
+      related_id: relatedId,
+      collection_request_id: collectionId,
       reason,
       category,
-      status: "open" as const,
-      created_at: new Date().toISOString(),
-    }
-
-    return NextResponse.json({ data: dispute }, { status: 201 })
-  } catch {
-    return NextResponse.json(
-      { error: { code: "INTERNAL_ERROR", message: "Terjadi kesalahan" } },
-      { status: 500 }
-    )
-  }
-}
+      status: "open",
+      status_changed_at: new Date(),
+    },
+    include: disputeInclude,
+  });
+  await writeAudit({ actorId: user.id, action: "CREATE_DISPUTE", entityType: "dispute", entityId: dispute.id, after: { related_type: relatedType, related_id: relatedId, category }, req });
+  return ok(serializeDispute(dispute), undefined, 201);
+});

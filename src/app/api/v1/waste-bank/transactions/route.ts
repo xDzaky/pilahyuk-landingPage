@@ -1,120 +1,100 @@
-// src/app/api/v1/waste-bank/transactions/route.ts
-import { NextRequest, NextResponse } from "next/server"
-import { MOCK_WEIGHING_TRANSACTIONS, MOCK_MATERIALS } from "@/lib/mock-data"
+import { NextRequest } from "next/server";
+import { Prisma, WeighingStatus } from "@prisma/client";
+import { prisma } from "@/server/db";
+import { route, readJson, ok, HttpError, parsePagination, meta } from "@/server/http";
+import { requireAuth } from "@/server/auth/current-user";
+import { requireOrgAccess } from "@/server/auth/current-user";
+import { createWeighingTransaction, serializeTransaction, transactionInclude } from "@/server/services/waste-bank";
+import { writeAudit } from "@/server/audit";
 
-// Module-level idempotency store (dev only — use Redis in production)
-const processedKeys = new Map<string, object>()
+export const GET = route(async (req: NextRequest) => {
+  const user = await requireAuth(req);
+  const { searchParams } = new URL(req.url);
+  const { page, perPage, skip } = parsePagination(searchParams);
+  const status = searchParams.get("status");
+  const memberId = searchParams.get("member_id");
+  const organizationId = searchParams.get("organization_id");
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
 
-function paginate<T>(data: T[], page: number, perPage: number) {
-  const total = data.length
-  const total_pages = Math.ceil(total / perPage)
-  const sliced = data.slice((page - 1) * perPage, page * perPage)
-  return { data: sliced, meta: { page, per_page: perPage, total, total_pages } }
-}
-
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const page = parseInt(searchParams.get("page") ?? "1")
-  const perPage = Math.min(parseInt(searchParams.get("per_page") ?? "10"), 100)
-  const memberId = searchParams.get("member_id")
-  const status = searchParams.get("status")
-
-  let data = [...MOCK_WEIGHING_TRANSACTIONS]
-  if (memberId) data = data.filter(t => t.member_id === memberId)
-  if (status) data = data.filter(t => t.status === status)
-  data.sort((a, b) => new Date(b.transaction_at).getTime() - new Date(a.transaction_at).getTime())
-
-  return NextResponse.json(paginate(data, page, perPage))
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-
-    // Support idempotency key from header OR body
-    const idempotencyKey =
-      request.headers.get("Idempotency-Key") ||
-      body.idempotency_key ||
-      null
-
-    // Check idempotency store
-    if (idempotencyKey && processedKeys.has(idempotencyKey)) {
-      const cached = processedKeys.get(idempotencyKey) as Record<string, unknown>
-      return NextResponse.json({ ...cached, meta: { ...(cached.meta as object || {}), idempotent: true } })
-    }
-
-    const { member_id, items } = body
-
-    // Validate
-    if (!member_id || !items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: { code: "VALIDATION_ERROR", message: "member_id dan items wajib diisi" } },
-        { status: 400 }
-      )
-    }
-
-    // Calculate with price snapshot
-    // Support both {gross, tare} and {amount_kg} formats
-    const processedItems = items.map((item: {
-      material_id: string;
-      gross?: number;
-      tare?: number;
-      amount_kg?: number;
-    }) => {
-      const material = MOCK_MATERIALS.find(m => m.id === item.material_id)
-      if (!material) throw new Error(`Material ${item.material_id} tidak ditemukan`)
-
-      const gross = item.gross ?? item.amount_kg ?? 0
-      const tare = item.tare ?? 0
-      const net = Math.max(0, gross - tare)
-      const priceSnapshot = material.current_price ?? 0
-
-      return {
-        material_id: item.material_id,
-        material_name: material.name,
-        gross,
-        tare,
-        net,
-        price_snapshot: priceSnapshot,
-        price_valid_from: material.price_valid_from,
-        value: net * priceSnapshot,
-      }
-    })
-
-    const totalNet = processedItems.reduce((s, i) => s + i.net, 0)
-    const totalValue = processedItems.reduce((s, i) => s + i.value, 0)
-
-    const transaction = {
-      id: `wtx-${Date.now()}`,
-      organization_id: "org-002",
-      member_id,
-      operator_id: request.headers.get("x-user-id") || "usr-002",
-      transaction_at: new Date().toISOString(),
-      status: "confirmed" as const,
-      sync_status: "synced" as const,
-      is_offline_created: false,
-      idempotency_key: idempotencyKey,
-      items: processedItems,
-      total_net: totalNet,
-      total_value: totalValue,
-    }
-
-    const responseBody = {
-      data: transaction,
-      meta: { idempotent: false },
-    }
-
-    // Store idempotency key
-    if (idempotencyKey) {
-      processedKeys.set(idempotencyKey, responseBody)
-    }
-
-    return NextResponse.json(responseBody, { status: 201 })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Terjadi kesalahan"
-    return NextResponse.json(
-      { error: { code: "INTERNAL_ERROR", message } },
-      { status: 500 }
-    )
+  const where: Prisma.WeighingTransactionWhereInput = {};
+  if (user.role === "super_admin") {
+    if (organizationId) where.organization_id = organizationId;
+    if (memberId) where.member_id = memberId;
+  } else if (user.role === "operator_bank_sampah") {
+    where.organization_id = user.org_id ?? "__none__";
+    if (memberId) where.member_id = memberId;
+  } else if (user.role === "resident" || user.role === "volunteer") {
+    where.member_id = user.id;
+  } else {
+    throw new HttpError(403, "FORBIDDEN", "Peran Anda tidak memiliki akses ke data bank sampah");
   }
-}
+  if (status && Object.values(WeighingStatus).includes(status as WeighingStatus)) where.status = status as WeighingStatus;
+  if (from || to) where.transaction_at = { ...(from ? { gte: new Date(from) } : {}), ...(to ? { lte: new Date(to) } : {}) };
+
+  const [total, rows] = await prisma.$transaction([
+    prisma.weighingTransaction.count({ where }),
+    prisma.weighingTransaction.findMany({
+      where, include: transactionInclude, orderBy: { transaction_at: "desc" }, skip, take: perPage,
+    }),
+  ]);
+
+  return ok(rows.map(serializeTransaction), meta(page, perPage, total));
+});
+
+export const POST = route(async (req: NextRequest) => {
+  const user = await requireAuth(req);
+  if (!["operator_bank_sampah", "super_admin"].includes(user.role)) {
+    throw new HttpError(403, "FORBIDDEN", "Hanya operator bank sampah yang dapat mencatat penimbangan");
+  }
+  const body = await readJson<Record<string, unknown>>(req);
+  const organizationId = String(body.organization_id ?? user.org_id ?? "").trim();
+  const memberId = String(body.member_id ?? "").trim();
+  const rawItems = Array.isArray(body.items) ? body.items : [];
+
+  if (!organizationId) throw new HttpError(400, "VALIDATION_ERROR", "organization_id wajib diisi");
+  if (!memberId) throw new HttpError(400, "VALIDATION_ERROR", "member_id wajib diisi");
+  await requireOrgAccess(user, organizationId);
+  if (rawItems.length === 0) throw new HttpError(400, "VALIDATION_ERROR", "items wajib diisi");
+
+  const items = rawItems.map((raw) => {
+    const item = raw as Record<string, unknown>;
+    return { material_id: String(item.material_id ?? ""), gross: Number(item.gross ?? 0), tare: Number(item.tare ?? 0) };
+  });
+
+  const idempotencyKey = req.headers.get("idempotency-key") || (body.idempotency_key ? String(body.idempotency_key) : null);
+  if (idempotencyKey) {
+    const existing = await prisma.syncIdempotencyKey.findUnique({ where: { key: idempotencyKey } });
+    if (existing) {
+      if (existing.response_reference) {
+        const trx = await prisma.weighingTransaction.findUnique({ where: { id: existing.response_reference }, include: transactionInclude });
+        if (trx) return ok({ ...serializeTransaction(trx), idempotent: true });
+      }
+      throw new HttpError(409, "CONFLICT", "Permintaan dengan Idempotency-Key ini sedang/sudah diproses");
+    }
+    try {
+      await prisma.syncIdempotencyKey.create({
+        data: { key: idempotencyKey, user_id: user.id, endpoint: "POST /waste-bank/transactions" },
+      });
+    } catch {
+      throw new HttpError(409, "CONFLICT", "Idempotency-Key sudah dipakai");
+    }
+  }
+
+  try {
+    const trx = await createWeighingTransaction({
+      organizationId, memberId, operatorId: user.id, items,
+      deviceId: body.device_id ? String(body.device_id) : null,
+      isOfflineCreated: Boolean(body.is_offline_created),
+      transactionAt: body.transaction_at ? new Date(String(body.transaction_at)) : new Date(),
+    });
+    if (idempotencyKey) {
+      await prisma.syncIdempotencyKey.update({ where: { key: idempotencyKey }, data: { response_reference: trx.id } });
+    }
+    await writeAudit({ actorId: user.id, action: "CREATE_TRANSACTION", entityType: "weighing_transaction", entityId: trx.id, after: { organization_id: organizationId, member_id: memberId }, req });
+    return ok(serializeTransaction(trx), undefined, 201);
+  } catch (error) {
+    if (idempotencyKey) await prisma.syncIdempotencyKey.delete({ where: { key: idempotencyKey } }).catch(() => undefined);
+    throw error;
+  }
+});
