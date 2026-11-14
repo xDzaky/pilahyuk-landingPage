@@ -436,7 +436,7 @@ export const imageSlots = {
   F6: { file: "img/fitur-budaya.avif", label: "F6 · fitur-budaya.avif", size: "1000 × 1333", alt: "Pengrajin lanjut usia menganyam bahan bekas di serambi" },
   F7: { file: "img/fitur-offline.avif", label: "F7 · fitur-offline.avif", size: "1000 × 1333", alt: "Petugas mencatat di meja balai warga dengan lampu sore" },
   O1: { file: "img/offline-balai.avif", label: "O1 · offline-balai.avif", size: "2400 × 1350", alt: "Balai warga sederhana dengan timbangan dan keranjang di sore hari" },
-  C1: { file: "img/komunitas-kerja-bakti.avif", label: "C1 · komunitas-kerja-bakti.avif", size: "1200 × 1500", alt: "Warga dari berbagai usia membersihkan lingkungan bersama" },
+  C1: { file: "img/komunitas-kerja-bakti.avif", label: "C1 · komunitas-kerja-bakti.avif", size: "1200 × 896", alt: "Warga dari berbagai usia membersihkan lingkungan bersama" },
   C2: { file: "img/komunitas-budaya.avif", label: "C2 · komunitas-budaya.avif", size: "1000 × 1000", alt: "Tangan perajin memegang anyaman dari bahan daur ulang" },
   B1: { file: "img/unduh-banner.avif", label: "B1 · unduh-banner.avif", size: "2400 × 1030", alt: "Warga bergotong royong di halaman balai warga saat pagi" },
 } as const;

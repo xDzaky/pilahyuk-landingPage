@@ -1,7 +1,7 @@
 # DECISIONS — Landing Page PilahYuk
 
 Dokumen ini mencatat keputusan, penyimpangan dari `docs/LANDING_BRIEF.md`, dan semua placeholder yang masih terbuka.
-Status: sudah di-push ke `xDzaky/pilahyuk-landingPage` dan ter-deploy di Vercel.
+Status: kode dan 15 foto §7.2 sudah di-push dan ter-deploy di Vercel. Screenshot aplikasi masih placeholder.
 
 ## 1. Ringkasan implementasi
 
@@ -13,7 +13,7 @@ Status: sudah di-push ke `xDzaky/pilahyuk-landingPage` dan ter-deploy di Vercel.
 | Styling | Tailwind v4 + `src/app/landing.css` dengan token §3 (scoped `.lp`) |
 | Font | Plus Jakarta Sans lewat `<link>` Google Fonts di `layout.tsx` (bukan `next/font`) |
 | Ikut serta | Navbar, S1–S11, S13–S15. S12 (cerita komunitas) tidak dirender karena belum ada kutipan nyata |
-| Gambar | Semua slot §7.2 dan screenshot §8.1 memakai placeholder berlabel; berkas otomatis terpakai begitu ditaruh di `public/` |
+| Gambar | 15 foto §7.2 sudah tersedia di `public/img/` (lokal, belum di-push). Screenshot aplikasi §8.1 masih placeholder berlabel |
 | Animasi | `Reveal` buatan sendiri (IntersectionObserver + CSS), tanpa pustaka `motion` |
 | QR | `qrcode.react` level H, hanya tampil ≥1024px |
 | Deploy | Vercel project `pilahyuk` → https://pilahyuk-dashboard.vercel.app |
@@ -22,6 +22,8 @@ Status: sudah di-push ke `xDzaky/pilahyuk-landingPage` dan ter-deploy di Vercel.
 ## 2. Gambar & screenshot yang masih placeholder
 
 Sistem placeholder: `src/lib/landing/assets.ts` memeriksa `public/` saat render. Selama berkas belum ada, komponen menampilkan kotak hijau bergaris dengan kode slot + nama berkas. Tidak ada UI aplikasi palsu yang digambar.
+
+**Status foto:** kelima belas slot di bawah sudah terisi di lokal. Yang masih placeholder hanya screenshot aplikasi (`public/screens/`).
 
 Letakkan berkas dengan nama berikut untuk mengaktifkannya otomatis (tanpa ubah kode):
 
@@ -61,6 +63,8 @@ Rekomendasi ukuran ada di brief §7.2 dan §8.1. Screenshot harus dari aplikasi 
 5. **Tombol unduh** memakai `public/download/pilahyuk-2.0.apk` (22 MB, SHA-256 `324a330c…70496d`). Berkas ini **ikut di-commit** agar APK tersedia di domain sendiri saat deploy (Vercel menyajikannya sebagai `application/vnd.android.package-archive`). `.gitignore` tetap mengabaikan APK baru; tambahkan dengan `git add -f` bila versi APK berubah.
 6. **Warna CTA**: navbar "Unduh" dan hero sama-sama amber (brief §5.1 dan §5.2 meminta keduanya amber), meski aturan umum mengatakan satu amber per layar.
 7. **Section gelap berdampingan**: banner CTA (gelap) diikuti footer (gelap) dipisahkan padding section terang, sesuai ritme brief.
+8. **C1 4:3, bukan 4:5**: foto `komunitas-kerja-bakti.avif` digenerate 1200×896 (4:3), sehingga bingkai `.poly` diubah dari 4:5 ke 4:3 agar tidak memotong samping secara berlebihan. Potongan poligon sudut kanan-atas dan stempel tetap sama.
+9. **Overlay hero & foto O1**: foto H1 cukup detail di sisi kiri, jadi overlay dinaikkan ke 0.97→0.9→0.42 (dan 0.94 rata di <1024px). Foto O1 yang high-key diredupkan (`brightness(.65)`, opacity 0.2) agar teks putih tetap lolos kontras AA.
 
 ## 5. Environment
 
@@ -96,6 +100,8 @@ Halaman portal/admin tetap terlindungi seperti sebelumnya.
 - Uji axe otomatis — belum dijalankan; navigasi keyboard sudah diimplementasikan manual.
 - Halaman Kebijakan Privasi & Syarat Penggunaan (tautan masih non-aktif).
 - OG image dibuat via `scripts/generate-og.mjs` (sharp + SVG), bukan Figma.
+- Screenshot aplikasi (`public/screens/01-beranda.png` … `15-bukti-hasil.png`) masih placeholder.
+
 
 ## 8. Deployment Vercel
 

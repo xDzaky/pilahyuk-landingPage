@@ -640,10 +640,22 @@
   z-index: 1;
   background: linear-gradient(
     100deg,
-    rgba(23, 63, 53, 0.93) 0%,
-    rgba(23, 63, 53, 0.82) 45%,
-    rgba(23, 63, 53, 0.38) 100%
+    rgba(23, 63, 53, 0.97) 0%,
+    rgba(23, 63, 53, 0.9) 46%,
+    rgba(23, 63, 53, 0.42) 100%
   );
+}
+
+/* Di layar <1024 teks memakai lebar penuh: foto dibuat lebih redup */
+@media (max-width: 1023px) {
+  .hero__overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(23, 63, 53, 0.94) 0%,
+      rgba(23, 63, 53, 0.9) 55%,
+      rgba(23, 63, 53, 0.86) 100%
+    );
+  }
 }
 
 .hero__pattern {
@@ -1772,20 +1784,22 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  opacity: 0.25;
+  opacity: 0.2;
 }
 
 .band__bg img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* foto O1 sangat terang; diredupkan agar teks tetap AA */
+  filter: brightness(0.65) saturate(0.85);
 }
 
 .band__pattern {
   position: absolute;
   inset: 0;
   z-index: 0;
-  opacity: 0.6;
+  opacity: 0.4;
   pointer-events: none;
 }
 
@@ -2137,7 +2151,8 @@
 .poly {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  /* C1 digenerate 4:3 (1200×896), bukan 4:5 seperti brief lama */
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: var(--radius-lg);
   clip-path: polygon(0 0, 78% 0, 100% 22%, 100% 100%, 0 100%);
