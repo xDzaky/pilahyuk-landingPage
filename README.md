@@ -12,14 +12,16 @@ Dashboard web + REST API untuk platform ekonomi sirkular PilahYuk 2.0. Satu proy
 | UI | Tailwind CSS 4 (CSS-first `@theme`), komponen custom, Lucide |
 | Chart | Recharts (`src/components/charts`) |
 | Server state | TanStack Query |
-| Database | PostgreSQL + Prisma (`prisma/schema.prisma`, belum terhubung ke runtime) |
-| Auth | JWT 8 jam (`jose`), cookie `pilahyuk_token` / Bearer token |
+| Database | PostgreSQL (Neon) + Prisma, terhubung ke runtime |
+| Auth | Access token JWT 8 jam + refresh token 30 hari (`jose`), cookie httpOnly / Bearer, rate limit persisten |
 
 ## Menjalankan lokal
 
 ```bash
 npm install
-cp .env.example .env.local   # isi DATABASE_URL, JWT_SECRET, dll.
+cp .env.example .env.local   # isi DATABASE_URL, DIRECT_URL, JWT_SECRET, FONNTE_TOKEN
+npm run db:push              # sinkronkan schema ke database
+npm run db:seed              # isi data nyata (Probolinggo, Jakarta, Bandung)
 npm run dev                  # http://localhost:3000
 ```
 
@@ -30,6 +32,10 @@ Akun demo:
 | Super Admin | `admin@pilahyuk.id` | `admin123` |
 | Operator Bank Sampah | `operator@banksampah.id` | `operator123` |
 | Pengurus Komunitas | `pengurus@komunitas.id` | `pengurus123` |
+| Warga | `warga@pilahyuk.id` | `warga123` |
+| Pengumpul | `collector@pilahyuk.id` | `collector123` |
+| Mitra Pengolah | `recycler@pilahyuk.id` | `recycler123` |
+| Kurator Budaya | `kurator@pilahyuk.id` | `kurator123` |
 
 ## Perintah
 
@@ -60,15 +66,19 @@ src/
 ## Dokumentasi
 
 - [`docs/PROJECT-FLOW.md`](docs/PROJECT-FLOW.md) — alur project end-to-end (onboarding, pengumpulan, bank sampah, batch, budaya, dampak) + status tiap langkah.
-- [`docs/API.md`](docs/API.md) — panduan API untuk tim mobile: autentikasi, registrasi, semua endpoint, contoh request/response, aturan bisnis, alur offline sync.
+- [`docs/API-MOBILE.md`](docs/API-MOBILE.md) — **kontrak API terbaru** untuk mobile: auth + refresh, wilayah, semua endpoint nyata, contoh request/response, rate limit, RBAC.
+- [`docs/API.md`](docs/API.md) — panduan lama; beberapa detail (mock, izin) sudah digantikan `API-MOBILE.md`.
 - [`docs/ACCOUNTS.md`](docs/ACCOUNTS.md) — akun demo (dashboard & mobile) + alur registrasi mandiri.
 - [`docs/MOBILE-APP-AUDIT.md`](docs/MOBILE-APP-AUDIT.md) — hasil reverse engineering APK Flutter: layar yang ada, endpoint yang dipanggil, dan gap integrasi.
 - [`docs/IMPLEMENTASI-CHECKLIST.md`](docs/IMPLEMENTASI-CHECKLIST.md) — audit kesesuaian implementasi terhadap `PilahYuk_Dashboard_AI_Agent_Prompts.md` (Prompt 0–14) beserta prioritas perbaikan.
 
 ## Status data
 
-Route API saat ini membaca `src/lib/mock-data.ts`; `POST` belum persisten. Skema Prisma sudah lengkap tetapi belum dipakai. Langkah migrasi ada di bagian akhir `docs/API.md`.
+- **API + database:** nyata. Route `/api/v1` membaca/menulis PostgreSQL melalui Prisma; auth, OTP, reset, refresh token, rate limit, idempotency sync, dan audit log persisten.
+- **Data seed:** 3 wilayah (Probolinggo, Jakarta Selatan, Bandung), 9 organisasi, 8 material + harga per bank, transaksi/ledger, permintaan jemput, batch, sengketa, agenda.
+- **Halaman web:** sebagian dashboard masih memakai `src/lib/mock-data.ts` untuk tampilan (API-nya sudah tersedia). Penyambungan halaman ke API adalah pekerjaan lanjutan.
+- **Mobile:** APK lama masih menunjuk `https://pilahyuk2.onrender.com/api`; ganti base URL ke `https://pilahyuk-dashboard.vercel.app/api/v1` (lihat `docs/MOBILE-APP-AUDIT.md`).
 
 ## Deploy
 
-Project Vercel terhubung ke branch `main` (framework Next.js). Environment variables diatur di dashboard Vercel — jangan pernah commit nilai secret ke repo.
+Project Vercel terhubung ke branch `main`. Environment variables diatur di dashboard Vercel (`DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`, `FONNTE_TOKEN`, `NEXT_PUBLIC_*`) — jangan pernah commit nilai secret ke repo. Build Vercel menjalankan `prisma generate` lewat `postinstall`.

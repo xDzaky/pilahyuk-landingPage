@@ -3,7 +3,7 @@
 > **Versi dokumen:** 1.0 — 14 November 2026
 > **Base URL (production):** `https://pilahyuk-dashboard.vercel.app/api/v1`
 > **Base URL (lokal):** `http://localhost:3000/api/v1`
-> **Status:** kontrak endpoint stabil dan bisa dipakai mobile untuk integrasi. Autentikasi (login, registrasi, OTP, lupa password) sudah berfungsi penuh; data domain lain masih mock.
+> **Status:** dokumen ini versi lama. API sekarang **DB-backed (PostgreSQL Neon + Prisma)** dan RBAC-nya sudah ditegakkan di server. Kontrak terbaru, termasuk refresh token, rate limit, wilayah, dan izin per role, ada di [`API-MOBILE.md`](API-MOBILE.md). Tabel izin di bagian 4 dokumen ini tidak lagi akurat.
 
 > ⚠️ **Penting untuk tim mobile:** APK saat ini memakai base URL `https://pilahyuk2.onrender.com/api` (backend lama). Ganti ke `https://pilahyuk-dashboard.vercel.app/api/v1` agar terhubung ke API ini. Detail temuan ada di [`docs/MOBILE-APP-AUDIT.md`](MOBILE-APP-AUDIT.md).
 
