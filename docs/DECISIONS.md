@@ -1,7 +1,7 @@
 # DECISIONS — Landing Page PilahYuk
 
 Dokumen ini mencatat keputusan, penyimpangan dari `docs/LANDING_BRIEF.md`, dan semua placeholder yang masih terbuka.
-Status: implementasi lokal, belum di-push.
+Status: sudah di-push ke `xDzaky/pilahyuk-landingPage` dan ter-deploy di Vercel.
 
 ## 1. Ringkasan implementasi
 
@@ -16,6 +16,7 @@ Status: implementasi lokal, belum di-push.
 | Gambar | Semua slot §7.2 dan screenshot §8.1 memakai placeholder berlabel; berkas otomatis terpakai begitu ditaruh di `public/` |
 | Animasi | `Reveal` buatan sendiri (IntersectionObserver + CSS), tanpa pustaka `motion` |
 | QR | `qrcode.react` level H, hanya tampil ≥1024px |
+| Deploy | Vercel project `pilahyuk` → https://pilahyuk-dashboard.vercel.app |
 | Analitik | Belum dipasang (tidak ada cookie/pelacak). Event §5.16 belum dikirim |
 
 ## 2. Gambar & screenshot yang masih placeholder
@@ -57,7 +58,7 @@ Rekomendasi ukuran ada di brief §7.2 dan §8.1. Screenshot harus dari aplikasi 
 2. **Font** dimuat lewat `<link>` Google Fonts (sudah ada di layout) alih-alih `next/font/google`, agar build tetap jalan tanpa akses jaringan saat kompilasi. Hasil visual identik.
 3. **Navbar mobile** tidak memuat tautan "Masuk" terpisah karena ruang 390px; tautan masuk ada di sheet menu ("Masuk ke portal").
 4. **Halaman `/`** memakai route group yang sudah ada, bukan proyek `landing/` terpisah seperti default brief §9.1. Dashboard dan landing berbagi satu deploy.
-5. **Tombol unduh** memakai berkas lokal `public/download/pilahyuk-2.0.apk` (22 MB, SHA-256 `324a330c…70496d`) untuk pengembangan. Berkas ini di-ignore Git; untuk produksi isi `NEXT_PUBLIC_APK_URL` dengan URL HTTPS domain sendiri.
+5. **Tombol unduh** memakai `public/download/pilahyuk-2.0.apk` (22 MB, SHA-256 `324a330c…70496d`). Berkas ini **ikut di-commit** agar APK tersedia di domain sendiri saat deploy (Vercel menyajikannya sebagai `application/vnd.android.package-archive`). `.gitignore` tetap mengabaikan APK baru; tambahkan dengan `git add -f` bila versi APK berubah.
 6. **Warna CTA**: navbar "Unduh" dan hero sama-sama amber (brief §5.1 dan §5.2 meminta keduanya amber), meski aturan umum mengatakan satu amber per layar.
 7. **Section gelap berdampingan**: banner CTA (gelap) diikuti footer (gelap) dipisahkan padding section terang, sesuai ritme brief.
 
@@ -77,6 +78,8 @@ NEXT_PUBLIC_APP_STORE_URL=""
 
 Catatan QR: pada dev, QR berisi `http://localhost:3000/download/...` sehingga hanya terbaca di mesin yang sama. Untuk mengujinya dari ponsel, set `NEXT_PUBLIC_SITE_URL` ke IP LAN (mis. `http://192.168.1.10:3000`) atau domain produksi.
 
+Kelima variabel di atas sudah diset di Vercel untuk environment **Production** pada dua project yang terhubung ke repo ini (lihat §8).
+
 ## 6. Middleware
 
 `src/proxy.ts` diubah agar:
@@ -93,3 +96,19 @@ Halaman portal/admin tetap terlindungi seperti sebelumnya.
 - Uji axe otomatis — belum dijalankan; navigasi keyboard sudah diimplementasikan manual.
 - Halaman Kebijakan Privasi & Syarat Penggunaan (tautan masih non-aktif).
 - OG image dibuat via `scripts/generate-og.mjs` (sharp + SVG), bukan Figma.
+
+## 8. Deployment Vercel
+
+Repo `xDzaky/pilahyuk-landingPage` terhubung ke **dua** project Vercel, dan keduanya ter-deploy setiap kali `main` di-push:
+
+| Project | URL produksi | Env | Catatan |
+|---|---|---|---|
+| `pilahyuk` | https://pilahyuk-dashboard.vercel.app | Lengkap (DB, R2, Fonnte, Sentry, landing) | **Jadikan kanonik** — ini yang punya domain rapi |
+| `pilahyuk-dashboard` | https://pilahyuk-dashboard-swart.vercel.app | Hanya variabel landing | Duplikat dari `.vercel/project.json` di repo |
+
+Keduanya saat ini menyajikan landing yang sama dan APK berfungsi. Disarankan memutus salah satu integrasi Git di dashboard Vercel agar tidak ada build ganda; pertahankan `pilahyuk`.
+
+Verifikasi produksi:
+- `/` → 200, judul & OG benar
+- `/download/pilahyuk-2.0.apk` → 200, `content-type: application/vnd.android.package-archive`, 22.605.712 byte
+- `/login` → 200, `/dashboard` tanpa token → 307 ke `/login`
