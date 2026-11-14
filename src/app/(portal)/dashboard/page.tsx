@@ -141,41 +141,33 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Offline sync banner */}
-      {pendingSync > 0 && (
-        <OfflineBanner
-          pendingCount={pendingSync}
-          lastSync="08.30"
-          onSync={handleSync}
-        />
-      )}
-
       {/* ── ANSWER BANNER ── */}
       <AnswerBanner
         compact
-        answer={
+        answer={`Operasional Hari Ini · Berat Bersih ${formatKg(initialSummary.totalNet)} dari ${initialSummary.confirmedCount} Transaksi`}
+        subtext={
           pendingSync > 0
-            ? `${pendingSync} transaksi menunggu sinkronisasi · berat bersih hari ini: ${formatKg(initialSummary.totalNet)}`
-            : `Semua ${initialSummary.confirmedCount} transaksi hari ini tersinkron · berat bersih: ${formatKg(initialSummary.totalNet)}`
+            ? `${pendingSync} transaksi tersimpan lokal dan siap disinkronkan ke server`
+            : "Semua transaksi hari ini telah tersinkronisasi realtime ke server"
         }
-        subtext={pendingSync > 0 ? "Periksa koneksi dan sinkronkan data sebelum tutup sesi" : undefined}
-        icon={pendingSync > 0 ? AlertTriangle : Scale}
-        variant={pendingSync > 0 ? "warning" : "dark"}
+        icon={Scale}
+        variant="dark"
         actions={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             {pendingSync > 0 && (
               <button
                 onClick={handleSync}
                 disabled={isSyncing}
-                className="px-3 py-1.5 bg-white/20 text-white text-xs font-semibold rounded-[12px] hover:bg-white/30 flex items-center gap-1.5 transition-colors disabled:opacity-60"
+                className="px-3 py-1.5 bg-[#FBF1DF] text-[#A86712] border border-[#F3DFBD] hover:bg-[#F5E5C9] text-xs font-semibold rounded-[12px] flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-60"
+                title="Klik untuk sinkronkan data lokal ke server"
               >
                 <RefreshCw className={cn("w-3.5 h-3.5", isSyncing && "animate-spin")} />
-                {isSyncing ? "Menyinkronkan..." : "Sinkronkan"}
+                {isSyncing ? "Menyinkronkan..." : `${pendingSync} Menunggu Sinkron`}
               </button>
             )}
             <Link
               href="/bank-sampah"
-              className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[12px] hover:bg-[#CBECE2] flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[12px] hover:bg-[#CBECE2] flex items-center gap-1.5 transition-colors shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               Timbang Baru

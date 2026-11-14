@@ -357,23 +357,29 @@ export default function BankSampahPage() {
 
   return (
     <div className="space-y-6">
-
-      {/* Offline sync banner */}
-      <OfflineBanner pendingCount={pendingSync} lastSync="08.30" />
-
       {/* ── ANSWER BANNER ── */}
       <AnswerBanner
-        answer={
+        answer={`Operasional Bank Sampah · Berat Bersih ${formatKg(summary.totalNet)} dari ${summary.totalCount} Transaksi`}
+        subtext={
           pendingSync > 0
-            ? `Berat bersih hari ini: ${formatKg(summary.totalNet)} dari ${summary.totalCount} transaksi · ${pendingSync} transaksi menunggu sinkronisasi`
-            : `Berat bersih hari ini: ${formatKg(summary.totalNet)} dari ${summary.confirmedCount} transaksi · semua tersinkron`
+            ? `${pendingSync} transaksi tersimpan lokal dan siap disinkronkan ke server pusat`
+            : "Semua data penimbangan telah tersinkronisasi realtime ke server pusat"
         }
-        icon={pendingSync > 0 ? AlertTriangle : Scale}
-        variant={pendingSync > 0 ? "warning" : "dark"}
+        icon={Scale}
+        variant="dark"
         actions={
-          <div className="flex gap-2">
-            <SyncIndicator pendingCount={pendingSync} onOpenOutbox={() => alert("Drawer outbox")} />
-            <button className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[12px] hover:bg-[#CBECE2] flex items-center gap-1 transition-colors">
+          <div className="flex items-center gap-2">
+            {pendingSync > 0 && (
+              <button
+                onClick={() => alert("Membuka drawer antrean sinkronisasi")}
+                className="px-3 py-1.5 bg-[#FBF1DF] text-[#A86712] border border-[#F3DFBD] hover:bg-[#F5E5C9] text-xs font-semibold rounded-[12px] flex items-center gap-1.5 transition-colors shadow-sm"
+                title="Buka antrean sinkronisasi"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                {pendingSync} Menunggu Sinkron
+              </button>
+            )}
+            <button className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[12px] hover:bg-[#CBECE2] flex items-center gap-1.5 transition-colors shadow-sm">
               <Download className="w-3.5 h-3.5" />
               Laporan
             </button>
