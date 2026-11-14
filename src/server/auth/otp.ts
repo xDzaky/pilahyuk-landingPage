@@ -43,10 +43,36 @@ export async function sendWhatsApp(phone: string, message: string): Promise<bool
   }
 }
 
+/** Fallback email via Resend (opsional). */
+export async function sendEmail(email: string, subject: string, text: string): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY;
+  const from = process.env.AUTH_EMAIL_FROM;
+  if (!key || !from) return false;
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to: [email], subject, text }),
+      signal: AbortSignal.timeout(8000),
+    });
+    return res.ok;
+  } catch (error) {
+    console.error("Resend send failed:", error);
+    return false;
+  }
+}
+
+export function supportUrl(): string | null {
+  const number = (process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? "").replace(/[^0-9]/g, "");
+  if (!number) return null;
+  return `https://wa.me/${number}?text=${encodeURIComponent("Halo admin PilahYuk, saya butuh bantuan verifikasi/pemulihan akun.")}`;
+}
+
 export async function createOtp(
   identifier: string,
-  purpose: "contact_verify" | "password_reset"
-): Promise<{ code: string; expiresIn: number; delivered: boolean }> {
+  purpose: "contact_verify" | "password_reset",
+  email?: string | null
+): Promise<{ code: string; expiresIn: number; delivered: boolean; channel: "whatsapp" | "email" | "manual" | "dev" }> {
   const code = String(randomInt(1000, 10000));
   await prisma.otpCode.updateMany({
     where: { identifier, purpose, consumed_at: null },
@@ -62,18 +88,26 @@ export async function createOtp(
   });
 
   if (isDevAuth()) {
-    return { code, expiresIn: OTP_TTL_MS / 1000, delivered: false };
+    return { code, expiresIn: OTP_TTL_MS / 1000, delivered: false, channel: "dev" };
   }
 
   const message =
     purpose === "contact_verify"
       ? `Kode verifikasi PilahYuk Anda: ${code}. Berlaku 5 menit. Jangan bagikan kode ini.`
       : `Kode reset kata sandi PilahYuk Anda: ${code}. Berlaku 5 menit. Jangan bagikan kode ini.`;
-  const delivered = await sendWhatsApp(identifier, message);
-  if (!delivered) {
-    throw new Error("GATEWAY_UNAVAILABLE");
+
+  if (identifier.includes("@")) {
+    const delivered = await sendEmail(identifier, "Kode PilahYuk", message);
+    return { code, expiresIn: OTP_TTL_MS / 1000, delivered, channel: delivered ? "email" : "manual" };
   }
-  return { code, expiresIn: OTP_TTL_MS / 1000, delivered: true };
+
+  if (await sendWhatsApp(identifier, message)) {
+    return { code, expiresIn: OTP_TTL_MS / 1000, delivered: true, channel: "whatsapp" };
+  }
+  if (email && email.includes("@") && (await sendEmail(email, "Kode PilahYuk", message))) {
+    return { code, expiresIn: OTP_TTL_MS / 1000, delivered: true, channel: "email" };
+  }
+  return { code, expiresIn: OTP_TTL_MS / 1000, delivered: false, channel: "manual" };
 }
 
 export async function verifyOtpRecord(

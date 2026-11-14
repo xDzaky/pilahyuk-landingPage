@@ -139,6 +139,8 @@ Transisi: `draft → submitted → confirmed → assigned → on_the_way → col
 | POST | `/waste-bank/transactions/{id}/adjustments` | Operator/admin; alasan wajib |
 | GET | `/waste-bank/reports/{YYYY-MM}` | Operator/admin |
 | GET | `/waste-bank/reports/{YYYY-MM-DD}` | Operator/admin |
+| POST | `/waste-bank/members/{id}/withdrawals` | Operator/admin; tarik tunai/sembako tabungan |
+| PUT | `/organizations/{id}/materials/prices` | Operator/admin; perbarui harga beli material |
 
 Body transaksi:
 
@@ -189,6 +191,39 @@ Event: `dikumpulkan`, `ditimbang`, `digabung`, `diserahkan` (asal) dan `diterima
 | GET | `/disputes` | Warga: miliknya; pengurus/operator: anggota/organisasinya; admin: semua |
 | POST | `/disputes` | Pelapor = token; `related_type` = `transaction`/`collection`/`batch`/`content` |
 | PATCH | `/disputes/{id}` | Pengurus/operator: `assigned`/`in_review`; admin: `resolved`/`rejected` (+`resolution`) |
+
+### Agenda & Gotong Royong Komunitas (Events)
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| GET | `/organizations/{id}/events` | Semua user login | Daftar agenda gotong royong/kegiatan komunitas |
+| POST | `/organizations/{id}/events` | Pengurus komunitas/admin | Buat agenda kegiatan baru |
+| POST | `/events/{id}/registrations` | Warga/relawan | Mendaftar keikutsertaan kegiatan |
+| POST | `/events/{id}/check-in` | Warga/pengurus | Presensi kehadiran di lokasi kegiatan |
+
+### Notifikasi In-App
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| GET | `/notifications` | Semua user login | Daftar notifikasi (status jemput, setoran, saldo, agenda) |
+| PATCH | `/notifications/{id}` | Pemilik notifikasi | Tandai notifikasi spesifik sudah dibaca |
+| POST | `/notifications/read-all` | Pemilik notifikasi | Tandai semua notifikasi sudah dibaca |
+
+### Tantangan Memilah & Gamifikasi (Challenges)
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| GET | `/challenges` | Semua user login | Daftar tantangan aksi memilah komunitas |
+| POST | `/challenges` | Pengurus komunitas/admin | Buat tantangan baru |
+| POST | `/challenges/{id}/join` | Warga/relawan | Gabung ke tantangan |
+
+### Arsip Budaya & Pengetahuan Lokal (Cultural Content)
+
+| Method | Path | Role | Keterangan |
+|---|---|---|---|
+| GET | `/cultural-contents` | Semua user login | Arsip cerita, kearifan lokal memilah & daur ulang |
+| POST | `/cultural-contents` | Warga/pengurus | Kirim cerita budaya & pengetahuan lokal |
+| PATCH | `/cultural-contents/{id}` | Kurator budaya/admin | Moderasi & kurasi konten (approve/revise/reject) |
 
 ### Sinkronisasi offline
 

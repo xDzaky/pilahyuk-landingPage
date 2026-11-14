@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
+import { prisma } from "@/server/db";
 import { route, readJson, ok, HttpError, getIp } from "@/server/http";
 import { enforceRateLimit } from "@/server/rate-limit";
-import { createOtp, isDevAuth, normalizePhone } from "@/server/auth/otp";
+import { createOtp, isDevAuth, normalizePhone, supportUrl } from "@/server/auth/otp";
 
 export const POST = route(async (req: NextRequest) => {
   const body = await readJson<{ phone?: unknown }>(req);
@@ -16,16 +17,15 @@ export const POST = route(async (req: NextRequest) => {
   await enforceRateLimit(`otp:ip:${getIp(req)}`, 30, 600);
   await enforceRateLimit(`otp:phone:${phone}`, 5, 600);
 
-  try {
-    const otp = await createOtp(phone, "contact_verify");
-    return ok({
-      sent: true,
-      channel: "whatsapp",
-      phone,
-      expires_in: otp.expiresIn,
-      ...(isDevAuth() ? { dev_code: otp.code } : {}),
-    });
-  } catch {
-    throw new HttpError(502, "GATEWAY_UNAVAILABLE", "Gateway WhatsApp belum siap. Coba lagi beberapa saat.");
-  }
+  const user = await prisma.user.findFirst({ where: { phone }, select: { email: true } });
+  const otp = await createOtp(phone, "contact_verify", user?.email ?? null);
+  return ok({
+    sent: otp.delivered,
+    delivery: otp.channel,
+    channel: "whatsapp",
+    phone,
+    expires_in: otp.expiresIn,
+    ...(isDevAuth() ? { dev_code: otp.code } : {}),
+    ...(!otp.delivered && !isDevAuth() ? { support_url: supportUrl(), message: "Kode tidak terkirim. Hubungi admin lewat tautan bantuan atau coba lagi." } : {}),
+  });
 });

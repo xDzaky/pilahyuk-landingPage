@@ -3,7 +3,7 @@ import { prisma } from "@/server/db";
 import { route, readJson, ok, HttpError, getIp } from "@/server/http";
 import { enforceRateLimit } from "@/server/rate-limit";
 import { hashPassword } from "@/server/auth/password";
-import { normalizePhone, createOtp, isDevAuth } from "@/server/auth/otp";
+import { normalizePhone, createOtp, isDevAuth, supportUrl } from "@/server/auth/otp";
 import { issueSession, orgNameFor } from "@/server/auth/issue-session";
 import { toPublicUser } from "@/server/auth/serializers";
 import { setAuthCookies } from "@/server/auth/session";
@@ -84,15 +84,17 @@ export const POST = route(async (req: NextRequest) => {
     }
   }
 
-  let otp: { channel: string; expires_in: number; dev_code?: string } | null = null;
-  let otpError: string | null = null;
+  let otp: { channel: string; delivery: string; sent: boolean; expires_in: number; dev_code?: string; support_url?: string | null } | null = null;
   if (phone) {
-    try {
-      const created = await createOtp(phone, "contact_verify");
-      otp = { channel: "whatsapp", expires_in: created.expiresIn, ...(isDevAuth() ? { dev_code: created.code } : {}) };
-    } catch {
-      otpError = "Kode verifikasi gagal dikirim. Coba minta ulang dari halaman verifikasi.";
-    }
+    const created = await createOtp(phone, "contact_verify", email || null);
+    otp = {
+      channel: created.channel,
+      delivery: created.channel,
+      sent: created.delivered,
+      expires_in: created.expiresIn,
+      ...(isDevAuth() ? { dev_code: created.code } : {}),
+      ...(!created.delivered && !isDevAuth() ? { support_url: supportUrl() } : {}),
+    };
   }
 
   const session = await issueSession(user, req);
@@ -107,7 +109,6 @@ export const POST = route(async (req: NextRequest) => {
     user: toPublicUser(user, await orgNameFor(user.org_id)),
     next_step: phone ? "verify_contact" : "complete_profile",
     otp,
-    otp_error: otpError,
   }, undefined, 201);
   return setAuthCookies(response, session.access, session.refresh);
 });
