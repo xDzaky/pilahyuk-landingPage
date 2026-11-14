@@ -99,6 +99,46 @@
 - **Body:** `{ "identifier": "081200000004", "password": "warga123" }`
 - **Simpan:** `token` (access token 8 jam) & `refresh_token` (30 hari) di `FlutterSecureStorage`.
 
+#### 4. Lupa Kata Sandi & Reset Password (`forgot_password_screen.dart` / `reset_password_screen.dart`)
+- **Langkah 1 (Minta Kode Pemulihan):** `POST /auth/forgot-password`
+  - **Body:** `{ "identifier": "081234567890" }` atau `{ "identifier": "user@example.com" }`
+  - **Keterangan:** Kode OTP 4 digit akan dikirimkan ke WhatsApp/Email pengguna (masa berlaku 5 menit).
+  - **Response 200:**
+    ```json
+    {
+      "data": {
+        "message": "Instruksi pemulihan kata sandi telah dikirimkan.",
+        "channel": "whatsapp",
+        "expires_in": 300
+      }
+    }
+    ```
+- **Langkah 2 (Eksekusi Reset Kata Sandi Baru):** `POST /auth/reset-password`
+  - **Body via OTP WhatsApp:**
+    ```json
+    {
+      "identifier": "081234567890",
+      "code": "4821",
+      "password": "passwordBaru123"
+    }
+    ```
+  - **Body via Reset Token (Link Email/Admin):**
+    ```json
+    {
+      "token": "reset_token_dari_link",
+      "password": "passwordBaru123"
+    }
+    ```
+  - **Response 200:**
+    ```json
+    {
+      "data": {
+        "message": "Kata sandi berhasil diperbarui. Silakan masuk kembali."
+      }
+    }
+    ```
+  - **Keterangan:** Semua sesi login lama akan otomatis dicabut (*revoked*) demi keamanan akun.
+
 #### 4. Refresh Token (Rotasi Otomatis saat 401)
 - **Method & Path:** `POST /auth/refresh`
 - **Body:** `{ "refresh_token": "rt_..." }`

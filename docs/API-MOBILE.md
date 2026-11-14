@@ -57,6 +57,40 @@ curl -X POST https://pilahyuk-dashboard.vercel.app/api/v1/auth/login \
 }
 ```
 
+Contoh pemulihan kata sandi (Forgot & Reset Password):
+
+1. Minta kode:
+```bash
+curl -X POST https://pilahyuk-dashboard.vercel.app/api/v1/auth/forgot-password \
+  -H "Content-Type: application/json" \
+  -d '{"identifier":"08123456789"}'
+```
+Response:
+```json
+{
+  "data": {
+    "message": "Instruksi pemulihan kata sandi telah dikirimkan.",
+    "channel": "whatsapp",
+    "expires_in": 300
+  }
+}
+```
+
+2. Reset dengan OTP:
+```bash
+curl -X POST https://pilahyuk-dashboard.vercel.app/api/v1/auth/reset-password \
+  -H "Content-Type: application/json" \
+  -d '{"identifier":"08123456789","code":"4821","password":"passwordBaru123"}'
+```
+Response:
+```json
+{
+  "data": {
+    "message": "Kata sandi berhasil diperbarui. Silakan masuk kembali."
+  }
+}
+```
+
 **Rate limit** (persisten di database): login 10×/15 menit per identifier dan 30×/15 menit per IP; OTP 5×/10 menit per nomor; register 5×/jam per IP. Melebihi batas → `429` + header `Retry-After`.
 
 ## 2. Registrasi

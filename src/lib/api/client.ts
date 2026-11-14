@@ -29,6 +29,8 @@ export class ApiError extends Error {
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
+  const local = localStorage.getItem("pilahyuk_token");
+  if (local) return local;
   return document.cookie
     .split("; ")
     .find((row) => row.startsWith("pilahyuk_token="))
@@ -47,6 +49,7 @@ async function request<T>(
   };
 
   const response = await fetch(`${BASE_URL}${path}`, {
+    credentials: "include",
     ...options,
     headers,
   });
