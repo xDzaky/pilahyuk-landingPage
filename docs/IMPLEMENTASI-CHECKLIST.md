@@ -13,7 +13,7 @@
 | 1 | Tech stack & arsitektur | 🟡 9/16 | Next.js + TS strict + Tailwind 4 jalan; Prisma/DB belum terhubung, Zod & service layer belum ada |
 | 2 | Design system & anti-slop | 🟡 9/14 | Token, KpiCard, AnswerBanner, DataTable, Timeline ada; Skeleton, Toast, QR card belum |
 | 3 | Database schema (Prisma) | 🟡 3/5 | 37 model + 16 enum + seed siap; belum ada migrasi & belum dipakai runtime |
-| 4 | REST API `/api/v1` | 🟡 26 endpoint | Semua endpoint inti ada; ±60 endpoint PRD belum lengkap, OpenAPI belum |
+| 4 | REST API `/api/v1` | 🟡 31 endpoint | Semua endpoint inti + auth lengkap; endpoint PRD lain belum, OpenAPI belum |
 | 5 | Auth, RBAC & routing | 🟡 4/7 | Login token + proteksi admin (page & API) jalan; refresh/role selector/audit login belum |
 | 6 | Dashboard shell portal | ✅ 10/12 | Sidebar, header, search, sync indicator, notifikasi, responsive lengkap |
 | 7 | Dashboard Pengurus Komunitas | ✅ 6/6 | AnswerBanner, agenda, join-request, tugas, dampak |
@@ -106,7 +106,7 @@
 
 | Grup | Endpoint yang belum |
 |---|---|
-| Auth | `POST /auth/register`, `POST /auth/refresh`, `GET /me/roles` |
+| Auth | `POST /auth/refresh`, `GET /me/roles` (registrasi, OTP, lupa password sudah ada) |
 | Communities | `POST /communities/{id}/join-requests`, `GET /organizations/{id}/members`, `PATCH /organizations/{id}/members/{userId}` |
 | Events & Tasks | Semua (`/organizations/{id}/events`, registrations, check-in, `/organizations/{id}/tasks`, `PATCH /tasks/{id}`) |
 | Materials | `GET /materials/{id}/rules`, `GET/PUT /organizations/{id}/materials/prices` |
@@ -138,6 +138,7 @@
 | # | Requirement | Status | Bukti |
 |---|---|---|---|
 | 1 | Login + sesi token | ✅ | `POST /auth/login`, cookie `pilahyuk_token` + Bearer |
+| 1b | Registrasi mandiri + OTP + lupa password | ✅ | `POST /auth/register`, `/auth/otp/*`, `/auth/forgot-password`, `/auth/reset-password`, halaman `/register` & `/forgot-password` |
 | 2 | Route group + middleware blokir role | ✅ | `src/proxy.ts` (Next 16 menggantikan `middleware.ts`); admin page → redirect `/dashboard`, admin API → 403 |
 | 3 | Role selector di header | 🟡 | Ada organization switcher di sidebar, belum selector role multi-role di header |
 | 4 | Sidebar dinamis per role | 🟡 | Menu admin/portal terpisah; filter per item role belum granular |
