@@ -19,37 +19,37 @@ const NAV_GROUPS = [
   {
     label: "UTAMA",
     items: [
-      { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard Operasional" },
-      { href: "/komunitas", icon: Building2, label: "Dashboard Komunitas" },
+      { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard Operasional", roles: ["super_admin", "operator_bank_sampah", "pengurus_komunitas", "collector", "recycler"] },
+      { href: "/komunitas", icon: Building2, label: "Dashboard Komunitas", roles: ["super_admin", "pengurus_komunitas"] },
     ],
   },
   {
     label: "KOMUNITAS",
     items: [
-      { href: "/komunitas/anggota", icon: Users, label: "Komunitas" },
-      { href: "/pengetahuan", icon: BookOpen, label: "Pengetahuan Budaya" },
+      { href: "/komunitas/anggota", icon: Users, label: "Komunitas", roles: ["super_admin", "pengurus_komunitas"] },
+      { href: "/pengetahuan", icon: BookOpen, label: "Pengetahuan Budaya", roles: ["super_admin", "pengurus_komunitas", "curator"] },
     ],
   },
   {
     label: "OPERASIONAL",
     items: [
-      { href: "/material", icon: Package, label: "Material" },
-      { href: "/pengumpulan", icon: Truck, label: "Pengumpulan" },
-      { href: "/bank-sampah", icon: Landmark, label: "Bank Sampah" },
-      { href: "/batch", icon: QrCode, label: "Jejak Batch" },
+      { href: "/material", icon: Package, label: "Material", roles: ["super_admin", "operator_bank_sampah", "pengurus_komunitas"] },
+      { href: "/pengumpulan", icon: Truck, label: "Pengumpulan", roles: ["super_admin", "operator_bank_sampah", "pengurus_komunitas", "collector"] },
+      { href: "/bank-sampah", icon: Landmark, label: "Bank Sampah", roles: ["super_admin", "operator_bank_sampah"] },
+      { href: "/batch", icon: QrCode, label: "Jejak Batch", roles: ["super_admin", "operator_bank_sampah", "pengurus_komunitas", "recycler"] },
     ],
   },
   {
     label: "LAPORAN",
     items: [
-      { href: "/dampak", icon: BarChart2, label: "Dampak" },
+      { href: "/dampak", icon: BarChart2, label: "Dampak", roles: ["super_admin", "resident", "volunteer"] },
     ],
   },
   {
     label: "LAINNYA",
     items: [
-      { href: "/bantuan", icon: HelpCircle, label: "Bantuan & Sengketa" },
-      { href: "/pengaturan", icon: Settings, label: "Pengaturan" },
+      { href: "/bantuan", icon: HelpCircle, label: "Bantuan & Sengketa", roles: null },
+      { href: "/pengaturan", icon: Settings, label: "Pengaturan", roles: null },
     ],
   },
 ]
@@ -60,6 +60,17 @@ const AVAILABLE_ORGS = [
   { id: "org-001", name: "Komunitas Hijau RW 05", type: "Komunitas", role: "pengurus_komunitas", roleLabel: "Pengurus Komunitas", short: "KH" },
   { id: "org-003", name: "Pengolah Mandiri Jaya", type: "Pengolah / Recycler", role: "operator_bank_sampah", roleLabel: "Koordinator Pengolah", short: "PM" },
 ]
+
+const ROLE_LABELS: Record<string, string> = {
+  super_admin: "Super Admin",
+  operator_bank_sampah: "Operator Bank Sampah",
+  pengurus_komunitas: "Pengurus Komunitas",
+  collector: "Petugas Pengumpul",
+  recycler: "Mitra Pengolah",
+  curator: "Kurator Budaya",
+  resident: "Warga / Resident",
+  volunteer: "Relawan / Volunteer",
+}
 
 // Mock notifications
 const INITIAL_NOTIFICATIONS = [
@@ -135,6 +146,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
   const [activeOrg, setActiveOrg] = useState(AVAILABLE_ORGS[0])
   const [userName, setUserName] = useState("Siti Rahayu")
+  const [userRole, setUserRole] = useState<string>("")
 
   const pathname = usePathname()
   const router = useRouter()
@@ -151,9 +163,30 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       if (stored) {
         const parsed = JSON.parse(stored)
         if (parsed.name) setUserName(parsed.name)
+        if (parsed.role) setUserRole(parsed.role)
         if (parsed.org_name) {
           const match = AVAILABLE_ORGS.find(o => o.name === parsed.org_name)
-          if (match) setActiveOrg(match)
+          if (match) {
+            setActiveOrg(match)
+          } else {
+            setActiveOrg({
+              id: parsed.org_id || "org-user",
+              name: parsed.org_name,
+              type: parsed.role === "resident" ? "Warga" : "Organisasi",
+              role: parsed.role || "resident",
+              roleLabel: ROLE_LABELS[parsed.role] || "Warga",
+              short: (parsed.org_name as string).slice(0, 2).toUpperCase(),
+            })
+          }
+        } else if (parsed.role === "resident" || parsed.role === "volunteer") {
+          setActiveOrg({
+            id: "resident-user",
+            name: "Akun Personal",
+            type: "Warga",
+            role: parsed.role,
+            roleLabel: ROLE_LABELS[parsed.role] || "Warga",
+            short: "WG",
+          })
         }
       }
     } catch {}
@@ -210,15 +243,45 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     return notifications
   }, [notifications, notifFilter])
 
+  const homeHref = useMemo(() => {
+    if (userRole === "super_admin") return "/admin/overview"
+    if (userRole === "resident" || userRole === "volunteer") return "/dampak"
+    if (userRole === "collector") return "/pengumpulan"
+    if (userRole === "recycler") return "/batch"
+    if (userRole === "curator") return "/pengetahuan"
+    return "/dashboard"
+  }, [userRole])
+
+  const filteredNavGroups = useMemo(() => {
+    return NAV_GROUPS.map(group => ({
+      ...group,
+      items: group.items.filter(item => {
+        if (!item.roles) return true
+        if (!userRole) return false
+        return item.roles.includes(userRole)
+      })
+    })).filter(group => group.items.length > 0)
+  }, [userRole])
+
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return []
     const q = searchQuery.toLowerCase()
-    return SEARCH_DATABASE.filter(item =>
-      item.label.toLowerCase().includes(q) ||
-      item.meta.toLowerCase().includes(q) ||
-      item.type.toLowerCase().includes(q)
-    ).slice(0, 6)
-  }, [searchQuery])
+    return SEARCH_DATABASE.filter(item => {
+      if (userRole && item.link) {
+        for (const g of NAV_GROUPS) {
+          const matched = g.items.find(navItem => item.link === navItem.href || item.link.startsWith(`${navItem.href}/`))
+          if (matched && matched.roles && !matched.roles.includes(userRole)) {
+            return false
+          }
+        }
+      }
+      return (
+        item.label.toLowerCase().includes(q) ||
+        item.meta.toLowerCase().includes(q) ||
+        item.type.toLowerCase().includes(q)
+      )
+    }).slice(0, 6)
+  }, [searchQuery, userRole])
 
   const handleMarkAllRead = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
@@ -227,11 +290,22 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const handleNotificationClick = useCallback((id: string, link?: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
     setNotifOpen(false)
-    if (link) router.push(link)
-  }, [router])
+    if (link) {
+      if (userRole) {
+        for (const g of NAV_GROUPS) {
+          const matched = g.items.find(navItem => link === navItem.href || link.startsWith(`${navItem.href}/`))
+          if (matched && matched.roles && !matched.roles.includes(userRole)) {
+            return
+          }
+        }
+      }
+      router.push(link)
+    }
+  }, [router, userRole])
 
   const handleSwitchOrg = useCallback((org: typeof AVAILABLE_ORGS[0]) => {
     setActiveOrg(org)
+    setUserRole(org.role)
     setOrgSwitcherOpen(false)
     try {
       const stored = localStorage.getItem("pilahyuk_user")
@@ -293,7 +367,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             "flex items-center justify-between px-4 py-5 border-b border-white/10 shrink-0",
             sidebarCollapsed && "justify-center px-2"
           )}>
-            <Link href="/dashboard" className="flex items-center gap-3 min-w-0 group">
+            <Link href={homeHref} className="flex items-center gap-3 min-w-0 group">
               <div className="w-8 h-8 bg-[#DDF3EC] rounded-lg flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105">
                 <span className="text-[#173F35] font-black text-sm">P</span>
               </div>
@@ -308,7 +382,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
           {/* Navigation Items */}
           <nav className="flex-1 overflow-y-auto py-3 space-y-1 px-2">
-            {NAV_GROUPS.map(group => (
+            {filteredNavGroups.map(group => (
               <div key={group.label}>
                 {!sidebarCollapsed && (
                   <div className="px-2.5 pt-3 pb-1 text-[10px] font-bold text-[#DDF3EC]/40 tracking-wider uppercase">
@@ -438,7 +512,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           />
           <aside className="relative flex flex-col w-64 max-w-[80vw] h-full z-50 bg-[#173F35] text-white brand-motif shadow-2xl">
             <div className="flex items-center justify-between px-4 py-5 border-b border-white/10 shrink-0">
-              <Link href="/dashboard" className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
+              <Link href={homeHref} className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
                 <div className="w-8 h-8 bg-[#DDF3EC] rounded-lg flex items-center justify-center">
                   <span className="text-[#173F35] font-black text-sm">P</span>
                 </div>
@@ -457,7 +531,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             </div>
 
             <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
-              {NAV_GROUPS.map(group => (
+              {filteredNavGroups.map(group => (
                 <div key={group.label}>
                   <div className="px-2.5 pt-3 pb-1 text-[10px] font-bold text-[#DDF3EC]/40 tracking-wider uppercase">
                     {group.label}
@@ -734,7 +808,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                 </div>
                 <div className="hidden sm:block text-left">
                   <div className="text-xs font-semibold text-[#1E2925] leading-tight truncate">{userName}</div>
-                  <div className="text-[10px] text-[#66736D] truncate">{activeOrg.roleLabel}</div>
+                  <div className="text-[10px] text-[#66736D] truncate">{ROLE_LABELS[userRole] || activeOrg.roleLabel}</div>
                 </div>
                 <ChevronDown className={cn(
                   "w-3.5 h-3.5 text-[#66736D] hidden sm:block transition-transform duration-200 group-hover:text-[#1E2925]",
@@ -756,7 +830,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                       </div>
                       <div className="min-w-0">
                         <div className="text-sm font-bold text-[#1E2925] truncate">{userName}</div>
-                        <div className="text-[11px] text-[#66736D] truncate">{activeOrg.roleLabel}</div>
+                        <div className="text-[11px] text-[#66736D] truncate">{ROLE_LABELS[userRole] || activeOrg.roleLabel}</div>
                         <div className="inline-block mt-1 px-2 py-0.5 bg-[#DDF3EC] text-[#173F35] text-[10px] font-bold rounded-md truncate max-w-full">
                           {activeOrg.name}
                         </div>
