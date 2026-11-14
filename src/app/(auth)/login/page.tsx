@@ -4,7 +4,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Eye, EyeOff } from "lucide-react"
+import { ArrowLeft, Eye, EyeOff } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -90,6 +90,14 @@ export default function LoginPage() {
       {/* Right panel — form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-[#F6F8F5]">
         <div className="w-full max-w-sm">
+          <Link
+            href="/"
+            className="mb-6 inline-flex items-center gap-1.5 text-xs font-semibold text-[#66736D] transition-colors hover:text-[#173F35]"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Kembali ke beranda
+          </Link>
+
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="w-9 h-9 bg-[#173F35] rounded-xl flex items-center justify-center">

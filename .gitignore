@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 vercel.env
+
+# lokal: APK tidak di-commit (22MB)
+public/download/*.apk

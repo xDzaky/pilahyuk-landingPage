@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
+// Berkas statis yang boleh diakses tanpa login (landing page)
+const PUBLIC_FILE =
+  /\.(?:svg|png|jpe?g|webp|avif|gif|ico|mp4|webm|woff2?|ttf|otf|apk|txt|xml|json|webmanifest)$/i;
+
 const SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "pilahyuk-secret-dev-only"
 );
@@ -18,6 +22,12 @@ const PUBLIC_PATHS = [
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Landing page (root) + berkas statis publik
+  const isPublicFile = PUBLIC_FILE.test(pathname);
+  if (pathname === "/" || isPublicFile) {
+    return NextResponse.next();
+  }
 
   // Allow public paths
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
