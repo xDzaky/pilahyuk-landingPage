@@ -59,7 +59,10 @@ src/
 
 ## Dokumentasi
 
-- [`docs/API.md`](docs/API.md) — panduan lengkap API untuk tim mobile: autentikasi, semua endpoint, contoh request/response, aturan bisnis, alur offline sync.
+- [`docs/PROJECT-FLOW.md`](docs/PROJECT-FLOW.md) — alur project end-to-end (onboarding, pengumpulan, bank sampah, batch, budaya, dampak) + status tiap langkah.
+- [`docs/API.md`](docs/API.md) — panduan API untuk tim mobile: autentikasi, registrasi, semua endpoint, contoh request/response, aturan bisnis, alur offline sync.
+- [`docs/ACCOUNTS.md`](docs/ACCOUNTS.md) — akun demo (dashboard & mobile) + alur registrasi mandiri.
+- [`docs/MOBILE-APP-AUDIT.md`](docs/MOBILE-APP-AUDIT.md) — hasil reverse engineering APK Flutter: layar yang ada, endpoint yang dipanggil, dan gap integrasi.
 - [`docs/IMPLEMENTASI-CHECKLIST.md`](docs/IMPLEMENTASI-CHECKLIST.md) — audit kesesuaian implementasi terhadap `PilahYuk_Dashboard_AI_Agent_Prompts.md` (Prompt 0–14) beserta prioritas perbaikan.
 
 ## Status data

@@ -3,7 +3,9 @@
 > **Versi dokumen:** 1.0 — 14 November 2026
 > **Base URL (production):** `https://pilahyuk-dashboard.vercel.app/api/v1`
 > **Base URL (lokal):** `http://localhost:3000/api/v1`
-> **Status:** kontrak endpoint sudah stabil dan bisa dipakai mobile untuk integrasi. **Data masih mock (in-memory)** — lihat [Batasan Saat Ini](#10-batasan-saat-ini) sebelum menganggap data persisten.
+> **Status:** kontrak endpoint stabil dan bisa dipakai mobile untuk integrasi. Autentikasi (login, registrasi, OTP, lupa password) sudah berfungsi penuh; data domain lain masih mock.
+
+> ⚠️ **Penting untuk tim mobile:** APK saat ini memakai base URL `https://pilahyuk2.onrender.com/api` (backend lama). Ganti ke `https://pilahyuk-dashboard.vercel.app/api/v1` agar terhubung ke API ini. Detail temuan ada di [`docs/MOBILE-APP-AUDIT.md`](MOBILE-APP-AUDIT.md).
 
 ---
 
@@ -47,14 +49,63 @@ curl -X POST https://pilahyuk-dashboard.vercel.app/api/v1/auth/login \
 
 ## 2. Autentikasi
 
+### 2.0 Registrasi
+
+`POST /auth/register` — publik. Mengikuti alur 3 langkah di mobile.
+
+| Field | Wajib | Aturan |
+|---|---|---|
+| `name` | ✅ | minimal 3 karakter (nama sesuai KTP) |
+| `phone` atau `email` | salah satu | phone `08…`/`+62…`; email valid |
+| `password` | ✅ | minimal 8 karakter |
+| `district` | – | kecamatan |
+| `village` | – | kelurahan |
+| `rw` | – | contoh `RW 02` |
+| `community_id` / `community_name` | – | opsional, butuh persetujuan pengurus |
+| `role` | – | `resident` (default) atau `volunteer` |
+
+```json
+{
+  "name": "Rina Wulandari",
+  "phone": "081298765432",
+  "password": "rahasia123",
+  "district": "Kecamatan Sukmajaya",
+  "village": "Kelurahan Mekarjaya",
+  "rw": "RW 02",
+  "community_name": "Komunitas Hijau Nusantara"
+}
+```
+
+**Response `201`**
+
+```json
+{
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiJ9....",
+    "user": { "id": "user-…", "name": "Rina Wulandari", "role": "resident", "contact_verified": false },
+    "expires_in": 28800,
+    "next_step": "verify_contact",
+    "otp": { "channel": "whatsapp", "expires_in": 300, "dev_code": "4821" }
+  }
+}
+```
+
+`dev_code` hanya ada selama gateway WhatsApp belum aktif. Jika mendaftar dengan email saja, `otp` = `null` dan `next_step` = `complete_profile`.
+
+**Error:** `400 VALIDATION_ERROR` (dengan `details` per field), `409 CONFLICT` (nomor/email sudah terdaftar).
+
 ### 2.1 Login
 
 `POST /auth/login` — publik.
 
-**Body**
+**Body** — `identifier` boleh email **atau** nomor HP (field lama `email`/`phone` tetap diterima)
 
 ```json
-{ "email": "operator@banksampah.id", "password": "operator123" }
+{ "identifier": "operator@banksampah.id", "password": "operator123" }
+```
+
+```json
+{ "identifier": "081200000002", "password": "operator123" }
 ```
 
 **Response `200`**
@@ -94,7 +145,57 @@ Authorization: Bearer <token>
 
 `POST /auth/logout` — butuh token. Menghapus cookie sesi. Di mobile: hapus token dari secure storage.
 
-### 2.3 Profil
+### 2.3 Verifikasi kontak (OTP)
+
+`POST /auth/otp/request` — publik.
+
+```json
+{ "phone": "081298765432" }
+```
+
+Response `200`:
+
+```json
+{
+  "data": {
+    "sent": true,
+    "channel": "whatsapp",
+    "phone": "081298765432",
+    "expires_in": 300,
+    "dev_code": "4821"
+  }
+}
+```
+
+`POST /auth/otp/verify` — publik.
+
+```json
+{ "phone": "081298765432", "code": "4821" }
+```
+
+Response `200`: `{ "data": { "verified": true, "user": { … } } }`
+
+Kode berlaku 5 menit, maksimal 5 percobaan. Error: `OTP_NOT_FOUND`, `OTP_EXPIRED`, `OTP_INVALID`, `OTP_TOO_MANY_ATTEMPTS` (semua HTTP 400).
+
+### 2.4 Lupa & atur ulang kata sandi
+
+`POST /auth/forgot-password` — publik, selalu `200` agar tidak membocorkan akun terdaftar.
+
+```json
+{ "identifier": "081298765432" }
+```
+
+Response: `{ "data": { "sent": true, "expires_in": 900, "dev_reset_token": "rst_…" } }` (`dev_reset_token` hanya mode demo).
+
+`POST /auth/reset-password`
+
+```json
+{ "token": "rst_…", "password": "sandiBaru123" }
+```
+
+Response `200`: `{ "data": { "reset": true } }` · token berlaku 15 menit · `400 INVALID_TOKEN` jika kedaluwarsa.
+
+### 2.5 Profil
 
 `GET /me` — butuh token.
 
@@ -190,36 +291,41 @@ Role yang sudah aktif di seed:
 
 ## 5. Referensi Endpoint
 
-Ringkasan semua endpoint yang tersedia saat ini (19 route handler):
+Ringkasan semua endpoint yang tersedia saat ini (**31 method** di 24 route handler):
 
 | # | Method | Path | Auth | Keterangan |
 |---|---|---|---|---|
-| 1 | POST | `/auth/login` | – | Login, dapat token 8 jam |
-| 2 | POST | `/auth/logout` | ✅ | Hapus sesi |
-| 3 | GET | `/me` | ✅ | Profil user aktif |
-| 4 | PATCH | `/me` | ✅ | Ubah nama / no. HP |
-| 5 | GET | `/communities` | ✅ | Daftar organisasi tipe komunitas |
-| 6 | GET | `/materials` | ✅ | Master material + harga aktif |
-| 7 | GET | `/collection-requests` | ✅ | Daftar permintaan penjemputan |
-| 8 | POST | `/collection-requests` | ✅ | Buat permintaan penjemputan |
-| 9 | GET | `/waste-bank/transactions` | ✅ | Riwayat transaksi timbang |
-| 10 | POST | `/waste-bank/transactions` | ✅ | Catat transaksi timbang (idempoten) |
-| 11 | GET | `/waste-bank/members/{id}/balance` | ✅ | Saldo anggota (dari ledger) |
-| 12 | GET | `/waste-bank/members/{id}/ledger` | ✅ | Riwayat buku tabungan |
-| 13 | GET | `/waste-bank/transactions/{id}/adjustments` | ✅ | Daftar koreksi transaksi |
-| 14 | POST | `/waste-bank/transactions/{id}/adjustments` | ✅ | Buat koreksi (tidak menghapus asal) |
-| 15 | GET | `/waste-bank/reports/{period}` | ✅ | Laporan harian/bulanan |
-| 16 | GET | `/batches` | ✅ | Daftar batch material |
-| 17 | POST | `/batches` | ✅ | Buat batch |
-| 18 | GET | `/batches/{id}/events` | ✅ | Timeline perjalanan batch |
-| 19 | POST | `/batches/{id}/events` | ✅ | Tambah event batch |
-| 20 | POST | `/sync/batch` | ✅ | Sinkronisasi offline (idempoten) |
-| 21 | GET | `/disputes` | ✅ | Daftar sengketa |
-| 22 | POST | `/disputes` | ✅ | Ajukan sengketa |
-| 23 | GET | `/admin/organizations` | 🔒 | Semua organisasi (super admin) |
-| 24 | POST | `/admin/organizations/{id}/verify` | 🔒 | Setujui / tolak organisasi |
-| 25 | GET | `/admin/audit-logs` | 🔒 | Jejak audit (append-only) |
-| 26 | GET | `/admin/system/health` | 🔒 | Status layanan |
+| 1 | POST | `/auth/register` | – | Daftar akun baru (3 langkah + OTP) |
+| 2 | POST | `/auth/login` | – | Login email/nomor HP, token 8 jam |
+| 3 | POST | `/auth/logout` | ✅ | Hapus sesi |
+| 4 | POST | `/auth/otp/request` | – | Kirim kode verifikasi kontak |
+| 5 | POST | `/auth/otp/verify` | – | Verifikasi kode OTP 4 digit |
+| 6 | POST | `/auth/forgot-password` | – | Minta token pemulihan |
+| 7 | POST | `/auth/reset-password` | – | Set kata sandi baru |
+| 8 | GET | `/me` | ✅ | Profil user aktif |
+| 9 | PATCH | `/me` | ✅ | Ubah nama / no. HP / kata sandi |
+| 10 | GET | `/communities` | ✅ | Daftar organisasi tipe komunitas |
+| 11 | GET | `/materials` | ✅ | Master material + harga aktif |
+| 12 | GET | `/collection-requests` | ✅ | Daftar permintaan penjemputan |
+| 13 | POST | `/collection-requests` | ✅ | Buat permintaan penjemputan |
+| 14 | GET | `/waste-bank/transactions` | ✅ | Riwayat transaksi timbang |
+| 15 | POST | `/waste-bank/transactions` | ✅ | Catat transaksi timbang (idempoten) |
+| 16 | GET | `/waste-bank/members/{id}/balance` | ✅ | Saldo anggota (dari ledger) |
+| 17 | GET | `/waste-bank/members/{id}/ledger` | ✅ | Riwayat buku tabungan |
+| 18 | GET | `/waste-bank/transactions/{id}/adjustments` | ✅ | Daftar koreksi transaksi |
+| 19 | POST | `/waste-bank/transactions/{id}/adjustments` | ✅ | Buat koreksi (tidak menghapus asal) |
+| 20 | GET | `/waste-bank/reports/{period}` | ✅ | Laporan harian/bulanan |
+| 21 | GET | `/batches` | ✅ | Daftar batch material |
+| 22 | POST | `/batches` | ✅ | Buat batch |
+| 23 | GET | `/batches/{id}/events` | ✅ | Timeline perjalanan batch |
+| 24 | POST | `/batches/{id}/events` | ✅ | Tambah event batch |
+| 25 | POST | `/sync/batch` | ✅ | Sinkronisasi offline (idempoten) |
+| 26 | GET | `/disputes` | ✅ | Daftar sengketa |
+| 27 | POST | `/disputes` | ✅ | Ajukan sengketa |
+| 28 | GET | `/admin/organizations` | 🔒 | Semua organisasi (super admin) |
+| 29 | POST | `/admin/organizations/{id}/verify` | 🔒 | Setujui / tolak organisasi |
+| 30 | GET | `/admin/audit-logs` | 🔒 | Jejak audit (append-only) |
+| 31 | GET | `/admin/system/health` | 🔒 | Status layanan |
 
 ### 5.1 Communities
 
@@ -761,7 +867,7 @@ Tim mobile **wajib tahu** batasan berikut agar tidak menganggapnya bug:
 1. **Data masih mock.** Semua route membaca `src/lib/mock-data.ts`. `POST` mengembalikan objek baru tetapi **tidak tersimpan permanen** (hilang saat instance server restart).
 2. **Idempotency disimpan di memori** (`Map`), bukan Redis — cukup untuk demo, bukan produksi.
 3. **Belum ada endpoint berikut** (kontrak ada di PRD, implementasi menyusul):
-   - `POST /auth/register`, `POST /auth/refresh`, `GET /me/roles`
+   - `POST /auth/refresh`, `GET /me/roles`
    - `POST /communities/{id}/join-requests`, `GET/PATCH /organizations/{id}/members`
    - `GET/POST /organizations/{id}/events`, `POST /events/{id}/registrations`, `POST /events/{id}/check-in`
    - `GET/POST /organizations/{id}/tasks`, `PATCH /tasks/{id}`
@@ -772,6 +878,7 @@ Tim mobile **wajib tahu** batasan berikut agar tidak menganggapnya bug:
    - Cultural content, impact, notifikasi, upload media
 4. **Otorisasi per organisasi belum lengkap.** Saat ini `GET /waste-bank/transactions` bisa dibaca semua user login; scoping "hanya bank sampah sendiri" masuk tahap berikutnya.
 5. **Belum ada rate limiting, validasi Zod, dan service layer** — validasi masih manual di route handler.
+6. **Akun hasil registrasi disimpan in-memory** — bertahan selama instance server hidup. Setelah Prisma tersambung, akun menjadi persisten.
 6. **Belum ada OpenAPI/Swagger** di `/api/docs`.
 
 ---

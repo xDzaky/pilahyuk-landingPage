@@ -1,63 +1,56 @@
-import { NextRequest, NextResponse } from "next/server";
-
-// Mock user store (replace with Prisma in production)
-const USERS: Record<string, {
-  id: string; name: string; email: string; role: string;
-  org_id: string | null; org_name: string | null; phone?: string; avatar?: string;
-}> = {
-  "user-superadmin-001": {
-    id: "user-superadmin-001",
-    name: "Super Admin",
-    email: "admin@pilahyuk.id",
-    role: "super_admin",
-    org_id: null,
-    org_name: null,
-  },
-  "user-operator-001": {
-    id: "user-operator-001",
-    name: "Budi Santoso",
-    email: "operator@banksampah.id",
-    role: "operator_bank_sampah",
-    org_id: "org-001",
-    org_name: "Bank Sampah Berkah Jaya",
-    phone: "08123456789",
-  },
-  "user-pengurus-001": {
-    id: "user-pengurus-001",
-    name: "Siti Rahayu",
-    email: "pengurus@komunitas.id",
-    role: "pengurus_komunitas",
-    org_id: "org-002",
-    org_name: "Komunitas Hijau Nusantara",
-    phone: "08234567890",
-  },
-};
+import { NextRequest, NextResponse } from "next/server"
+import { findById, setPassword, toPublicUser } from "@/server/auth/user-store"
 
 export async function GET(req: NextRequest) {
-  const userId = req.headers.get("x-user-id");
-  if (!userId || !USERS[userId]) {
+  const userId = req.headers.get("x-user-id")
+  const user = userId ? findById(userId) : undefined
+  if (!user) {
     return NextResponse.json(
       { error: { code: "NOT_FOUND", message: "Pengguna tidak ditemukan" } },
       { status: 404 }
-    );
+    )
   }
-  return NextResponse.json({ data: USERS[userId] });
+  return NextResponse.json({ data: toPublicUser(user) })
 }
 
 export async function PATCH(req: NextRequest) {
-  const userId = req.headers.get("x-user-id");
-  if (!userId || !USERS[userId]) {
+  const userId = req.headers.get("x-user-id")
+  const user = userId ? findById(userId) : undefined
+  if (!user) {
     return NextResponse.json(
       { error: { code: "NOT_FOUND", message: "Pengguna tidak ditemukan" } },
       { status: 404 }
-    );
+    )
   }
-  const body = await req.json();
-  const allowed = ["name", "phone"];
-  const updates: Record<string, string> = {};
-  for (const key of allowed) {
-    if (body[key] !== undefined) updates[key] = body[key];
+
+  const body = await req.json()
+  const details: Record<string, string[]> = {}
+
+  if (body.name !== undefined) {
+    const name = String(body.name).trim()
+    if (name.length < 3) details.name = ["Nama minimal 3 karakter"]
+    else user.name = name
   }
-  USERS[userId] = { ...USERS[userId], ...updates };
-  return NextResponse.json({ data: USERS[userId] });
+  if (body.phone !== undefined) {
+    const phone = String(body.phone).trim()
+    if (!/^(\+?62|0)8[1-9][0-9]{6,11}$/.test(phone.replace(/[\s-]/g, ""))) {
+      details.phone = ["Format nomor HP tidak valid"]
+    } else {
+      user.phone = phone
+    }
+  }
+  if (body.password !== undefined) {
+    const password = String(body.password)
+    if (password.length < 8) details.password = ["Kata sandi minimal 8 karakter"]
+    else setPassword(user, password)
+  }
+
+  if (Object.keys(details).length > 0) {
+    return NextResponse.json(
+      { error: { code: "VALIDATION_ERROR", message: "Data tidak valid", details } },
+      { status: 400 }
+    )
+  }
+
+  return NextResponse.json({ data: toPublicUser(user) })
 }

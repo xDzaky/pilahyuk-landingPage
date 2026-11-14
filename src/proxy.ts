@@ -5,7 +5,16 @@ const SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "pilahyuk-secret-dev-only"
 );
 
-const PUBLIC_PATHS = ["/login", "/api/v1/auth/login"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/api/v1/auth/login",
+  "/api/v1/auth/register",
+  "/api/v1/auth/otp",
+  "/api/v1/auth/forgot-password",
+  "/api/v1/auth/reset-password",
+];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
