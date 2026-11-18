@@ -28,20 +28,20 @@ export function EmptyState({
       className
     )}>
       {/* Minimal line illustration */}
-      <div className="w-16 h-16 rounded-full bg-[#F6F8F5] border border-[#E1E8E3] flex items-center justify-center mb-4">
-        <Icon className="w-7 h-7 text-[#66736D]" strokeWidth={1.5} />
+      <div className="w-16 h-16 rounded-full bg-[#F6F8F5] border border-[#D2DCD5] flex items-center justify-center mb-4">
+        <Icon className="w-7 h-7 text-[#55615B]" strokeWidth={1.5} />
       </div>
 
       <h3 className="font-semibold text-[#1E2925] text-sm">{title}</h3>
 
       {description && (
-        <p className="mt-1 text-xs text-[#66736D] max-w-xs">{description}</p>
+        <p className="mt-1 text-xs text-[#55615B] max-w-xs">{description}</p>
       )}
 
       {action && (
         <button
           onClick={action.onClick}
-          className="mt-4 px-4 py-2 bg-[#173F35] text-white text-sm font-semibold rounded-[12px] hover:bg-[#246B56] transition-colors"
+          className="mt-4 px-4 py-2 bg-[#173F35] text-white text-sm font-semibold rounded-[6px] hover:bg-[#246B56] transition-colors"
         >
           {action.label}
         </button>
@@ -68,18 +68,18 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div className={cn(
-      "rounded-[16px] border border-[#FCEBEB] bg-[#FCEBEB]/30 p-6 text-center",
+      "rounded-[6px] border border-[#FCEBEB] bg-[#FCEBEB]/30 p-6 text-center",
       className
     )}>
       <p className="font-semibold text-[#B54747] text-sm">{title}</p>
-      {description && <p className="mt-1 text-xs text-[#66736D]">{description}</p>}
+      {description && <p className="mt-1 text-xs text-[#55615B]">{description}</p>}
       {lastLoaded && (
-        <p className="mt-2 text-[11px] text-[#66736D]">Terakhir dimuat {lastLoaded}</p>
+        <p className="mt-2 text-[11px] text-[#55615B]">Terakhir dimuat {lastLoaded}</p>
       )}
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-3 px-4 py-1.5 border border-[#B54747] text-[#B54747] text-xs font-semibold rounded-[12px] hover:bg-[#FCEBEB] transition-colors"
+          className="mt-3 px-4 py-1.5 border border-[#B54747] text-[#B54747] text-xs font-semibold rounded-[6px] hover:bg-[#FCEBEB] transition-colors"
         >
           Coba lagi
         </button>
@@ -91,7 +91,7 @@ export function ErrorState({
 // Skeleton components
 export function SkeletonCard({ className }: { className?: string }) {
   return (
-    <div className={cn("rounded-[16px] border border-[#E1E8E3] bg-white p-6", className)}>
+    <div className={cn("rounded-[6px] border border-[#D2DCD5] bg-white p-6", className)}>
       <div className="skeleton h-3 w-24 rounded mb-3" />
       <div className="skeleton h-8 w-32 rounded mb-2" />
       <div className="skeleton h-3 w-20 rounded" />
@@ -101,7 +101,7 @@ export function SkeletonCard({ className }: { className?: string }) {
 
 export function SkeletonRow({ className }: { className?: string }) {
   return (
-    <div className={cn("flex items-center gap-4 py-3 border-b border-[#E1E8E3]", className)}>
+    <div className={cn("flex items-center gap-4 py-3 border-b border-[#D2DCD5]", className)}>
       <div className="skeleton h-8 w-8 rounded-full" />
       <div className="flex-1 space-y-1.5">
         <div className="skeleton h-3 w-40 rounded" />
@@ -115,7 +115,7 @@ export function SkeletonRow({ className }: { className?: string }) {
 export function SkeletonTable({ rows = 5 }: { rows?: number }) {
   return (
     <div>
-      <div className="flex gap-4 py-3 border-b border-[#E1E8E3]">
+      <div className="flex gap-4 py-3 border-b border-[#D2DCD5]">
         {[40, 100, 80, 60, 70].map((w, i) => (
           <div key={i} className={`skeleton h-3 rounded`} style={{ width: w }} />
         ))}

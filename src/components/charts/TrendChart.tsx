@@ -48,14 +48,14 @@ function CustomTooltip({
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
   return (
-    <div className="bg-white border border-[#E1E8E3] rounded-xl px-3 py-2 shadow-sm text-sm">
-      <div className="text-[#66736D] mb-0.5">{label}</div>
+    <div className="bg-white border border-[#D2DCD5] rounded-[6px] px-3 py-2 shadow-sm text-sm">
+      <div className="text-[#55615B] mb-0.5">{label}</div>
       <div className="font-semibold text-[#1E2925]">
         {payload[0].value.toLocaleString("id-ID")}
-        {unit && <span className="text-[#66736D] ml-1 font-normal">{unit}</span>}
+        {unit && <span className="text-[#55615B] ml-1 font-normal">{unit}</span>}
       </div>
       {point.estimated && (
-        <div className="text-[#66736D] text-xs mt-0.5">~ Estimasi</div>
+        <div className="text-[#55615B] text-xs mt-0.5">~ Estimasi</div>
       )}
     </div>
   );
@@ -76,11 +76,11 @@ export function TrendChart({
   const hasEstimated = estimatedStartIdx !== -1;
 
   return (
-    <div className="bg-white border border-[#E1E8E3] rounded-2xl p-4">
+    <div className="bg-white border border-[#D2DCD5] rounded-[6px] p-4">
       {/* Header */}
       <div className="flex items-start justify-between mb-1">
         <div>
-          <div className="text-xs text-[#66736D] font-medium uppercase tracking-wide">
+          <div className="text-xs text-[#55615B] font-medium uppercase tracking-wide">
             {title}
           </div>
           <div className="text-sm text-[#1E2925] font-semibold mt-0.5">
@@ -88,15 +88,15 @@ export function TrendChart({
           </div>
         </div>
         {/* Range selector */}
-        <div className="flex gap-1 bg-[#F6F8F5] rounded-xl p-0.5">
+        <div className="flex gap-1 bg-[#F6F8F5] rounded-[6px] p-0.5">
           {ranges.map((r) => (
             <button
               key={r.label}
               onClick={() => setActiveRange(r.label)}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
                 activeRange === r.label
-                  ? "bg-white text-[#173F35] border border-[#E1E8E3]"
-                  : "text-[#66736D] hover:text-[#1E2925]"
+                  ? "bg-white text-[#173F35] border border-[#D2DCD5]"
+                  : "text-[#55615B] hover:text-[#1E2925]"
               }`}
             >
               {r.label}
@@ -113,14 +113,14 @@ export function TrendChart({
               className="w-6 h-0.5 rounded"
               style={{ backgroundColor: color }}
             />
-            <span className="text-xs text-[#66736D]">Aktual</span>
+            <span className="text-xs text-[#55615B]">Aktual</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div
               className="w-6 h-0.5 rounded border-t-2 border-dashed"
               style={{ borderColor: color }}
             />
-            <span className="text-xs text-[#66736D]">Estimasi</span>
+            <span className="text-xs text-[#55615B]">Estimasi</span>
           </div>
         </div>
       )}
@@ -136,17 +136,17 @@ export function TrendChart({
           </defs>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="#E1E8E3"
+            stroke="#D2DCD5"
             vertical={false}
           />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: "#66736D" }}
+            tick={{ fontSize: 11, fill: "#55615B" }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: "#66736D" }}
+            tick={{ fontSize: 11, fill: "#55615B" }}
             axisLine={false}
             tickLine={false}
           />
@@ -154,7 +154,7 @@ export function TrendChart({
           {hasEstimated && (
             <ReferenceLine
               x={data[estimatedStartIdx]?.label}
-              stroke="#E1E8E3"
+              stroke="#D2DCD5"
               strokeDasharray="4 4"
             />
           )}

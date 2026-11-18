@@ -93,23 +93,23 @@ export function DataTable<T>({
       <div className="flex items-center gap-3 flex-wrap">
         {searchKeys && (
           <div className="relative flex-1 min-w-48 max-w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#66736D]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#55615B]" />
             <input
               type="text"
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1) }}
               placeholder={searchPlaceholder}
-              className="w-full pl-9 pr-3 h-9 text-sm border border-[#E1E8E3] rounded-[12px] bg-white text-[#1E2925] placeholder:text-[#66736D] focus:outline-none focus:border-[#246B56] focus:ring-1 focus:ring-[#DDF3EC]"
+              className="w-full pl-9 pr-3 h-9 text-sm border border-[#D2DCD5] rounded-[6px] bg-white text-[#1E2925] placeholder:text-[#55615B] focus:outline-none focus:border-[#246B56] focus:ring-1 focus:ring-[#DDF3EC]"
             />
           </div>
         )}
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#66736D]">Baris per halaman:</span>
+          <span className="text-xs text-[#55615B]">Baris per halaman:</span>
           <select
             value={perPage}
             onChange={e => { setPerPage(Number(e.target.value)); setPage(1) }}
-            className="text-xs border border-[#E1E8E3] rounded-[12px] px-2 py-1 bg-white text-[#1E2925] focus:outline-none focus:border-[#246B56]"
+            className="text-xs border border-[#D2DCD5] rounded-[6px] px-2 py-1 bg-white text-[#1E2925] focus:outline-none focus:border-[#246B56]"
           >
             {[10, 25, 50].map(n => <option key={n} value={n}>{n}</option>)}
           </select>
@@ -117,18 +117,18 @@ export function DataTable<T>({
 
         {selected.size > 0 && bulkActions && (
           <div className="flex items-center gap-2 ml-auto">
-            <span className="text-xs text-[#66736D]">{selected.size} dipilih</span>
+            <span className="text-xs text-[#55615B]">{selected.size} dipilih</span>
             {bulkActions}
           </div>
         )}
       </div>
 
       {/* Table */}
-      <div className="rounded-[16px] border border-[#E1E8E3] bg-white overflow-hidden">
+      <div className="rounded-[6px] border border-[#D2DCD5] bg-white overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm" role="grid">
             <thead>
-              <tr className="border-b border-[#E1E8E3] bg-[#F6F8F5]">
+              <tr className="border-b border-[#D2DCD5] bg-[#E9EDE9]">
                 {bulkActions && (
                   <th className="w-10 px-3 py-3 text-left">
                     <input
@@ -147,7 +147,7 @@ export function DataTable<T>({
                   <th
                     key={col.key}
                     className={cn(
-                      "px-4 py-3 text-left text-xs font-semibold text-[#66736D] uppercase tracking-wide whitespace-nowrap",
+                      "px-4 py-3 text-left text-xs font-semibold text-[#55615B] uppercase tracking-wide whitespace-nowrap",
                       col.sortable && "cursor-pointer select-none hover:text-[#1E2925]",
                       col.className
                     )}
@@ -187,9 +187,9 @@ export function DataTable<T>({
                     <tr
                       key={id}
                       className={cn(
-                        "border-b border-[#E1E8E3] last:border-0 transition-colors",
+                        "border-b border-[#D2DCD5] last:border-0 transition-colors",
                         onRowClick && "cursor-pointer",
-                        selected.has(id) ? "bg-[#DDF3EC]/30" : "hover:bg-[#F6F8F5]"
+                        selected.has(id) ? "bg-[#DDF3EC]/30" : "hover:bg-[#EDF1EC]"
                       )}
                       onClick={() => onRowClick?.(row)}
                     >
@@ -219,15 +219,15 @@ export function DataTable<T>({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-[#E1E8E3] bg-[#F6F8F5]">
-            <span className="text-xs text-[#66736D]">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-[#D2DCD5] bg-[#F6F8F5]">
+            <span className="text-xs text-[#55615B]">
               {(page-1)*perPage+1}–{Math.min(page*perPage, sorted.length)} dari {sorted.length} data
             </span>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage(p => Math.max(1, p-1))}
                 disabled={page === 1}
-                className="p-1.5 rounded-[8px] hover:bg-[#E1E8E3] disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-1.5 rounded-[4px] hover:bg-[#D2DCD5] disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Halaman sebelumnya"
               >
                 <ChevronLeft className="w-4 h-4 text-[#1E2925]" />
@@ -240,10 +240,10 @@ export function DataTable<T>({
                     key={p}
                     onClick={() => setPage(p)}
                     className={cn(
-                      "w-7 h-7 rounded-[8px] text-xs font-medium",
+                      "w-7 h-7 rounded-[4px] text-xs font-medium",
                       page === p
                         ? "bg-[#173F35] text-white"
-                        : "hover:bg-[#E1E8E3] text-[#1E2925]"
+                        : "hover:bg-[#D2DCD5] text-[#1E2925]"
                     )}
                   >
                     {p}
@@ -253,7 +253,7 @@ export function DataTable<T>({
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p+1))}
                 disabled={page === totalPages}
-                className="p-1.5 rounded-[8px] hover:bg-[#E1E8E3] disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-1.5 rounded-[4px] hover:bg-[#D2DCD5] disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Halaman berikutnya"
               >
                 <ChevronRight className="w-4 h-4 text-[#1E2925]" />

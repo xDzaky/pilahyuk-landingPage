@@ -45,9 +45,9 @@ export default function AdminUsersPage() {
   const columns: Column<User>[] = [
     { key: "name", header: "Pengguna", sortable: true, cell: (row) => (
       <div><div className="font-semibold text-[#1E2925]">{row.name}</div>
-        <div className="text-[11px] text-[#66736D]">{row.email ?? row.phone ?? row.id}</div></div>
+        <div className="text-[11px] text-[#55615B]">{row.email ?? row.phone ?? row.id}</div></div>
     )},
-    { key: "role", header: "Peran", sortable: true, cell: (row) => <span className="text-xs text-[#66736D]">{ROLE_LABEL[row.role] ?? row.role}</span> },
+    { key: "role", header: "Peran", sortable: true, cell: (row) => <span className="text-xs text-[#55615B]">{ROLE_LABEL[row.role] ?? row.role}</span> },
     { key: "status", header: "Status", cell: (row) => (
       <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${row.status === "active" ? "bg-[#DDF3EC] text-[#173F35]" : "bg-[#FCEBEB] text-[#B54747]"}`}>
         {row.status === "active" ? "Aktif" : "Ditangguhkan"}
@@ -58,10 +58,10 @@ export default function AdminUsersPage() {
         {row.contact_verified ? "Terverifikasi" : "Belum"}
       </span>
     )},
-    { key: "last_login_at", header: "Login terakhir", sortable: true, cell: (row) => <span className="text-[11px] text-[#66736D]">{formatDate(row.last_login_at)}</span> },
+    { key: "last_login_at", header: "Login terakhir", sortable: true, cell: (row) => <span className="text-[11px] text-[#55615B]">{formatDate(row.last_login_at)}</span> },
     { key: "actions", header: "Aksi", className: "text-right", cell: (row) => (
       <div className="flex justify-end gap-1">
-        <button disabled={busy === row.id} onClick={() => createReset(row)} title="Buat token reset" className="rounded-lg border border-[#E1E8E3] p-1.5 text-[#246B56] disabled:opacity-50"><KeyRound className="h-3.5 w-3.5" /></button>
+        <button disabled={busy === row.id} onClick={() => createReset(row)} title="Buat token reset" className="rounded-lg border border-[#D2DCD5] p-1.5 text-[#246B56] disabled:opacity-50"><KeyRound className="h-3.5 w-3.5" /></button>
         <button disabled={busy === row.id} onClick={() => update(row.id, { status: row.status === "active" ? "suspended" : "active" })} title={row.status === "active" ? "Tangguhkan" : "Aktifkan"} className={`rounded-lg border p-1.5 disabled:opacity-50 ${row.status === "active" ? "border-[#FCEBEB] text-[#B54747]" : "border-[#DDF3EC] text-[#246B56]"}`}>
           {row.status === "active" ? <Ban className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
         </button>
@@ -74,18 +74,18 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <AnswerBanner icon={Users} answer={`${rows.length} pengguna terdaftar`} subtext="Gunakan tindakan dengan hati-hati. Menangguhkan akun langsung mencabut seluruh refresh token-nya." />
-      {message ? <div className="rounded-xl border border-[#FCEBEB] bg-[#FCEBEB]/40 px-4 py-2 text-sm text-[#B54747]">{message}</div> : null}
+      {message ? <div className="rounded-[6px] border border-[#FCEBEB] bg-[#FCEBEB]/40 px-4 py-2 text-sm text-[#B54747]">{message}</div> : null}
       {reset ? (
-        <div className="rounded-[16px] border border-[#FBF1DF] bg-[#FBF1DF]/50 p-4">
+        <div className="rounded-[6px] border border-[#FBF1DF] bg-[#FBF1DF]/50 p-4">
           <div className="text-sm font-semibold text-[#1E2925]">Token reset untuk {reset.name}</div>
           <div className="mt-2 flex items-center gap-2">
             <code className="flex-1 overflow-x-auto rounded-lg bg-white px-3 py-2 text-xs text-[#1E2925]">{reset.token}</code>
-            <button onClick={() => { navigator.clipboard.writeText(reset.token); setMessage("Token disalin."); }} className="inline-flex items-center gap-1 rounded-lg border border-[#E1E8E3] bg-white px-2 py-1.5 text-xs font-semibold text-[#246B56]"><Copy className="h-3.5 w-3.5" />Salin</button>
+            <button onClick={() => { navigator.clipboard.writeText(reset.token); setMessage("Token disalin."); }} className="inline-flex items-center gap-1 rounded-lg border border-[#D2DCD5] bg-white px-2 py-1.5 text-xs font-semibold text-[#246B56]"><Copy className="h-3.5 w-3.5" />Salin</button>
           </div>
-          <p className="mt-2 text-[11px] text-[#66736D]">Berlaku 15 menit. Kirim ke pemilik akun lewat kanal tepercaya. Token ini tidak ditampilkan lagi.</p>
+          <p className="mt-2 text-[11px] text-[#55615B]">Berlaku 15 menit. Kirim ke pemilik akun lewat kanal tepercaya. Token ini tidak ditampilkan lagi.</p>
         </div>
       ) : null}
-      <div className="rounded-[16px] border border-[#E1E8E3] bg-white p-4">
+      <div className="rounded-[6px] border border-[#D2DCD5] bg-white p-4">
         <DataTable columns={columns} data={rows} keyExtractor={(row) => row.id} isLoading={users.loading}
           searchPlaceholder="Cari nama, email, atau nomor HP..." searchKeys={["name", "email", "phone", "role"]}
           emptyTitle="Belum ada pengguna" pageSize={20} />

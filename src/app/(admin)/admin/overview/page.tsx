@@ -42,7 +42,7 @@ const ORG_COLUMNS: Column<Org>[] = [
     cell: row => (
       <div>
         <div className="text-sm font-semibold text-[#1E2925]">{row.name}</div>
-        <div className="text-xs text-[#66736D]">{row.area_name}</div>
+        <div className="text-xs text-[#55615B]">{row.area_name}</div>
       </div>
     )
   },
@@ -54,7 +54,7 @@ const ORG_COLUMNS: Column<Org>[] = [
         collector: "Pengumpul", recycler: "Pengolah",
         artisan: "Perajin", school: "Sekolah",
       }
-      return <span className="text-xs text-[#66736D]">{labels[row.type] ?? row.type}</span>
+      return <span className="text-xs text-[#55615B]">{labels[row.type] ?? row.type}</span>
     }
   },
   {
@@ -77,17 +77,17 @@ const ORG_COLUMNS: Column<Org>[] = [
     key: "actions", header: "Aksi",
     cell: row => row.status === "pending_verification" ? (
       <div className="flex gap-1.5">
-        <button className="flex items-center gap-1 px-2.5 py-1 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-full hover:bg-[#CBECE2] transition-colors">
+        <button className="flex items-center gap-1 px-2.5 py-1 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[4px] hover:bg-[#CBECE2] transition-colors">
           <CheckCircle2 className="w-3 h-3" />
           Verifikasi
         </button>
-        <button className="flex items-center gap-1 px-2.5 py-1 border border-[#B54747] text-[#B54747] text-xs font-semibold rounded-full hover:bg-[#FCEBEB] transition-colors">
+        <button className="flex items-center gap-1 px-2.5 py-1 border border-[#B54747] text-[#B54747] text-xs font-semibold rounded-[4px] hover:bg-[#FCEBEB] transition-colors">
           <XCircle className="w-3 h-3" />
           Tolak
         </button>
       </div>
     ) : (
-      <button className="flex items-center gap-1 px-2.5 py-1 border border-[#E1E8E3] text-[#66736D] text-xs font-semibold rounded-full hover:border-[#246B56] transition-colors">
+      <button className="flex items-center gap-1 px-2.5 py-1 border border-[#D2DCD5] text-[#55615B] text-xs font-semibold rounded-[4px] hover:border-[#246B56] transition-colors">
         <Eye className="w-3 h-3" />
         Detail
       </button>
@@ -108,7 +108,7 @@ const DISPUTE_COLUMNS: Column<Dis>[] = [
         berat: "Berat", harga: "Harga", kualitas: "Kualitas",
         layanan: "Layanan", konten: "Konten",
       }
-      return <span className="text-xs text-[#66736D]">{labels[row.category]}</span>
+      return <span className="text-xs text-[#55615B]">{labels[row.category]}</span>
     }
   },
   {
@@ -131,12 +131,12 @@ const DISPUTE_COLUMNS: Column<Dis>[] = [
   },
   {
     key: "created_at", header: "Dibuat",
-    cell: row => <span className="text-xs text-[#66736D]">{timeAgo(row.created_at)}</span>
+    cell: row => <span className="text-xs text-[#55615B]">{timeAgo(row.created_at)}</span>
   },
   {
     key: "actions", header: "Aksi",
     cell: row => (
-      <button className="px-2.5 py-1 border border-[#E1E8E3] text-[#66736D] text-xs font-semibold rounded-full hover:border-[#246B56] hover:text-[#246B56] transition-colors">
+      <button className="px-2.5 py-1 border border-[#D2DCD5] text-[#55615B] text-xs font-semibold rounded-[4px] hover:border-[#246B56] hover:text-[#246B56] transition-colors">
         Tangani
       </button>
     )
@@ -147,7 +147,7 @@ type Log = AuditLog
 const AUDIT_COLUMNS: Column<Log>[] = [
   {
     key: "occurred_at", header: "Waktu", sortable: true,
-    cell: row => <span className="text-xs text-[#66736D]">{formatDateTime(row.occurred_at)}</span>
+    cell: row => <span className="text-xs text-[#55615B]">{formatDateTime(row.occurred_at)}</span>
   },
   {
     key: "actor_name", header: "Aktor", sortable: true,
@@ -164,14 +164,14 @@ const AUDIT_COLUMNS: Column<Log>[] = [
   {
     key: "entity_type", header: "Entitas",
     cell: row => (
-      <span className="text-xs text-[#66736D]">
+      <span className="text-xs text-[#55615B]">
         {row.entity_type} #{row.entity_id.slice(-6)}
       </span>
     )
   },
   {
     key: "ip", header: "IP",
-    cell: row => <span className="text-xs text-[#66736D] font-mono">{row.ip}</span>
+    cell: row => <span className="text-xs text-[#55615B] font-mono">{row.ip}</span>
   },
 ]
 
@@ -182,10 +182,10 @@ export default function AdminOverviewPage() {
     <div className="space-y-6">
 
       {/* ── SYSTEM HEALTH ── */}
-      <div className="bg-white border border-[#E1E8E3] rounded-[16px] p-5">
+      <div className="bg-white border border-[#D2DCD5] rounded-[6px] p-5">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[#66736D]">Status Sistem</span>
-          <span className="text-[11px] text-[#66736D]">diperbarui otomatis</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#55615B]">Status Sistem</span>
+          <span className="text-[11px] text-[#55615B]">diperbarui otomatis</span>
         </div>
         <div className="flex items-center gap-6 flex-wrap">
           {[
@@ -197,7 +197,7 @@ export default function AdminOverviewPage() {
           ].map(item => (
             <div key={item.label} className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-              <span className="text-xs text-[#66736D]">{item.label}</span>
+              <span className="text-xs text-[#55615B]">{item.label}</span>
               <span className="text-xs font-semibold text-[#1E2925]">{item.status}</span>
             </div>
           ))}
@@ -225,7 +225,7 @@ export default function AdminOverviewPage() {
           emphasis={pendingVerif > 0}
           source="dari organizations"
           footer={
-            <div className="text-[11px] text-[#66736D] space-y-0.5">
+            <div className="text-[11px] text-[#55615B] space-y-0.5">
               <div>✓ {verifiedOrgs} terverifikasi</div>
               {pendingVerif > 0 && <div className="text-[#A86712] font-semibold">⏳ {pendingVerif} menunggu</div>}
             </div>
@@ -259,7 +259,7 @@ export default function AdminOverviewPage() {
           icon={Server}
           source="dari health checks"
           footer={
-            <div className="text-[11px] text-[#66736D] space-y-0.5">
+            <div className="text-[11px] text-[#55615B] space-y-0.5">
               <div>API p95: 142ms ✓</div>
               <div>Queue: 0 ✓</div>
             </div>
@@ -277,7 +277,7 @@ export default function AdminOverviewPage() {
 
       {/* ── TABS + TABEL ── */}
       <div>
-        <div className="flex gap-1 border-b border-[#E1E8E3] mb-6">
+        <div className="flex gap-1 border-b border-[#D2DCD5] mb-6">
           {([
             { key: "verifikasi", label: `Antrean Verifikasi (${pendingVerif})` },
             { key: "sengketa", label: `Pusat Sengketa (${activeDisputes})` },
@@ -289,7 +289,7 @@ export default function AdminOverviewPage() {
               className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
                 activeTab === tab.key
                   ? "border-[#246B56] text-[#173F35]"
-                  : "border-transparent text-[#66736D] hover:text-[#1E2925]"
+                  : "border-transparent text-[#55615B] hover:text-[#1E2925]"
               }`}
             >
               {tab.label}
@@ -300,11 +300,11 @@ export default function AdminOverviewPage() {
         {activeTab === "verifikasi" && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs text-[#66736D]">
+              <p className="text-xs text-[#55615B]">
                 Tinjau dokumen dan setujui / tolak pendaftaran organisasi mitra
               </p>
               {pendingVerif > 1 && (
-                <button className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[12px] hover:bg-[#CBECE2] transition-colors">
+                <button className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[6px] hover:bg-[#CBECE2] transition-colors">
                   Approve Semua ({pendingVerif})
                 </button>
               )}
@@ -344,7 +344,7 @@ export default function AdminOverviewPage() {
 
         {activeTab === "audit" && (
           <div>
-            <div className="rounded-[12px] bg-[#EBF3F9] border border-[#286A9B]/20 px-4 py-2 mb-3 flex items-center gap-2">
+            <div className="rounded-[6px] bg-[#EBF3F9] border border-[#286A9B]/20 px-4 py-2 mb-3 flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-[#286A9B]" />
               <p className="text-xs text-[#286A9B]">
                 Audit log bersifat append-only — tidak ada aksi edit atau hapus di halaman ini.

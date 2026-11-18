@@ -63,7 +63,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 bg-[#173F35] brand-motif flex-col justify-between p-12">
         <div>
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 bg-[#DDF3EC] rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#DDF3EC] rounded-[6px] flex items-center justify-center">
               <span className="text-[#173F35] font-black text-lg">P</span>
             </div>
             <div>
@@ -96,7 +96,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           <Link
             href="/"
-            className="mb-6 inline-flex items-center gap-1.5 text-xs font-semibold text-[#66736D] transition-colors hover:text-[#173F35]"
+            className="mb-6 inline-flex items-center gap-1.5 text-xs font-semibold text-[#55615B] transition-colors hover:text-[#173F35]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Kembali ke beranda
@@ -104,17 +104,17 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-9 h-9 bg-[#173F35] rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-[#173F35] rounded-[6px] flex items-center justify-center">
               <span className="text-white font-black">P</span>
             </div>
             <div className="font-bold text-[#173F35]">PilahYuk 2.0</div>
           </div>
 
           <h2 className="text-2xl font-bold text-[#1E2925] mb-1">Masuk</h2>
-          <p className="text-sm text-[#66736D] mb-6">Portal Mitra & Super Admin</p>
+          <p className="text-sm text-[#55615B] mb-6">Portal Mitra & Super Admin</p>
 
           {error && (
-            <div className="mb-4 rounded-[12px] bg-[#FCEBEB] border border-[#B54747]/30 px-4 py-3" role="alert">
+            <div className="mb-4 rounded-[6px] bg-[#FCEBEB] border border-[#B54747]/30 px-4 py-3" role="alert">
               <p className="text-sm text-[#B54747]">{error}</p>
             </div>
           )}
@@ -131,7 +131,7 @@ export default function LoginPage() {
                 value={identifier}
                 onChange={e => setIdentifier(e.target.value)}
                 placeholder="email@contoh.com atau 08123456789"
-                className="w-full h-12 px-4 border border-[#E1E8E3] rounded-[12px] text-sm text-[#1E2925] placeholder:text-[#66736D] bg-white focus:outline-none focus:border-[#246B56] focus:ring-2 focus:ring-[#DDF3EC] transition-colors"
+                className="w-full h-12 px-4 border border-[#D2DCD5] rounded-[6px] text-sm text-[#1E2925] placeholder:text-[#55615B] bg-white focus:outline-none focus:border-[#246B56] focus:ring-2 focus:ring-[#DDF3EC] transition-colors"
                 autoComplete="username"
               />
             </div>
@@ -150,7 +150,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full h-12 pl-4 pr-12 border border-[#E1E8E3] rounded-[12px] text-sm text-[#1E2925] placeholder:text-[#66736D] bg-white focus:outline-none focus:border-[#246B56] focus:ring-2 focus:ring-[#DDF3EC] transition-colors"
+                  className="w-full h-12 pl-4 pr-12 border border-[#D2DCD5] rounded-[6px] text-sm text-[#1E2925] placeholder:text-[#55615B] bg-white focus:outline-none focus:border-[#246B56] focus:ring-2 focus:ring-[#DDF3EC] transition-colors"
                   autoComplete="current-password"
                 />
                 <button
@@ -158,7 +158,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(v => !v)}
                   aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
                   aria-pressed={showPassword}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-[8px] text-[#66736D] hover:text-[#1E2925] hover:bg-[#F6F8F5] transition-colors"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-[4px] text-[#55615B] hover:text-[#1E2925] hover:bg-[#EDF1EC] transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -168,7 +168,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-[#173F35] text-white font-semibold rounded-[12px] hover:bg-[#246B56] disabled:opacity-50 transition-colors flex items-center justify-center gap-2 text-sm"
+              className="w-full h-12 bg-[#173F35] text-white font-semibold rounded-[6px] hover:bg-[#246B56] disabled:opacity-50 transition-colors flex items-center justify-center gap-2 text-sm"
             >
               {loading ? (
                 <>
@@ -179,7 +179,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-[#66736D]">
+          <p className="mt-6 text-center text-sm text-[#55615B]">
             Belum punya akun?{" "}
             <Link href="/register" className="font-semibold text-[#246B56] hover:underline">
               Daftar akun baru

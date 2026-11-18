@@ -55,14 +55,14 @@ export default function PengumpulanPage() {
       cell: (row) => (
         <div>
           <div className="font-semibold text-[#1E2925]">{row.requester.name}</div>
-          <div className="text-[11px] text-[#66736D]">{row.id.slice(0, 8)} · {row.method} · {row.organization_name}</div>
+          <div className="text-[11px] text-[#55615B]">{row.id.slice(0, 8)} · {row.method} · {row.organization_name}</div>
         </div>
       ),
     },
     {
       key: "area_name", header: "Lokasi",
       cell: (row) => (
-        <div className="text-xs text-[#66736D]">
+        <div className="text-xs text-[#55615B]">
           <div>{row.area_name ?? "—"}</div>
           {row.address ? <div className="max-w-[220px] truncate">{row.address}</div> : null}
         </div>
@@ -71,14 +71,14 @@ export default function PengumpulanPage() {
     {
       key: "items", header: "Material",
       cell: (row) => (
-        <div className="text-xs text-[#66736D]">
+        <div className="text-xs text-[#55615B]">
           {row.items.map((item) => `${item.material_name} ${item.estimated_quantity ?? 0} kg`).join(" · ") || "—"}
         </div>
       ),
     },
     {
       key: "slot_start", header: "Jadwal", sortable: true,
-      cell: (row) => <span className="text-xs text-[#66736D]">{formatDate(row.slot_start)}</span>,
+      cell: (row) => <span className="text-xs text-[#55615B]">{formatDate(row.slot_start)}</span>,
     },
     {
       key: "status", header: "Status", sortable: true,
@@ -120,9 +120,9 @@ export default function PengumpulanPage() {
         subtext={`Menampilkan permintaan yang sesuai peranmu (${me.data?.org_name ?? me.data?.role ?? "memuat…"}). Alamat hanya terlihat oleh pemilik dan petugas terkait.`}
       />
       {actionError ? (
-        <div className="rounded-xl border border-[#FCEBEB] bg-[#FCEBEB]/40 px-4 py-2 text-sm text-[#B54747]">{actionError}</div>
+        <div className="rounded-[6px] border border-[#FCEBEB] bg-[#FCEBEB]/40 px-4 py-2 text-sm text-[#B54747]">{actionError}</div>
       ) : null}
-      <div className="rounded-[16px] border border-[#E1E8E3] bg-white p-4">
+      <div className="rounded-[6px] border border-[#D2DCD5] bg-white p-4">
         <DataTable
           columns={columns}
           data={rows}

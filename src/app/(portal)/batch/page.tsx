@@ -68,16 +68,16 @@ function BatchDetailDrawer({
       {/* Drawer */}
       <div className="relative w-full max-w-lg bg-white h-full overflow-y-auto shadow-xl flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-[#E1E8E3] px-6 py-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-white border-b border-[#D2DCD5] px-6 py-4 flex items-center justify-between z-10">
           <div>
-            <div className="text-xs font-mono text-[#66736D]">{batch.code}</div>
+            <div className="text-xs font-mono text-[#55615B]">{batch.code}</div>
             <h2 className="font-bold text-[#1E2925]">{batch.material_name}</h2>
           </div>
           <div className="flex items-center gap-3">
             <StatusBadge status={mapBatchStatus(batch.status)} />
             <button
               onClick={onClose}
-              className="p-2 rounded-[12px] hover:bg-[#F6F8F5] text-[#66736D]"
+              className="p-2 rounded-[6px] hover:bg-[#EDF1EC] text-[#55615B]"
               aria-label="Tutup"
             >
               <X className="w-5 h-5" />
@@ -87,16 +87,16 @@ function BatchDetailDrawer({
 
         <div className="flex-1 p-6 space-y-6">
           {/* Origin info — MASKED individual data */}
-          <div className="rounded-[12px] bg-[#F6F8F5] border border-[#E1E8E3] p-4">
-            <div className="text-xs font-semibold text-[#66736D] mb-2 uppercase tracking-wide">
+          <div className="rounded-[6px] bg-[#F6F8F5] border border-[#D2DCD5] p-4">
+            <div className="text-xs font-semibold text-[#55615B] mb-2 uppercase tracking-wide">
               Asal Material
             </div>
             <div className="text-sm font-semibold text-[#1E2925]">{batch.origin_org_name}</div>
-            <div className="text-xs text-[#66736D] mt-0.5">
+            <div className="text-xs text-[#55615B] mt-0.5">
               {formatKg(batch.quantity)} · dikumpulkan dari anggota komunitas
             </div>
             {/* Privacy note */}
-            <div className="mt-2 text-[11px] text-[#286A9B] bg-[#EBF3F9] rounded-[8px] px-2 py-1">
+            <div className="mt-2 text-[11px] text-[#286A9B] bg-[#EBF3F9] rounded-[4px] px-2 py-1">
               🔒 Data individu rumah tangga tidak ditampilkan sesuai kebijakan privasi
             </div>
           </div>
@@ -111,7 +111,7 @@ function BatchDetailDrawer({
 
           {/* Validation form — only for "diserahkan" */}
           {batch.status === "diserahkan" && (
-            <div className="border-t border-[#E1E8E3] pt-6">
+            <div className="border-t border-[#D2DCD5] pt-6">
               <h3 className="font-semibold text-[#1E2925] text-sm mb-4">
                 Validasi Penerimaan
               </h3>
@@ -119,7 +119,7 @@ function BatchDetailDrawer({
               {!validating ? (
                 <button
                   onClick={() => setValidating(true)}
-                  className="w-full h-10 bg-[#173F35] text-white rounded-[12px] text-sm font-semibold hover:bg-[#246B56] transition-colors"
+                  className="w-full h-10 bg-[#173F35] text-white rounded-[6px] text-sm font-semibold hover:bg-[#246B56] transition-colors"
                 >
                   Mulai Validasi
                 </button>
@@ -127,7 +127,7 @@ function BatchDetailDrawer({
                 <div className="space-y-4">
                   {/* Quality */}
                   <div>
-                    <label className="block text-xs font-semibold text-[#66736D] mb-2">
+                    <label className="block text-xs font-semibold text-[#55615B] mb-2">
                       Grade Kualitas <span className="text-[#B54747]">*</span>
                     </label>
                     <div className="flex gap-2">
@@ -135,10 +135,10 @@ function BatchDetailDrawer({
                         <button
                           key={q}
                           onClick={() => setQuality(q)}
-                          className={`flex-1 h-10 rounded-[12px] text-sm font-semibold border transition-colors ${
+                          className={`flex-1 h-10 rounded-[6px] text-sm font-semibold border transition-colors ${
                             quality === q
                               ? "bg-[#173F35] text-white border-[#173F35]"
-                              : "bg-white text-[#1E2925] border-[#E1E8E3] hover:border-[#246B56]"
+                              : "bg-white text-[#1E2925] border-[#D2DCD5] hover:border-[#246B56]"
                           }`}
                         >
                           Grade {q}
@@ -149,7 +149,7 @@ function BatchDetailDrawer({
 
                   {/* Decision */}
                   <div>
-                    <label className="block text-xs font-semibold text-[#66736D] mb-2">
+                    <label className="block text-xs font-semibold text-[#55615B] mb-2">
                       Keputusan <span className="text-[#B54747]">*</span>
                     </label>
                     <div className="flex gap-2">
@@ -160,8 +160,8 @@ function BatchDetailDrawer({
                         <button
                           key={v}
                           onClick={() => setDecision(v)}
-                          className={`flex-1 h-10 rounded-[12px] text-sm font-semibold border transition-colors ${
-                            decision === v ? cls : "bg-white text-[#1E2925] border-[#E1E8E3] hover:border-[#246B56]"
+                          className={`flex-1 h-10 rounded-[6px] text-sm font-semibold border transition-colors ${
+                            decision === v ? cls : "bg-white text-[#1E2925] border-[#D2DCD5] hover:border-[#246B56]"
                           }`}
                         >
                           {label}
@@ -173,7 +173,7 @@ function BatchDetailDrawer({
                   {/* Reject reason */}
                   {decision === "tolak" && (
                     <div>
-                      <label className="block text-xs font-semibold text-[#66736D] mb-1.5">
+                      <label className="block text-xs font-semibold text-[#55615B] mb-1.5">
                         Alasan Penolakan <span className="text-[#B54747]">*</span>
                       </label>
                       <textarea
@@ -181,7 +181,7 @@ function BatchDetailDrawer({
                         onChange={e => setRejectReason(e.target.value)}
                         rows={3}
                         placeholder="Jelaskan alasan penolakan..."
-                        className="w-full px-3 py-2 text-sm border border-[#E1E8E3] rounded-[12px] focus:outline-none focus:border-[#246B56] resize-none"
+                        className="w-full px-3 py-2 text-sm border border-[#D2DCD5] rounded-[6px] focus:outline-none focus:border-[#246B56] resize-none"
                       />
                     </div>
                   )}
@@ -189,7 +189,7 @@ function BatchDetailDrawer({
                   <button
                     onClick={handleSubmitValidation}
                     disabled={submitted}
-                    className="w-full h-10 bg-[#173F35] text-white rounded-[12px] text-sm font-semibold hover:bg-[#246B56] disabled:opacity-50 transition-colors"
+                    className="w-full h-10 bg-[#173F35] text-white rounded-[6px] text-sm font-semibold hover:bg-[#246B56] disabled:opacity-50 transition-colors"
                   >
                     {submitted ? "Menyimpan..." : "Simpan Validasi"}
                   </button>
@@ -200,9 +200,9 @@ function BatchDetailDrawer({
 
           {/* Upload evidence — only for "menunggu_bukti" */}
           {batch.status === "menunggu_bukti" && (
-            <div className="border-t border-[#E1E8E3] pt-6">
+            <div className="border-t border-[#D2DCD5] pt-6">
               {/* Important notice — no "recycled" claim before evidence */}
-              <div className="rounded-[12px] bg-[#FBF1DF] border border-[#F3DFBD] p-3 mb-4 flex gap-2">
+              <div className="rounded-[6px] bg-[#FBF1DF] border border-[#F3DFBD] p-3 mb-4 flex gap-2">
                 <AlertTriangle className="w-4 h-4 text-[#A86712] shrink-0 mt-0.5" />
                 <p className="text-xs text-[#A86712]">
                   <strong>Perhatian:</strong> Status &ldquo;sudah didaur ulang&rdquo; hanya akan ditampilkan
@@ -217,7 +217,7 @@ function BatchDetailDrawer({
               <div className="space-y-4">
                 {/* Outcome */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#66736D] mb-2">
+                  <label className="block text-xs font-semibold text-[#55615B] mb-2">
                     Hasil Pemrosesan <span className="text-[#B54747]">*</span>
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -229,10 +229,10 @@ function BatchDetailDrawer({
                       <button
                         key={v}
                         onClick={() => setOutcome(v)}
-                        className={`h-10 rounded-[12px] text-xs font-semibold border transition-colors ${
+                        className={`h-10 rounded-[6px] text-xs font-semibold border transition-colors ${
                           outcome === v
                             ? "bg-[#173F35] text-white border-[#173F35]"
-                            : "bg-white text-[#1E2925] border-[#E1E8E3] hover:border-[#246B56]"
+                            : "bg-white text-[#1E2925] border-[#D2DCD5] hover:border-[#246B56]"
                         }`}
                       >
                         {label}
@@ -244,7 +244,7 @@ function BatchDetailDrawer({
                 {/* Residu weight — mandatory if residu */}
                 {outcome === "residu" && (
                   <div>
-                    <label className="block text-xs font-semibold text-[#66736D] mb-1.5">
+                    <label className="block text-xs font-semibold text-[#55615B] mb-1.5">
                       Berat Residu (kg) <span className="text-[#B54747]">*</span>
                     </label>
                     <input
@@ -253,19 +253,19 @@ function BatchDetailDrawer({
                       value={residuKg}
                       onChange={e => setResiduKg(e.target.value)}
                       placeholder="0.00"
-                      className="w-full h-10 px-3 text-sm border border-[#E1E8E3] rounded-[12px] focus:outline-none focus:border-[#246B56]"
+                      className="w-full h-10 px-3 text-sm border border-[#D2DCD5] rounded-[6px] focus:outline-none focus:border-[#246B56]"
                     />
                   </div>
                 )}
 
                 {/* File upload */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#66736D] mb-1.5">
+                  <label className="block text-xs font-semibold text-[#55615B] mb-1.5">
                     Bukti Pemrosesan (foto/dokumen)
                   </label>
-                  <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed border-[#E1E8E3] rounded-[12px] hover:border-[#246B56] cursor-pointer transition-colors">
-                    <Upload className="w-5 h-5 text-[#66736D]" />
-                    <span className="text-xs text-[#66736D]">
+                  <label className="flex flex-col items-center gap-2 p-4 border-2 border-dashed border-[#D2DCD5] rounded-[6px] hover:border-[#246B56] cursor-pointer transition-colors">
+                    <Upload className="w-5 h-5 text-[#55615B]" />
+                    <span className="text-xs text-[#55615B]">
                       {evidenceFile ? evidenceFile.name : "Klik untuk unggah foto/dokumen"}
                     </span>
                     <input
@@ -280,7 +280,7 @@ function BatchDetailDrawer({
                 <button
                   onClick={handleSubmitValidation}
                   disabled={submitted}
-                  className="w-full h-10 bg-[#173F35] text-white rounded-[12px] text-sm font-semibold hover:bg-[#246B56] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  className="w-full h-10 bg-[#173F35] text-white rounded-[6px] text-sm font-semibold hover:bg-[#246B56] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                 >
                   <Upload className="w-4 h-4" />
                   {submitted ? "Mengunggah..." : "Unggah & Selesaikan"}
@@ -309,7 +309,7 @@ const BATCH_COLUMNS: Column<Batch>[] = [
   },
   {
     key: "origin_org_name", header: "Asal",
-    cell: row => <span className="text-xs text-[#66736D]">{row.origin_org_name}</span>
+    cell: row => <span className="text-xs text-[#55615B]">{row.origin_org_name}</span>
   },
   {
     key: "quantity", header: "Berat", sortable: true,
@@ -321,7 +321,7 @@ const BATCH_COLUMNS: Column<Batch>[] = [
   },
   {
     key: "created_at", header: "Dibuat",
-    cell: row => <span className="text-xs text-[#66736D]">{timeAgo(row.created_at)}</span>
+    cell: row => <span className="text-xs text-[#55615B]">{timeAgo(row.created_at)}</span>
   },
 ]
 
@@ -392,23 +392,23 @@ export default function BatchPage() {
       </div>
 
       {/* ── SEARCH BATCH ── */}
-      <div className="bg-white rounded-[16px] border border-[#E1E8E3] p-6">
+      <div className="bg-white rounded-[6px] border border-[#D2DCD5] p-6">
         <h2 className="font-semibold text-[#1E2925] text-sm mb-3">
           Cari Batch
         </h2>
         <div className="flex gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#66736D]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#55615B]" />
             <input
               type="text"
               value={searchCode}
               onChange={e => setSearchCode(e.target.value)}
               placeholder="Masukkan kode batch (contoh: PY-20261113-MELATI-001)..."
-              className="w-full pl-9 pr-3 h-10 text-sm border border-[#E1E8E3] rounded-[12px] focus:outline-none focus:border-[#246B56]"
+              className="w-full pl-9 pr-3 h-10 text-sm border border-[#D2DCD5] rounded-[6px] focus:outline-none focus:border-[#246B56]"
             />
           </div>
           <button
-            className="flex items-center gap-2 px-4 h-10 border border-[#E1E8E3] rounded-[12px] text-sm text-[#66736D] hover:border-[#246B56] hover:text-[#246B56] transition-colors"
+            className="flex items-center gap-2 px-4 h-10 border border-[#D2DCD5] rounded-[6px] text-sm text-[#55615B] hover:border-[#246B56] hover:text-[#246B56] transition-colors"
             aria-label="Scan kode QR"
           >
             <QrCode className="w-4 h-4" />
@@ -423,12 +423,12 @@ export default function BatchPage() {
               <button
                 key={b.id}
                 onClick={() => setSelectedBatch(b)}
-                className="w-full flex items-center gap-3 p-3 mt-1 rounded-[12px] border border-[#E1E8E3] hover:border-[#246B56] text-left transition-colors"
+                className="w-full flex items-center gap-3 p-3 mt-1 rounded-[6px] border border-[#D2DCD5] hover:border-[#246B56] text-left transition-colors"
               >
                 <Package className="w-4 h-4 text-[#3D9274]" />
                 <div className="flex-1">
                   <div className="text-sm font-mono font-semibold text-[#1E2925]">{b.code}</div>
-                  <div className="text-xs text-[#66736D]">{b.material_name} · {formatKg(b.quantity)}</div>
+                  <div className="text-xs text-[#55615B]">{b.material_name} · {formatKg(b.quantity)}</div>
                 </div>
                 <StatusBadge status={mapBatchStatus(b.status)} size="sm" />
               </button>
@@ -441,7 +441,7 @@ export default function BatchPage() {
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-bold text-[#1E2925]">Semua Batch</h2>
-          <span className="text-xs text-[#66736D]">dari material_batches · klik baris untuk detail</span>
+          <span className="text-xs text-[#55615B]">dari material_batches · klik baris untuk detail</span>
         </div>
         <DataTable
           columns={BATCH_COLUMNS}

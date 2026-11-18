@@ -361,7 +361,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         )}
         aria-label="Navigasi utama portal"
       >
-        <div className="flex flex-col h-full bg-[#173F35] brand-motif text-white relative">
+        <div className="flex flex-col h-full bg-[#173F35] text-white relative">
           {/* Logo Header */}
           <div className={cn(
             "flex items-center justify-between px-4 py-5 border-b border-white/10 shrink-0",
@@ -397,10 +397,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-3 px-2.5 py-2 rounded-[12px] text-sm font-medium transition-all my-0.5",
+                        "flex items-center gap-3 px-2.5 py-2 rounded-none text-sm font-medium transition-all my-0.5 border-l-[3px]",
                         active
-                          ? "bg-[#DDF3EC] text-[#173F35] font-semibold shadow-sm"
-                          : "text-[#DDF3EC]/80 hover:bg-white/10 hover:text-white",
+                          ? "bg-[#DDF3EC] text-[#173F35] font-semibold border-l-[#3D9274]"
+                          : "text-[#DDF3EC]/80 hover:bg-white/10 hover:text-white border-l-transparent",
                         sidebarCollapsed && "justify-center px-0"
                       )}
                       aria-current={active ? "page" : undefined}
@@ -420,7 +420,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             <button
               onClick={() => setOrgSwitcherOpen(prev => !prev)}
               className={cn(
-                "w-full flex items-center gap-2.5 rounded-[12px] p-2 hover:bg-white/10 transition-colors text-left group",
+                "w-full flex items-center gap-2.5 rounded-[6px] p-2 hover:bg-white/10 transition-colors text-left group",
                 orgSwitcherOpen && "bg-white/10",
                 sidebarCollapsed && "justify-center p-1.5"
               )}
@@ -448,12 +448,12 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             {orgSwitcherOpen && (
               <div
                 className={cn(
-                  "absolute bottom-full left-3 mb-2 bg-white border border-[#E1E8E3] rounded-[16px] shadow-xl overflow-hidden z-50 text-[#1E2925]",
+                  "absolute bottom-full left-3 mb-2 bg-white border border-[#D2DCD5] rounded-[6px] shadow-xl overflow-hidden z-50 text-[#1E2925]",
                   sidebarCollapsed ? "left-14 w-60" : "right-3 w-64"
                 )}
               >
-                <div className="px-3.5 py-2.5 bg-[#F6F8F5] border-b border-[#E1E8E3]">
-                  <span className="text-[11px] font-bold text-[#66736D] uppercase tracking-wider">
+                <div className="px-3.5 py-2.5 bg-[#F6F8F5] border-b border-[#D2DCD5]">
+                  <span className="text-[11px] font-bold text-[#55615B] uppercase tracking-wider">
                     Pilih Organisasi
                   </span>
                 </div>
@@ -465,32 +465,32 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                         key={org.id}
                         onClick={() => handleSwitchOrg(org)}
                         className={cn(
-                          "w-full flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-left transition-colors",
+                          "w-full flex items-center gap-2.5 px-3 py-2 rounded-[6px] text-left transition-colors",
                           isSelected
                             ? "bg-[#DDF3EC] text-[#173F35] font-semibold"
-                            : "hover:bg-[#F6F8F5] text-[#1E2925]"
+                            : "hover:bg-[#EDF1EC] text-[#1E2925]"
                         )}
                       >
                         <div className={cn(
                           "w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold shrink-0",
-                          isSelected ? "bg-[#173F35] text-white" : "bg-[#E1E8E3] text-[#66736D]"
+                          isSelected ? "bg-[#173F35] text-white" : "bg-[#D2DCD5] text-[#55615B]"
                         )}>
                           {org.short}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs truncate">{org.name}</div>
-                          <div className="text-[10px] text-[#66736D] truncate">{org.type}</div>
+                          <div className="text-[10px] text-[#55615B] truncate">{org.type}</div>
                         </div>
                         {isSelected && <Check className="w-3.5 h-3.5 text-[#173F35] shrink-0" />}
                       </button>
                     )
                   })}
                 </div>
-                <div className="border-t border-[#E1E8E3] p-1.5">
+                <div className="border-t border-[#D2DCD5] p-1.5">
                   <Link
                     href="/pengaturan"
                     onClick={() => setOrgSwitcherOpen(false)}
-                    className="flex items-center justify-center gap-1.5 w-full py-1.5 text-[11px] font-medium text-[#246B56] hover:bg-[#F6F8F5] rounded-[8px] transition-colors"
+                    className="flex items-center justify-center gap-1.5 w-full py-1.5 text-[11px] font-medium text-[#246B56] hover:bg-[#EDF1EC] rounded-[4px] transition-colors"
                   >
                     <Settings className="w-3 h-3" />
                     Kelola Semua Organisasi
@@ -510,7 +510,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <aside className="relative flex flex-col w-64 max-w-[80vw] h-full z-50 bg-[#173F35] text-white brand-motif shadow-2xl">
+          <aside className="relative flex flex-col w-64 max-w-[80vw] h-full z-50 bg-[#173F35] text-white shadow-2xl">
             <div className="flex items-center justify-between px-4 py-5 border-b border-white/10 shrink-0">
               <Link href={homeHref} className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
                 <div className="w-8 h-8 bg-[#DDF3EC] rounded-lg flex items-center justify-center">
@@ -545,10 +545,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
                         className={cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-[12px] text-sm font-medium transition-colors my-0.5",
+                          "flex items-center gap-3 px-3 py-2 rounded-none text-sm font-medium transition-colors my-0.5 border-l-[3px]",
                           active
-                            ? "bg-[#DDF3EC] text-[#173F35] font-semibold"
-                            : "text-[#DDF3EC]/80 hover:bg-white/10 hover:text-white"
+                            ? "bg-[#DDF3EC] text-[#173F35] font-semibold border-l-[#3D9274]"
+                            : "text-[#DDF3EC]/80 hover:bg-white/10 hover:text-white border-l-transparent"
                         )}
                       >
                         <Icon className={cn("w-4 h-4", active ? "text-[#173F35]" : "text-[#DDF3EC]/80")} />
@@ -566,10 +566,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       {/* ── MAIN CONTENT AREA ── */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         {/* Top Navbar / Header */}
-        <header className="sticky top-0 z-20 shrink-0 bg-white border-b border-[#E1E8E3] h-16 flex items-center px-4 sm:px-6 gap-3 sm:gap-4">
+        <header className="sticky top-0 z-20 shrink-0 bg-white border-b border-[#D2DCD5] h-16 flex items-center px-4 sm:px-6 gap-3 sm:gap-4">
           {/* Mobile menu toggle */}
           <button
-            className="lg:hidden p-2 rounded-[12px] hover:bg-[#F6F8F5] text-[#1E2925] transition-colors"
+            className="lg:hidden p-2 rounded-[6px] hover:bg-[#EDF1EC] text-[#1E2925] transition-colors"
             onClick={() => setMobileOpen(true)}
             aria-label="Buka menu navigasi"
           >
@@ -578,7 +578,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
           {/* Desktop sidebar collapse toggle */}
           <button
-            className="hidden lg:flex p-2 rounded-[12px] hover:bg-[#F6F8F5] text-[#66736D] hover:text-[#1E2925] transition-colors"
+            className="hidden lg:flex p-2 rounded-[6px] hover:bg-[#EDF1EC] text-[#55615B] hover:text-[#1E2925] transition-colors"
             onClick={() => setSidebarCollapsed(c => !c)}
             aria-label={sidebarCollapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
           >
@@ -591,14 +591,14 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           {/* Interactive Global Search Bar */}
           <div ref={searchRef} className="relative flex-1 max-w-sm">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#66736D] pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#55615B] pointer-events-none" />
               <input
                 type="search"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 placeholder="Cari anggota, material, batch..."
-                className="w-full pl-9 pr-3 h-9 text-xs sm:text-sm border border-[#E1E8E3] rounded-[12px] bg-[#F6F8F5] text-[#1E2925] placeholder:text-[#66736D] focus:outline-none focus:border-[#246B56] focus:bg-white transition-all shadow-none"
+                className="w-full pl-9 pr-3 h-9 text-xs sm:text-sm border border-[#D2DCD5] rounded-[6px] bg-[#F6F8F5] text-[#1E2925] placeholder:text-[#55615B] focus:outline-none focus:border-[#246B56] focus:bg-white transition-all shadow-none"
                 aria-label="Cari global"
               />
             </div>
@@ -606,23 +606,23 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             {/* Search Suggestions Popover */}
             {searchFocused && searchQuery.trim().length > 0 && (
               <div
-                className="absolute left-0 top-full mt-2 w-full sm:w-96 bg-white border border-[#E1E8E3] rounded-[16px] shadow-xl overflow-hidden z-50 text-[#1E2925]"
+                className="absolute left-0 top-full mt-2 w-full sm:w-96 bg-white border border-[#D2DCD5] rounded-[6px] shadow-xl overflow-hidden z-50 text-[#1E2925]"
                 style={{ boxShadow: "0 8px 30px rgba(23,63,53,0.12)" }}
               >
-                <div className="px-3.5 py-2 bg-[#F6F8F5] border-b border-[#E1E8E3] flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-[#66736D] uppercase tracking-wider">
+                <div className="px-3.5 py-2 bg-[#F6F8F5] border-b border-[#D2DCD5] flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-[#55615B] uppercase tracking-wider">
                     Hasil Pencarian Cepat
                   </span>
-                  <span className="text-[10px] text-[#66736D]">{searchResults.length} ditemukan</span>
+                  <span className="text-[10px] text-[#55615B]">{searchResults.length} ditemukan</span>
                 </div>
-                <div className="max-h-72 overflow-y-auto divide-y divide-[#E1E8E3]/60">
+                <div className="max-h-72 overflow-y-auto divide-y divide-[#D2DCD5]/60">
                   {searchResults.length > 0 ? (
                     searchResults.map((item, idx) => (
                       <Link
                         key={idx}
                         href={item.link}
                         onClick={() => { setSearchFocused(false); setSearchQuery("") }}
-                        className="flex items-center justify-between px-3.5 py-2.5 hover:bg-[#F6F8F5] transition-colors group"
+                        className="flex items-center justify-between px-3.5 py-2.5 hover:bg-[#EDF1EC] transition-colors group"
                       >
                         <div className="min-w-0 pr-2">
                           <div className="flex items-center gap-2">
@@ -633,13 +633,13 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                               {item.label}
                             </span>
                           </div>
-                          <div className="text-[11px] text-[#66736D] mt-0.5 truncate">{item.meta}</div>
+                          <div className="text-[11px] text-[#55615B] mt-0.5 truncate">{item.meta}</div>
                         </div>
-                        <ArrowRight className="w-3.5 h-3.5 text-[#66736D] group-hover:text-[#246B56] group-hover:translate-x-0.5 transition-all shrink-0" />
+                        <ArrowRight className="w-3.5 h-3.5 text-[#55615B] group-hover:text-[#246B56] group-hover:translate-x-0.5 transition-all shrink-0" />
                       </Link>
                     ))
                   ) : (
-                    <div className="px-4 py-6 text-center text-xs text-[#66736D]">
+                    <div className="px-4 py-6 text-center text-xs text-[#55615B]">
                       Tidak ada hasil yang cocok dengan &quot;{searchQuery}&quot;
                     </div>
                   )}
@@ -663,10 +663,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               <button
                 onClick={() => { setNotifOpen(prev => !prev); setProfileOpen(false) }}
                 className={cn(
-                  "relative p-2 rounded-[12px] transition-colors focus:outline-none",
+                  "relative p-2 rounded-[6px] transition-colors focus:outline-none",
                   notifOpen
                     ? "bg-[#DDF3EC] text-[#173F35]"
-                    : "hover:bg-[#F6F8F5] text-[#66736D] hover:text-[#1E2925]"
+                    : "hover:bg-[#EDF1EC] text-[#55615B] hover:text-[#1E2925]"
                 )}
                 aria-label={`Notifikasi (${unreadCount} belum dibaca)`}
                 aria-expanded={notifOpen}
@@ -682,11 +682,11 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               {/* Notification Popover Panel */}
               {notifOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-[#E1E8E3] rounded-[16px] overflow-hidden z-50 text-[#1E2925]"
+                  className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-[#D2DCD5] rounded-[6px] overflow-hidden z-50 text-[#1E2925]"
                   style={{ boxShadow: "0 10px 32px rgba(23,63,53,0.12)" }}
                 >
                   {/* Popover Header */}
-                  <div className="px-4 py-3 border-b border-[#E1E8E3] flex items-center justify-between">
+                  <div className="px-4 py-3 border-b border-[#D2DCD5] flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-[#1E2925]">Notifikasi</span>
                       {unreadCount > 0 && (
@@ -706,14 +706,14 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                   </div>
 
                   {/* Filter tabs */}
-                  <div className="flex border-b border-[#E1E8E3] bg-[#F6F8F5] px-3 pt-1">
+                  <div className="flex border-b border-[#D2DCD5] bg-[#F6F8F5] px-3 pt-1">
                     <button
                       onClick={() => setNotifFilter("all")}
                       className={cn(
                         "px-3 py-1.5 text-xs font-semibold border-b-2 transition-colors",
                         notifFilter === "all"
                           ? "border-[#173F35] text-[#173F35]"
-                          : "border-transparent text-[#66736D] hover:text-[#1E2925]"
+                          : "border-transparent text-[#55615B] hover:text-[#1E2925]"
                       )}
                     >
                       Semua ({notifications.length})
@@ -724,7 +724,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                         "px-3 py-1.5 text-xs font-semibold border-b-2 transition-colors",
                         notifFilter === "unread"
                           ? "border-[#173F35] text-[#173F35]"
-                          : "border-transparent text-[#66736D] hover:text-[#1E2925]"
+                          : "border-transparent text-[#55615B] hover:text-[#1E2925]"
                       )}
                     >
                       Belum Dibaca ({unreadCount})
@@ -732,7 +732,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                   </div>
 
                   {/* Notification List */}
-                  <div className="max-h-80 overflow-y-auto divide-y divide-[#E1E8E3]">
+                  <div className="max-h-80 overflow-y-auto divide-y divide-[#D2DCD5]">
                     {filteredNotifs.length > 0 ? (
                       filteredNotifs.map(n => {
                         const icon =
@@ -746,21 +746,21 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                             onClick={() => handleNotificationClick(n.id, n.link)}
                             className={cn(
                               "w-full flex items-start gap-3 px-4 py-3 text-left transition-colors cursor-pointer group",
-                              n.read ? "bg-white hover:bg-[#F6F8F5]" : "bg-[#F4FAF7] hover:bg-[#EDF7F2]"
+                              n.read ? "bg-white hover:bg-[#EDF1EC]" : "bg-[#F4FAF7] hover:bg-[#EDF7F2]"
                             )}
                           >
                             <div className="mt-0.5 shrink-0">{icon}</div>
                             <div className="flex-1 min-w-0">
                               <div className={cn(
                                 "text-xs font-semibold truncate group-hover:text-[#246B56] transition-colors",
-                                n.read ? "text-[#66736D]" : "text-[#1E2925]"
+                                n.read ? "text-[#55615B]" : "text-[#1E2925]"
                               )}>
                                 {n.title}
                               </div>
-                              <div className="text-[11px] text-[#66736D] mt-0.5 leading-snug line-clamp-2">
+                              <div className="text-[11px] text-[#55615B] mt-0.5 leading-snug line-clamp-2">
                                 {n.desc}
                               </div>
-                              <div className="text-[10px] text-[#66736D]/70 mt-1">{n.time}</div>
+                              <div className="text-[10px] text-[#55615B]/70 mt-1">{n.time}</div>
                             </div>
                             {!n.read && (
                               <div className="w-2 h-2 rounded-full bg-[#3D9274] mt-1 shrink-0" />
@@ -769,14 +769,14 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                         )
                       })
                     ) : (
-                      <div className="py-8 text-center text-xs text-[#66736D]">
+                      <div className="py-8 text-center text-xs text-[#55615B]">
                         Tidak ada notifikasi yang ditemukan
                       </div>
                     )}
                   </div>
 
                   {/* Popover Footer */}
-                  <div className="px-4 py-2.5 bg-[#F6F8F5] border-t border-[#E1E8E3] text-center">
+                  <div className="px-4 py-2.5 bg-[#F6F8F5] border-t border-[#D2DCD5] text-center">
                     <Link
                       href="/bantuan"
                       onClick={() => setNotifOpen(false)}
@@ -795,10 +795,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               <button
                 onClick={() => { setProfileOpen(prev => !prev); setNotifOpen(false) }}
                 className={cn(
-                  "flex items-center gap-2 rounded-[12px] px-2 py-1.5 transition-all focus:outline-none group",
+                  "flex items-center gap-2 rounded-[6px] px-2 py-1.5 transition-all focus:outline-none group",
                   profileOpen
                     ? "bg-[#DDF3EC]"
-                    : "hover:bg-[#F6F8F5]"
+                    : "hover:bg-[#EDF1EC]"
                 )}
                 aria-label="Menu profil pengguna"
                 aria-expanded={profileOpen}
@@ -808,10 +808,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                 </div>
                 <div className="hidden sm:block text-left">
                   <div className="text-xs font-semibold text-[#1E2925] leading-tight truncate">{userName}</div>
-                  <div className="text-[10px] text-[#66736D] truncate">{ROLE_LABELS[userRole] || activeOrg.roleLabel}</div>
+                  <div className="text-[10px] text-[#55615B] truncate">{ROLE_LABELS[userRole] || activeOrg.roleLabel}</div>
                 </div>
                 <ChevronDown className={cn(
-                  "w-3.5 h-3.5 text-[#66736D] hidden sm:block transition-transform duration-200 group-hover:text-[#1E2925]",
+                  "w-3.5 h-3.5 text-[#55615B] hidden sm:block transition-transform duration-200 group-hover:text-[#1E2925]",
                   profileOpen && "rotate-180 text-[#173F35]"
                 )} />
               </button>
@@ -819,18 +819,18 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               {/* Profile Dropdown Popover */}
               {profileOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2 w-64 bg-white border border-[#E1E8E3] rounded-[16px] overflow-hidden z-50 text-[#1E2925]"
+                  className="absolute right-0 top-full mt-2 w-64 bg-white border border-[#D2DCD5] rounded-[6px] overflow-hidden z-50 text-[#1E2925]"
                   style={{ boxShadow: "0 10px 32px rgba(23,63,53,0.12)" }}
                 >
                   {/* User Profile Card */}
-                  <div className="p-4 border-b border-[#E1E8E3] bg-[#F6F8F5]">
+                  <div className="p-4 border-b border-[#D2DCD5] bg-[#F6F8F5]">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-[#173F35] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm">
                         {getInitials(userName)}
                       </div>
                       <div className="min-w-0">
                         <div className="text-sm font-bold text-[#1E2925] truncate">{userName}</div>
-                        <div className="text-[11px] text-[#66736D] truncate">{ROLE_LABELS[userRole] || activeOrg.roleLabel}</div>
+                        <div className="text-[11px] text-[#55615B] truncate">{ROLE_LABELS[userRole] || activeOrg.roleLabel}</div>
                         <div className="inline-block mt-1 px-2 py-0.5 bg-[#DDF3EC] text-[#173F35] text-[10px] font-bold rounded-md truncate max-w-full">
                           {activeOrg.name}
                         </div>
@@ -843,34 +843,34 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                     <Link
                       href="/pengaturan"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-[#1E2925] hover:bg-[#F6F8F5] rounded-[10px] transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-[#1E2925] hover:bg-[#EDF1EC] rounded-[6px] transition-colors"
                     >
-                      <User className="w-4 h-4 text-[#66736D]" />
+                      <User className="w-4 h-4 text-[#55615B]" />
                       <span>Profil Saya</span>
                     </Link>
                     <Link
                       href="/pengaturan"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-[#1E2925] hover:bg-[#F6F8F5] rounded-[10px] transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-[#1E2925] hover:bg-[#EDF1EC] rounded-[6px] transition-colors"
                     >
-                      <Settings className="w-4 h-4 text-[#66736D]" />
+                      <Settings className="w-4 h-4 text-[#55615B]" />
                       <span>Pengaturan Akun</span>
                     </Link>
                     <Link
                       href="/bantuan"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-[#1E2925] hover:bg-[#F6F8F5] rounded-[10px] transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-[#1E2925] hover:bg-[#EDF1EC] rounded-[6px] transition-colors"
                     >
-                      <HelpCircle className="w-4 h-4 text-[#66736D]" />
+                      <HelpCircle className="w-4 h-4 text-[#55615B]" />
                       <span>Bantuan & FAQ</span>
                     </Link>
                   </div>
 
                   {/* Logout Button */}
-                  <div className="border-t border-[#E1E8E3] p-1.5">
+                  <div className="border-t border-[#D2DCD5] p-1.5">
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#B54747] hover:bg-[#FCEBEB] rounded-[10px] transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#B54747] hover:bg-[#FCEBEB] rounded-[6px] transition-colors text-left"
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Keluar dari Sesi</span>
@@ -890,7 +890,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               onClick={() => setOutboxOpen(false)}
             />
             <div
-              className="relative w-full max-w-lg bg-white rounded-[16px] border border-[#E1E8E3] shadow-2xl overflow-hidden z-10"
+              className="relative w-full max-w-lg bg-white rounded-[6px] border border-[#D2DCD5] shadow-2xl overflow-hidden z-10"
               style={{ boxShadow: "0 16px 40px rgba(23,63,53,0.18)" }}
             >
               {/* Modal Header */}
@@ -914,12 +914,12 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
               {/* Modal Body */}
               <div className="p-6 space-y-4">
-                <div className="flex items-center justify-between p-3.5 bg-[#F6F8F5] rounded-[12px] border border-[#E1E8E3]">
+                <div className="flex items-center justify-between p-3.5 bg-[#F6F8F5] rounded-[6px] border border-[#D2DCD5]">
                   <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-[#3D9274] animate-pulse" />
                     <div>
                       <div className="text-xs font-bold text-[#1E2925]">Status Jaringan: Terhubung (Online)</div>
-                      <div className="text-[11px] text-[#66736D]">Koneksi server API normal · Latency 42ms</div>
+                      <div className="text-[11px] text-[#55615B]">Koneksi server API normal · Latency 42ms</div>
                     </div>
                   </div>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-[6px] bg-[#DDF3EC] text-[#173F35]">
@@ -932,24 +932,24 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                     <h4 className="text-xs font-bold text-[#1E2925] uppercase tracking-wider">
                       Item Antrean Outbox ({pendingSyncCount})
                     </h4>
-                    <span className="text-[11px] text-[#66736D]">Tersimpan di IndexedDB lokal</span>
+                    <span className="text-[11px] text-[#55615B]">Tersimpan di IndexedDB lokal</span>
                   </div>
 
                   {pendingSyncCount > 0 ? (
                     <div className="space-y-2 max-h-56 overflow-y-auto">
-                      <div className="p-3 bg-white border border-[#E7A34B]/30 rounded-[12px] flex items-center justify-between">
+                      <div className="p-3 bg-white border border-[#E7A34B]/30 rounded-[6px] flex items-center justify-between">
                         <div>
                           <div className="text-xs font-bold text-[#1E2925]">Penimbangan #TX-8091</div>
-                          <div className="text-[11px] text-[#66736D]">Reza Pratama · 2,0 kg Plastik PET (Rp 24.000)</div>
+                          <div className="text-[11px] text-[#55615B]">Reza Pratama · 2,0 kg Plastik PET (Rp 24.000)</div>
                         </div>
                         <span className="px-2 py-0.5 rounded-full bg-[#FBF1DF] text-[#A86712] text-[10px] font-bold">
                           Pending Sync
                         </span>
                       </div>
-                      <div className="p-3 bg-white border border-[#E7A34B]/30 rounded-[12px] flex items-center justify-between">
+                      <div className="p-3 bg-white border border-[#E7A34B]/30 rounded-[6px] flex items-center justify-between">
                         <div>
                           <div className="text-xs font-bold text-[#1E2925]">Penimbangan #TX-8092</div>
-                          <div className="text-[11px] text-[#66736D]">Nurul Hidayah · 4,5 kg Kertas HVS (Rp 2.250)</div>
+                          <div className="text-[11px] text-[#55615B]">Nurul Hidayah · 4,5 kg Kertas HVS (Rp 2.250)</div>
                         </div>
                         <span className="px-2 py-0.5 rounded-full bg-[#FBF1DF] text-[#A86712] text-[10px] font-bold">
                           Pending Sync
@@ -957,20 +957,20 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                       </div>
                     </div>
                   ) : (
-                    <div className="p-6 text-center bg-[#F6F8F5] rounded-[12px] border border-[#E1E8E3]">
+                    <div className="p-6 text-center bg-[#F6F8F5] rounded-[6px] border border-[#D2DCD5]">
                       <CheckCircle2 className="w-8 h-8 text-[#3D9274] mx-auto mb-2" />
                       <div className="text-xs font-bold text-[#1E2925]">Semua Data Telah Tersinkronisasi</div>
-                      <div className="text-[11px] text-[#66736D] mt-0.5">Tidak ada antrean pending di outbox lokal</div>
+                      <div className="text-[11px] text-[#55615B] mt-0.5">Tidak ada antrean pending di outbox lokal</div>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Modal Footer */}
-              <div className="px-6 py-3.5 bg-[#F6F8F5] border-t border-[#E1E8E3] flex items-center justify-end gap-2.5">
+              <div className="px-6 py-3.5 bg-[#F6F8F5] border-t border-[#D2DCD5] flex items-center justify-end gap-2.5">
                 <button
                   onClick={() => setOutboxOpen(false)}
-                  className="px-4 py-2 border border-[#E1E8E3] rounded-[10px] text-xs font-semibold text-[#66736D] hover:bg-white transition-colors"
+                  className="px-4 py-2 border border-[#D2DCD5] rounded-[6px] text-xs font-semibold text-[#55615B] hover:bg-white transition-colors"
                 >
                   Tutup
                 </button>
@@ -978,7 +978,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                   <button
                     onClick={handleTriggerSync}
                     disabled={isSyncing}
-                    className="px-4 py-2 bg-[#173F35] text-white rounded-[10px] text-xs font-semibold hover:bg-[#246B56] disabled:opacity-60 transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-[#173F35] text-white rounded-[6px] text-xs font-semibold hover:bg-[#246B56] disabled:opacity-60 transition-colors flex items-center gap-2"
                   >
                     <RefreshCw className={cn("w-3.5 h-3.5", isSyncing && "animate-spin")} />
                     {isSyncing ? "Menyinkronkan Data..." : `Sinkronkan Sekarang (${pendingSyncCount})`}

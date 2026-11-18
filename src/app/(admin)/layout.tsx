@@ -158,7 +158,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         className="hidden lg:flex flex-col h-full w-56 shrink-0 border-r border-white/10 z-30 select-none"
         aria-label="Navigasi admin"
       >
-        <div className="flex flex-col h-full bg-[#0D2920] brand-motif text-white">
+        <div className="flex flex-col h-full bg-[#0D2920] text-white">
           {/* Logo Header */}
           <div className="px-4 py-5 border-b border-white/10 flex items-center justify-between shrink-0">
             <Link href="/admin/overview" className="flex items-center gap-3 min-w-0 group">
@@ -182,14 +182,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-[12px] text-xs font-medium transition-all my-0.5",
+                    "flex items-center gap-3 px-3 py-2 rounded-none text-xs font-medium transition-all my-0.5 border-l-[3px]",
                     active
-                      ? "bg-white/15 text-white font-semibold shadow-sm border-l-[2px] border-white/60"
-                      : "text-white/60 hover:bg-white/10 hover:text-white border-l-[2px] border-transparent"
+                      ? "bg-[#DDF3EC] text-[#0D2920] font-semibold border-l-[#3D9274]"
+                      : "text-white/60 hover:bg-white/10 hover:text-white border-l-transparent"
                   )}
                   aria-current={active ? "page" : undefined}
                 >
-                  <Icon className={cn("w-4 h-4 shrink-0", active ? "text-white" : "text-white/60")} />
+                  <Icon className={cn("w-4 h-4 shrink-0", active ? "text-[#0D2920]" : "text-white/60")} />
                   <span className="truncate flex-1">{item.label}</span>
                   {item.badge && (
                     <span className={`ml-auto px-1.5 py-0.5 ${item.badge.color} text-white text-[9px] font-bold rounded-full leading-none`}>
@@ -205,7 +205,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="border-t border-white/10 p-3 shrink-0">
             <Link
               href="/dashboard"
-              className="w-full flex items-center gap-2 px-2.5 py-2 rounded-[10px] text-xs text-[#DDF3EC]/70 hover:text-white hover:bg-white/10 transition-colors"
+              className="w-full flex items-center gap-2 px-2.5 py-2 rounded-[6px] text-xs text-[#DDF3EC]/70 hover:text-white hover:bg-white/10 transition-colors"
             >
               <ExternalLink className="w-3.5 h-3.5" />
               <span>Buka Portal Mitra</span>
@@ -247,8 +247,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-sm font-medium transition-colors",
-                      active ? "bg-white/15 text-white font-semibold" : "text-white/60 hover:bg-white/10 hover:text-white"
+                      "flex items-center gap-3 px-3 py-2.5 rounded-none text-sm font-medium transition-colors border-l-[3px]",
+                      active ? "bg-[#DDF3EC] text-[#0D2920] font-semibold border-l-[#3D9274]" : "text-white/60 hover:bg-white/10 hover:text-white border-l-transparent"
                     )}
                   >
                     <Icon className="w-4 h-4" />
@@ -269,9 +269,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* ── MAIN CONTENT AREA ── */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="sticky top-0 z-20 shrink-0 bg-white border-b border-[#E1E8E3] h-16 flex items-center px-4 sm:px-6 gap-4">
+        <header className="sticky top-0 z-20 shrink-0 bg-white border-b border-[#D2DCD5] h-16 flex items-center px-4 sm:px-6 gap-4">
           <button
-            className="lg:hidden text-[#1E2925] hover:bg-[#F6F8F5] p-2 rounded-[12px] transition-colors"
+            className="lg:hidden text-[#1E2925] hover:bg-[#EDF1EC] p-2 rounded-[6px] transition-colors"
             onClick={() => setMobileOpen(true)}
             aria-label="Buka navigasi admin"
           >
@@ -280,7 +280,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <div className="flex items-center gap-2">
             <span className="text-[#1E2925] font-semibold text-sm">Console Super Admin</span>
-            <span className="hidden sm:inline-block px-2 py-0.5 bg-[#F6F8F5] border border-[#E1E8E3] rounded-full text-[10px] text-[#66736D] font-mono">
+            <span className="hidden sm:inline-block px-2 py-0.5 bg-[#F6F8F5] border border-[#D2DCD5] rounded-full text-[10px] text-[#55615B] font-mono">
               v2.0-stable
             </span>
           </div>
@@ -292,7 +292,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 onClick={() => { setNotifOpen(prev => !prev); setProfileOpen(false) }}
                 className={cn(
                   "relative p-2 rounded-lg transition-colors focus:outline-none",
-                  notifOpen ? "bg-[#DDF3EC] text-[#173F35]" : "text-[#66736D] hover:text-[#1E2925] hover:bg-[#F6F8F5]"
+                  notifOpen ? "bg-[#DDF3EC] text-[#173F35]" : "text-[#55615B] hover:text-[#1E2925] hover:bg-[#EDF1EC]"
                 )}
                 aria-label={`Alert sistem (${unreadCount} belum dibaca)`}
                 aria-expanded={notifOpen}
@@ -308,10 +308,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {/* Admin Notification Panel */}
               {notifOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-[#E1E8E3] rounded-[16px] overflow-hidden z-50 text-[#1E2925]"
+                  className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-[#D2DCD5] rounded-[6px] overflow-hidden z-50 text-[#1E2925]"
                   style={{ boxShadow: "0 10px 32px rgba(23,63,53,0.12)" }}
                 >
-                  <div className="px-4 py-3 border-b border-[#E1E8E3] flex items-center justify-between">
+                  <div className="px-4 py-3 border-b border-[#D2DCD5] flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-[#1E2925]">System Alerts</span>
                       {unreadCount > 0 && (
@@ -331,12 +331,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </div>
 
                   {/* Filter Tabs */}
-                  <div className="flex border-b border-[#E1E8E3] bg-[#F6F8F5] px-3 pt-1">
+                  <div className="flex border-b border-[#D2DCD5] bg-[#F6F8F5] px-3 pt-1">
                     <button
                       onClick={() => setNotifFilter("all")}
                       className={cn(
                         "px-3 py-1.5 text-xs font-medium border-b-2 transition-colors",
-                        notifFilter === "all" ? "border-[#173F35] text-[#173F35] font-bold" : "border-transparent text-[#66736D] hover:text-[#1E2925]"
+                        notifFilter === "all" ? "border-[#173F35] text-[#173F35] font-bold" : "border-transparent text-[#55615B] hover:text-[#1E2925]"
                       )}
                     >
                       Semua ({notifications.length})
@@ -345,7 +345,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       onClick={() => setNotifFilter("unread")}
                       className={cn(
                         "px-3 py-1.5 text-xs font-medium border-b-2 transition-colors",
-                        notifFilter === "unread" ? "border-[#173F35] text-[#173F35] font-bold" : "border-transparent text-[#66736D] hover:text-[#1E2925]"
+                        notifFilter === "unread" ? "border-[#173F35] text-[#173F35] font-bold" : "border-transparent text-[#55615B] hover:text-[#1E2925]"
                       )}
                     >
                       Belum Dibaca ({unreadCount})
@@ -353,7 +353,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </div>
 
                   {/* Notifications List */}
-                  <div className="max-h-72 overflow-y-auto divide-y divide-[#E1E8E3]">
+                  <div className="max-h-72 overflow-y-auto divide-y divide-[#D2DCD5]">
                     {filteredNotifs.length > 0 ? (
                       filteredNotifs.map(n => {
                         const icon =
@@ -368,7 +368,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             onClick={() => handleNotificationClick(n.id, n.link)}
                             className={cn(
                               "w-full flex items-start gap-3 px-4 py-3 text-left transition-colors cursor-pointer group",
-                              n.read ? "bg-white hover:bg-[#F6F8F5]" : "bg-[#F4FAF7] hover:bg-[#EDF7F2]"
+                              n.read ? "bg-white hover:bg-[#EDF1EC]" : "bg-[#F4FAF7] hover:bg-[#EDF7F2]"
                             )}
                           >
                             <div className="mt-0.5 shrink-0">{icon}</div>
@@ -376,10 +376,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                               <div className="text-xs font-semibold text-[#1E2925] group-hover:text-[#246B56] transition-colors truncate">
                                 {n.title}
                               </div>
-                              <div className="text-[11px] text-[#66736D] mt-0.5 leading-snug line-clamp-2">
+                              <div className="text-[11px] text-[#55615B] mt-0.5 leading-snug line-clamp-2">
                                 {n.desc}
                               </div>
-                              <div className="text-[10px] text-[#66736D]/70 mt-1">{n.time}</div>
+                              <div className="text-[10px] text-[#55615B]/70 mt-1">{n.time}</div>
                             </div>
                             {!n.read && (
                               <div className="w-2 h-2 rounded-full bg-red-400 mt-1 shrink-0" />
@@ -388,13 +388,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         )
                       })
                     ) : (
-                      <div className="py-8 text-center text-xs text-[#66736D]">
+                      <div className="py-8 text-center text-xs text-[#55615B]">
                         Tidak ada log alert
                       </div>
                     )}
                   </div>
 
-                  <div className="px-4 py-2.5 border-t border-[#E1E8E3] bg-[#F6F8F5] text-center">
+                  <div className="px-4 py-2.5 border-t border-[#D2DCD5] bg-[#F6F8F5] text-center">
                     <Link
                       href="/admin/audit"
                       onClick={() => setNotifOpen(false)}
@@ -413,7 +413,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 onClick={() => { setProfileOpen(prev => !prev); setNotifOpen(false) }}
                 className={cn(
                   "flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors focus:outline-none group",
-                  profileOpen ? "bg-[#DDF3EC]" : "hover:bg-[#F6F8F5]"
+                  profileOpen ? "bg-[#DDF3EC]" : "hover:bg-[#EDF1EC]"
                 )}
                 aria-label="Menu akun Super Admin"
                 aria-expanded={profileOpen}
@@ -423,7 +423,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
                 <span className="hidden sm:block text-xs font-semibold text-[#1E2925]">Super Admin</span>
                 <ChevronDown className={cn(
-                  "w-3.5 h-3.5 text-[#66736D] transition-transform duration-200 group-hover:text-[#1E2925]",
+                  "w-3.5 h-3.5 text-[#55615B] transition-transform duration-200 group-hover:text-[#1E2925]",
                   profileOpen && "rotate-180 text-[#173F35]"
                 )} />
               </button>
@@ -431,12 +431,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {/* Dropdown Menu */}
               {profileOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2 w-56 bg-white border border-[#E1E8E3] rounded-[16px] overflow-hidden z-50 text-[#1E2925]"
+                  className="absolute right-0 top-full mt-2 w-56 bg-white border border-[#D2DCD5] rounded-[6px] overflow-hidden z-50 text-[#1E2925]"
                   style={{ boxShadow: "0 10px 32px rgba(23,63,53,0.12)" }}
                 >
-                  <div className="p-3.5 border-b border-[#E1E8E3] bg-[#F6F8F5]">
+                  <div className="p-3.5 border-b border-[#D2DCD5] bg-[#F6F8F5]">
                     <div className="text-xs font-bold text-[#1E2925]">Ahmad Fauzan</div>
-                    <div className="text-[11px] text-[#66736D]">admin@pilahyuk.id</div>
+                    <div className="text-[11px] text-[#55615B]">admin@pilahyuk.id</div>
                     <div className="mt-1 inline-block px-1.5 py-0.5 rounded bg-[#FCEBEB] text-[#B54747] text-[10px] font-mono">
                       Role: super_admin
                     </div>
@@ -446,7 +446,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Link
                       href="/admin/users"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#1E2925] hover:bg-[#F6F8F5] rounded-[8px] transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#1E2925] hover:bg-[#EDF1EC] rounded-[4px] transition-colors"
                     >
                       <Users className="w-3.5 h-3.5" />
                       <span>Manajemen Pengguna</span>
@@ -454,7 +454,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Link
                       href="/admin/konfigurasi"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#1E2925] hover:bg-[#F6F8F5] rounded-[8px] transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#1E2925] hover:bg-[#EDF1EC] rounded-[4px] transition-colors"
                     >
                       <Settings className="w-3.5 h-3.5" />
                       <span>Konfigurasi Sistem</span>
@@ -462,17 +462,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Link
                       href="/admin/audit"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#1E2925] hover:bg-[#F6F8F5] rounded-[8px] transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#1E2925] hover:bg-[#EDF1EC] rounded-[4px] transition-colors"
                     >
                       <ScrollText className="w-3.5 h-3.5" />
                       <span>Log Audit</span>
                     </Link>
                   </div>
 
-                  <div className="border-t border-[#E1E8E3] p-1.5">
+                  <div className="border-t border-[#D2DCD5] p-1.5">
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#B54747] hover:bg-[#FCEBEB] rounded-[8px] transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#B54747] hover:bg-[#FCEBEB] rounded-[4px] transition-colors text-left"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Keluar dari Admin</span>

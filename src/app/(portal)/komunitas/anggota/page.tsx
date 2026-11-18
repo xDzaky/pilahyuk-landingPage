@@ -39,7 +39,7 @@ export default function AnggotaPage() {
   return (
     <div className="space-y-6">
       {/* Answer Banner */}
-      <div className="relative rounded-2xl px-6 py-4 overflow-hidden" style={{ background: "#173F35" }}>
+      <div className="relative rounded-[6px] px-6 py-4 overflow-hidden" style={{ background: "#173F35" }}>
         <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='100' cy='100' r='80' fill='none' stroke='white' stroke-width='1'/%3E%3Ccircle cx='100' cy='100' r='55' fill='none' stroke='white' stroke-width='1'/%3E%3Ccircle cx='100' cy='100' r='30' fill='none' stroke='white' stroke-width='1'/%3E%3C/svg%3E")`, backgroundSize: "120px 120px", backgroundPosition: "right -20px top -20px", backgroundRepeat: "no-repeat" }} />
         <div className="relative">
           <div className="text-xs text-[#DDF3EC] font-medium uppercase tracking-widest mb-1">Manajemen Anggota</div>
@@ -59,8 +59,8 @@ export default function AnggotaPage() {
           { label: "Menunggu", value: pending.length },
           { label: "Ditangguhkan", value: MOCK_MEMBERS.filter(m => m.status === "suspended").length },
         ].map(s => (
-          <div key={s.label} className="bg-white border border-[#E1E8E3] rounded-2xl px-4 py-3">
-            <div className="text-xs text-[#66736D] mb-1">{s.label}</div>
+          <div key={s.label} className="bg-white border border-[#D2DCD5] rounded-[6px] px-4 py-3">
+            <div className="text-xs text-[#55615B] mb-1">{s.label}</div>
             <div className="text-2xl font-bold text-[#1E2925]">{s.value}</div>
           </div>
         ))}
@@ -68,19 +68,19 @@ export default function AnggotaPage() {
 
       {/* Pending queue */}
       {pending.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-2">
+        <div className="bg-amber-50 border border-amber-200 rounded-[6px] p-4 space-y-2">
           <div className="text-sm font-semibold text-amber-900 mb-2">Permohonan Bergabung ({pending.length})</div>
           {pending.map(m => (
-            <div key={m.id} className="bg-white border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between">
+            <div key={m.id} className="bg-white border border-amber-200 rounded-[6px] px-4 py-3 flex items-center justify-between">
               <div>
                 <div className="font-medium text-sm text-[#1E2925]">{m.name}</div>
-                <div className="text-xs text-[#66736D]">{m.email} · Mendaftar {m.joined_at}</div>
+                <div className="text-xs text-[#55615B]">{m.email} · Mendaftar {m.joined_at}</div>
               </div>
               <div className="flex gap-2">
-                <button className="px-3 py-1.5 border border-red-200 text-red-700 rounded-xl text-xs font-semibold hover:bg-red-50">
+                <button className="px-3 py-1.5 border border-red-200 text-red-700 rounded-[6px] text-xs font-semibold hover:bg-red-50">
                   <UserX className="w-3.5 h-3.5 inline mr-1" />Tolak
                 </button>
-                <button className="px-3 py-1.5 bg-[#173F35] text-white rounded-xl text-xs font-semibold hover:bg-[#246B56]">
+                <button className="px-3 py-1.5 bg-[#173F35] text-white rounded-[6px] text-xs font-semibold hover:bg-[#246B56]">
                   <UserCheck className="w-3.5 h-3.5 inline mr-1" />Terima
                 </button>
               </div>
@@ -92,12 +92,12 @@ export default function AnggotaPage() {
       {/* Filter */}
       <div className="flex gap-3">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#66736D]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#55615B]" />
           <input type="text" placeholder="Cari nama atau email..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-[#E1E8E3] rounded-xl text-sm focus:outline-none focus:border-[#3D9274] bg-white" />
+            className="w-full pl-9 pr-4 py-2 border border-[#D2DCD5] rounded-[6px] text-sm focus:outline-none focus:border-[#3D9274] bg-white" />
         </div>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-[#E1E8E3] rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#3D9274]">
+          className="border border-[#D2DCD5] rounded-[6px] px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#3D9274]">
           <option value="all">Semua Status</option>
           <option value="active">Aktif</option>
           <option value="pending">Menunggu</option>
@@ -106,29 +106,29 @@ export default function AnggotaPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-[#E1E8E3] rounded-2xl overflow-hidden">
+      <div className="bg-white border border-[#D2DCD5] rounded-[6px] overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#E1E8E3] bg-[#F6F8F5]">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-[#66736D] uppercase tracking-wide">Anggota</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-[#66736D] uppercase tracking-wide">Peran</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-[#66736D] uppercase tracking-wide">Status</th>
-              <th className="text-right px-4 py-3 text-xs font-semibold text-[#66736D] uppercase tracking-wide">Total kg</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-[#66736D] uppercase tracking-wide">Bergabung</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-[#66736D] uppercase tracking-wide">Aksi</th>
+            <tr className="border-b border-[#D2DCD5] bg-[#E9EDE9]">
+              <th className="text-left px-4 py-3 text-xs font-semibold text-[#55615B] uppercase tracking-wide">Anggota</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-[#55615B] uppercase tracking-wide">Peran</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-[#55615B] uppercase tracking-wide">Status</th>
+              <th className="text-right px-4 py-3 text-xs font-semibold text-[#55615B] uppercase tracking-wide">Total kg</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-[#55615B] uppercase tracking-wide">Bergabung</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-[#55615B] uppercase tracking-wide">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E1E8E3]">
+          <tbody className="divide-y divide-[#D2DCD5]">
             {filtered.map((m) => (
-              <tr key={m.id} className="hover:bg-[#F6F8F5]">
+              <tr key={m.id} className="hover:bg-[#EDF1EC]">
                 <td className="px-4 py-3">
                   <div className="font-medium text-[#1E2925]">{m.name}</div>
-                  <div className="flex items-center gap-1 text-xs text-[#66736D]">
+                  <div className="flex items-center gap-1 text-xs text-[#55615B]">
                     <Mail className="w-3 h-3" />{m.email}
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-1.5 text-sm text-[#66736D]">
+                  <div className="flex items-center gap-1.5 text-sm text-[#55615B]">
                     <Shield className="w-3.5 h-3.5" />
                     {m.role === "pengurus_komunitas" ? "Pengurus" : "Anggota"}
                   </div>
@@ -142,10 +142,10 @@ export default function AnggotaPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right font-semibold text-[#1E2925]">{m.total_kg.toFixed(1)}</td>
-                <td className="px-4 py-3 text-xs text-[#66736D]">{m.joined_at}</td>
+                <td className="px-4 py-3 text-xs text-[#55615B]">{m.joined_at}</td>
                 <td className="px-4 py-3">
                   {m.status === "active" && (
-                    <button className="inline-flex items-center gap-1 px-2.5 py-1 border border-[#E1E8E3] text-[#66736D] rounded-lg text-xs hover:bg-[#F6F8F5]">
+                    <button className="inline-flex items-center gap-1 px-2.5 py-1 border border-[#D2DCD5] text-[#55615B] rounded-lg text-xs hover:bg-[#EDF1EC]">
                       Lihat Detail
                     </button>
                   )}

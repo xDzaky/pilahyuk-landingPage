@@ -59,11 +59,11 @@ export function KpiCard({
     <div
       className={cn(
         // rigid vertical rhythm so every KPI card in a row lines up
-        "relative flex h-full flex-col rounded-[16px] p-5 border group",
+        "relative flex h-full flex-col rounded-[6px] p-5 border group",
         dark
           ? "bg-[#173F35] border-transparent text-white brand-motif"
-          : "bg-white border-[#E1E8E3]",
-        emphasis && !dark && "border-l-[3px] border-l-[#173F35] ring-1 ring-[#E1E8E3]",
+          : "bg-white border-[#D2DCD5]",
+        emphasis && !dark && "border-l-[3px] border-l-[#173F35] ring-1 ring-[#D2DCD5]",
         isClickable && "cursor-pointer transition-transform card-hover",
         className
       )}
@@ -74,7 +74,7 @@ export function KpiCard({
         <div
           className={cn(
             "min-h-[32px] text-xs font-semibold uppercase leading-snug tracking-wide",
-            dark ? "text-[#DDF3EC]/70" : "text-[#66736D]"
+            dark ? "text-[#DDF3EC]/70" : "text-[#55615B]"
           )}
         >
           {label}
@@ -82,7 +82,7 @@ export function KpiCard({
         {Icon && (
           <div
             className={cn(
-              "shrink-0 rounded-xl p-1.5",
+              "shrink-0 rounded-[6px] p-1.5",
               dark ? "bg-white/10" : "bg-[#F6F8F5]"
             )}
           >
@@ -107,7 +107,7 @@ export function KpiCard({
           <span
             className={cn(
               "text-sm font-medium",
-              dark ? "text-[#DDF3EC]/80" : "text-[#66736D]"
+              dark ? "text-[#DDF3EC]/80" : "text-[#55615B]"
             )}
           >
             {unit}
@@ -121,7 +121,7 @@ export function KpiCard({
           "mt-2 flex min-h-[16px] items-center gap-1 text-xs font-medium",
           trendPositive === true && (dark ? "text-[#DDF3EC]" : "text-[#246B56]"),
           trendPositive === false && "text-[#B54747]",
-          trendPositive === null && (dark ? "text-[#DDF3EC]/60" : "text-[#66736D]")
+          trendPositive === null && (dark ? "text-[#DDF3EC]/60" : "text-[#55615B]")
         )}
       >
         {trend && TrendIcon && (
@@ -132,7 +132,7 @@ export function KpiCard({
               {trend.value}%
             </span>
             <span
-              className={cn("font-normal", dark ? "text-[#DDF3EC]/50" : "text-[#66736D]")}
+              className={cn("font-normal", dark ? "text-[#DDF3EC]/50" : "text-[#55615B]")}
             >
               {trend.period}
             </span>
@@ -146,7 +146,7 @@ export function KpiCard({
           title={metaText}
           className={cn(
             "mt-2 flex items-baseline justify-between gap-2 text-[11px] leading-snug",
-            dark ? "text-[#DDF3EC]/40" : "text-[#66736D]/60"
+            dark ? "text-[#DDF3EC]/40" : "text-[#55615B]/60"
           )}
         >
           <span className="truncate">{source}</span>

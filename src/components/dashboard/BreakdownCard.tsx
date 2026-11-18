@@ -48,7 +48,7 @@ function Legend({ visible }: { visible: BreakdownSegment[] }) {
       {visible.map((s) => (
         <li key={s.label} className="flex items-center gap-1.5">
           <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", s.colorClass)} />
-          <span className="text-xs text-[#66736D]">{s.label}</span>
+          <span className="text-xs text-[#55615B]">{s.label}</span>
           <span className="text-xs font-semibold tabular-nums text-[#1E2925]">{s.value}</span>
         </li>
       ))}
@@ -71,16 +71,16 @@ export function BreakdownCard({
     return (
       <section
         className={cn(
-          "bg-white border border-[#E1E8E3] rounded-[16px] px-4 py-3 sm:px-5",
+          "bg-white border border-[#D2DCD5] rounded-[6px] px-4 py-3 sm:px-5",
           className
         )}
       >
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <div className="flex shrink-0 items-baseline gap-2">
-            <h2 className="whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-[#66736D]">
+            <h2 className="whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-[#55615B]">
               {title}
             </h2>
-            <span className="whitespace-nowrap text-xs tabular-nums text-[#66736D]">
+            <span className="whitespace-nowrap text-xs tabular-nums text-[#55615B]">
               {total} {unit}
             </span>
           </div>
@@ -95,17 +95,17 @@ export function BreakdownCard({
             </div>
           </div>
         ) : (
-          <p className="mt-3 text-sm text-[#66736D]">Belum ada data.</p>
+          <p className="mt-3 text-sm text-[#55615B]">Belum ada data.</p>
         )}
       </section>
     )
   }
 
   return (
-    <section className={cn("bg-white border border-[#E1E8E3] rounded-[16px] p-4 sm:p-5", className)}>
+    <section className={cn("bg-white border border-[#D2DCD5] rounded-[6px] p-4 sm:p-5", className)}>
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-[#66736D]">{title}</h2>
-        <span className="whitespace-nowrap text-xs tabular-nums text-[#66736D]">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-[#55615B]">{title}</h2>
+        <span className="whitespace-nowrap text-xs tabular-nums text-[#55615B]">
           {total} {unit}
         </span>
       </div>
@@ -120,10 +120,10 @@ export function BreakdownCard({
           </div>
         </>
       ) : (
-        <p className="mt-4 text-sm text-[#66736D]">Belum ada data.</p>
+        <p className="mt-4 text-sm text-[#55615B]">Belum ada data.</p>
       )}
 
-      {footer && <div className="mt-4 border-t border-[#E1E8E3] pt-3">{footer}</div>}
+      {footer && <div className="mt-4 border-t border-[#D2DCD5] pt-3">{footer}</div>}
     </section>
   )
 }

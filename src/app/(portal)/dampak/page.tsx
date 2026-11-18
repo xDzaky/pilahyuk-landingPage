@@ -69,7 +69,7 @@ export default function DampakPage() {
           icon={Award}
           source="dari challenge_participants"
           footer={
-            <span className="text-[11px] text-[#66736D]">
+            <span className="text-[11px] text-[#55615B]">
               💡 Poin = pengakuan partisipasi, bukan nilai uang
             </span>
           }
@@ -86,7 +86,7 @@ export default function DampakPage() {
 
         {/* Trend chart placeholder (span 8) */}
         <div className="lg:col-span-8">
-          <div className="bg-white rounded-[16px] border border-[#E1E8E3] p-6">
+          <div className="bg-white rounded-[6px] border border-[#D2DCD5] p-6">
             <div className="flex items-center justify-between mb-1">
               <h2 className="font-bold text-[#1E2925]">
                 Seberapa banyak yang sudah kamu pisahkan?
@@ -95,38 +95,38 @@ export default function DampakPage() {
                 {["7H", "30H", "90H"].map(p => (
                   <button
                     key={p}
-                    className="px-2 py-1 text-xs rounded-[8px] border border-[#E1E8E3] text-[#66736D] hover:border-[#246B56] hover:text-[#246B56] first:bg-[#DDF3EC] first:text-[#173F35] first:border-[#3D9274] transition-colors"
+                    className="px-2 py-1 text-xs rounded-[4px] border border-[#D2DCD5] text-[#55615B] hover:border-[#246B56] hover:text-[#246B56] first:bg-[#DDF3EC] first:text-[#173F35] first:border-[#3D9274] transition-colors"
                   >
                     {p}
                   </button>
                 ))}
               </div>
             </div>
-            <p className="text-xs text-[#66736D] mb-4">dari transaksi terverifikasi · diperbarui 08.32</p>
+            <p className="text-xs text-[#55615B] mb-4">dari transaksi terverifikasi · diperbarui 08.32</p>
 
             {/* Chart placeholder */}
-            <div className="h-40 bg-[#F6F8F5] rounded-[12px] flex items-center justify-center">
-              <span className="text-xs text-[#66736D]">
+            <div className="h-40 bg-[#F6F8F5] rounded-[6px] flex items-center justify-center">
+              <span className="text-xs text-[#55615B]">
                 Chart (Recharts AreaChart) — tersedia setelah install dependencies
               </span>
             </div>
 
             {/* Comparison bar */}
-            <div className="mt-4 p-3 rounded-[12px] bg-[#F6F8F5] border border-[#E1E8E3]">
-              <div className="text-xs text-[#66736D] mb-2">Perbandingan komunitas (anonim, agregat)</div>
+            <div className="mt-4 p-3 rounded-[6px] bg-[#F6F8F5] border border-[#D2DCD5]">
+              <div className="text-xs text-[#55615B] mb-2">Perbandingan komunitas (anonim, agregat)</div>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-[#1E2925] w-20 shrink-0">Kamu</span>
-                <div className="flex-1 h-2 bg-[#E1E8E3] rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-[#D2DCD5] rounded-full overflow-hidden">
                   <div className="h-full bg-[#3D9274] rounded-full" style={{ width: "68%" }} />
                 </div>
                 <span className="text-xs font-semibold text-[#173F35]">{formatKg(myTotalNet)}</span>
               </div>
               <div className="flex items-center gap-3 mt-1.5">
-                <span className="text-xs text-[#66736D] w-20 shrink-0">Rata-rata</span>
-                <div className="flex-1 h-2 bg-[#E1E8E3] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#E1E8E3] rounded-full" style={{ width: "45%" }} />
+                <span className="text-xs text-[#55615B] w-20 shrink-0">Rata-rata</span>
+                <div className="flex-1 h-2 bg-[#D2DCD5] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#D2DCD5] rounded-full" style={{ width: "45%" }} />
                 </div>
-                <span className="text-xs text-[#66736D]">~5.2 kg</span>
+                <span className="text-xs text-[#55615B]">~5.2 kg</span>
               </div>
             </div>
           </div>
@@ -134,26 +134,26 @@ export default function DampakPage() {
 
         {/* Active pickup (span 4) */}
         <div className="lg:col-span-4">
-          <div className="bg-white rounded-[16px] border border-[#E1E8E3] p-6 h-full">
+          <div className="bg-white rounded-[6px] border border-[#D2DCD5] p-6 h-full">
             <h2 className="font-bold text-[#1E2925] mb-4">Permintaan Aktif</h2>
             {myCollections.filter(c => !["completed", "cancelled"].includes(c.status)).length === 0 ? (
               <div className="text-center py-6">
-                <p className="text-sm text-[#66736D]">Tidak ada permintaan aktif</p>
-                <button className="mt-3 px-4 py-2 bg-[#173F35] text-white text-xs font-semibold rounded-[12px] hover:bg-[#246B56] transition-colors">
+                <p className="text-sm text-[#55615B]">Tidak ada permintaan aktif</p>
+                <button className="mt-3 px-4 py-2 bg-[#173F35] text-white text-xs font-semibold rounded-[6px] hover:bg-[#246B56] transition-colors">
                   Ajukan Pengumpulan
                 </button>
               </div>
             ) : (
               <div className="space-y-3">
                 {myCollections.filter(c => !["completed", "cancelled"].includes(c.status)).map(col => (
-                  <div key={col.id} className="p-3 rounded-[12px] border border-[#E1E8E3]">
+                  <div key={col.id} className="p-3 rounded-[6px] border border-[#D2DCD5]">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold text-[#1E2925]">
                         #{col.id.slice(-4)}
                       </span>
                       <StatusBadge status={mapCollectionStatus(col.status)} size="sm" />
                     </div>
-                    <div className="text-xs text-[#66736D]">
+                    <div className="text-xs text-[#55615B]">
                       {col.items.map(i => i.material_name).join(", ")}
                     </div>
                     {col.slot_start && (
@@ -174,32 +174,32 @@ export default function DampakPage() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="font-bold text-[#1E2925]">Riwayat Transaksi Bank Sampah</h2>
-            <p className="text-xs text-[#66736D]">Hanya transaksimu · baca saja di web · transaksi baru via mobile/operator</p>
+            <p className="text-xs text-[#55615B]">Hanya transaksimu · baca saja di web · transaksi baru via mobile/operator</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-[16px] border border-[#E1E8E3] overflow-hidden">
+        <div className="bg-white rounded-[6px] border border-[#D2DCD5] overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#E1E8E3] bg-[#F6F8F5]">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[#66736D] uppercase tracking-wide">Tanggal</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[#66736D] uppercase tracking-wide">Material</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[#66736D] uppercase tracking-wide">Berat</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[#66736D] uppercase tracking-wide">Harga/kg</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[#66736D] uppercase tracking-wide">Nilai</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[#66736D] uppercase tracking-wide">Status</th>
+              <tr className="border-b border-[#D2DCD5] bg-[#E9EDE9]">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#55615B] uppercase tracking-wide">Tanggal</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#55615B] uppercase tracking-wide">Material</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#55615B] uppercase tracking-wide">Berat</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#55615B] uppercase tracking-wide">Harga/kg</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#55615B] uppercase tracking-wide">Nilai</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-[#55615B] uppercase tracking-wide">Status</th>
               </tr>
             </thead>
             <tbody>
               {myTxns.map(tx => (
                 tx.items.map((item, i) => (
-                  <tr key={`${tx.id}-${i}`} className="border-b border-[#E1E8E3] last:border-0 hover:bg-[#F6F8F5]">
-                    <td className="px-4 py-3 text-xs text-[#66736D]">
+                  <tr key={`${tx.id}-${i}`} className="border-b border-[#D2DCD5] last:border-0 hover:bg-[#EDF1EC]">
+                    <td className="px-4 py-3 text-xs text-[#55615B]">
                       {i === 0 ? formatDate(tx.transaction_at, { day: "numeric", month: "short" }) : ""}
                     </td>
                     <td className="px-4 py-3 text-sm text-[#1E2925]">{item.material_name}</td>
                     <td className="px-4 py-3 text-sm font-semibold text-[#1E2925]">{formatKg(item.net)}</td>
-                    <td className="px-4 py-3 text-xs text-[#66736D]">{formatRupiah(item.price_snapshot)}</td>
+                    <td className="px-4 py-3 text-xs text-[#55615B]">{formatRupiah(item.price_snapshot)}</td>
                     <td className="px-4 py-3 text-sm text-[#246B56] font-semibold">{formatRupiah(item.value)}</td>
                     <td className="px-4 py-3">
                       {i === 0 && <StatusBadge status="terverifikasi" size="sm" />}
@@ -210,7 +210,7 @@ export default function DampakPage() {
             </tbody>
           </table>
           {/* Footer */}
-          <div className="px-4 py-3 border-t border-[#E1E8E3] bg-[#F6F8F5] flex items-center gap-2 text-xs text-[#66736D]">
+          <div className="px-4 py-3 border-t border-[#D2DCD5] bg-[#F6F8F5] flex items-center gap-2 text-xs text-[#55615B]">
             <Info className="w-3.5 h-3.5" />
             Saldo dihitung dari ledger · total nilai: <strong className="text-[#1E2925]">{formatRupiah(myTotalValue)}</strong>
           </div>
@@ -224,25 +224,25 @@ export default function DampakPage() {
           {MOCK_IMPACT.map(metric => (
             <div
               key={metric.key}
-              className="bg-white rounded-[16px] border border-[#E1E8E3] p-4"
+              className="bg-white rounded-[6px] border border-[#D2DCD5] p-4"
             >
               <div className="flex items-start justify-between gap-2 mb-2">
-                <span className="text-xs text-[#66736D] font-medium">{metric.label}</span>
+                <span className="text-xs text-[#55615B] font-medium">{metric.label}</span>
                 {metric.verified ? (
                   <span className="shrink-0 text-[10px] font-bold bg-[#DDF3EC] text-[#173F35] px-1.5 py-0.5 rounded-full">
                     ✓ Terverifikasi
                   </span>
                 ) : (
-                  <span className="shrink-0 text-[10px] font-bold border border-dashed border-[#66736D] text-[#66736D] px-1.5 py-0.5 rounded-full">
+                  <span className="shrink-0 text-[10px] font-bold border border-dashed border-[#55615B] text-[#55615B] px-1.5 py-0.5 rounded-full">
                     ~ Perkiraan
                   </span>
                 )}
               </div>
               <div className="text-2xl font-black text-[#173F35]">
                 {metric.value.toLocaleString("id-ID")}
-                <span className="text-sm font-medium text-[#66736D] ml-1">{metric.unit}</span>
+                <span className="text-sm font-medium text-[#55615B] ml-1">{metric.unit}</span>
               </div>
-              <div className="text-[11px] text-[#66736D] mt-1">
+              <div className="text-[11px] text-[#55615B] mt-1">
                 Sumber: {metric.source} · {metric.period}
               </div>
             </div>

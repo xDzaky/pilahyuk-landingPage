@@ -12,8 +12,8 @@
   --color-canvas:    #F6F8F5;
   --color-surface:   #FFFFFF;
   --color-ink:       #1E2925;
-  --color-muted:     #66736D;
-  --color-border:    #E1E8E3;
+  --color-muted:     #55615B;
+  --color-border:    #D2DCD5;
   --color-warning-bg:   #FBF1DF;
   --color-warning-text: #A86712;
   --color-danger-bg:    #FCEBEB;
@@ -24,8 +24,8 @@
 
   --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 
-  --radius-card:    16px;
-  --radius-control: 12px;
+  --radius-card:    6px;
+  --radius-control: 6px;
   --radius-pill:    9999px;
 }
 
@@ -43,10 +43,11 @@
 
   /* Text */
   --ink:       #1E2925;
-  --muted:     #66736D;
+  --muted:     #55615B;
 
   /* Borders */
-  --border:    #E1E8E3;
+  --border:    #D2DCD5;
+  --table-head: #E9EDE9;
 
   /* Semantic */
   --warning-bg:   #FBF1DF;
@@ -58,8 +59,8 @@
   --accent:       #E7A34B;
 
   /* Radius */
-  --radius-card:    16px;
-  --radius-control: 12px;
+  --radius-card:    6px;
+  --radius-control: 6px;
   --radius-pill:    9999px;
 }
 
@@ -184,3 +185,10 @@ tbody tr { transition: background-color 0.1s; }
 
 /* Sidebar search input */
 .sidebar-search { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); }
+
+/* === Table legibility === */
+@layer base {
+  table thead tr { background-color: var(--table-head); }
+  table thead th { color: #4E5A54; }
+  table tbody tr { border-color: var(--border); }
+}

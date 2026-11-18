@@ -29,23 +29,23 @@ export function FilterBar({
   extraRight,
   className,
 }: FilterBarProps) {
-  const btnBase = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-[#E1E8E3] rounded-[12px] text-[#66736D] hover:border-[#246B56] hover:text-[#246B56] transition-colors bg-white"
+  const btnBase = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-[#D2DCD5] rounded-[6px] text-[#55615B] hover:border-[#246B56] hover:text-[#246B56] transition-colors bg-white"
   const btnActive = "border-[#246B56] text-[#246B56] bg-[#DDF3EC]/30"
 
   return (
     <div className={cn("flex items-center gap-2 flex-wrap mb-4", className)}>
       {/* View toggle */}
       {viewOptions && viewOptions.length > 0 && (
-        <div className="flex items-center bg-[#F6F8F5] border border-[#E1E8E3] rounded-[12px] p-0.5">
+        <div className="flex items-center bg-[#F6F8F5] border border-[#D2DCD5] rounded-[6px] p-0.5">
           {viewOptions.map(view => (
             <button
               key={view}
               onClick={() => onViewChange?.(view)}
               className={cn(
-                "px-3 py-1 text-xs font-medium rounded-[10px] transition-all",
+                "px-3 py-1 text-xs font-medium rounded-[6px] transition-all",
                 activeView === view
-                  ? "bg-white text-[#173F35] border border-[#E1E8E3]"
-                  : "text-[#66736D] hover:text-[#1E2925]"
+                  ? "bg-white text-[#173F35] border border-[#D2DCD5]"
+                  : "text-[#55615B] hover:text-[#1E2925]"
               )}
             >
               {view}

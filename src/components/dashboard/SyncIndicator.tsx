@@ -23,7 +23,7 @@ export function SyncIndicator({
       <button
         onClick={onOpenOutbox}
         className={cn(
-          "inline-flex items-center gap-2 rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition-colors",
+          "inline-flex items-center gap-2 rounded-[6px] border px-3 py-1.5 text-xs font-semibold transition-colors",
           "bg-[#FCEBEB] border-[#B54747]/30 text-[#B54747] hover:bg-[#FCEBEB]/80"
         )}
         aria-label="Mode offline — klik untuk lihat antrean"
@@ -39,7 +39,7 @@ export function SyncIndicator({
       <button
         onClick={onOpenOutbox}
         className={cn(
-          "inline-flex items-center gap-2 rounded-[12px] border px-3 py-1.5 text-xs font-semibold transition-colors",
+          "inline-flex items-center gap-2 rounded-[6px] border px-3 py-1.5 text-xs font-semibold transition-colors",
           "bg-[#FBF1DF] border-[#A86712]/30 text-[#A86712] hover:bg-[#FBF1DF]/80"
         )}
         aria-label={`${pendingCount} item menunggu sinkronisasi — klik untuk lihat`}
@@ -58,7 +58,7 @@ export function SyncIndicator({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-2 rounded-[12px] border px-3 py-1.5 text-xs font-semibold",
+        "inline-flex items-center gap-2 rounded-[6px] border px-3 py-1.5 text-xs font-semibold",
         "bg-[#DDF3EC] border-[#3D9274]/30 text-[#173F35]"
       )}
       aria-label="Semua data tersinkronisasi"
@@ -80,7 +80,7 @@ export function OfflineBanner({ pendingCount = 0, lastSync, onSync }: OfflineBan
   if (pendingCount === 0) return null
 
   return (
-    <div className="rounded-[12px] bg-[#FBF1DF] border border-[#F3DFBD] p-3 flex items-center gap-3">
+    <div className="rounded-[6px] bg-[#FBF1DF] border border-[#F3DFBD] p-3 flex items-center gap-3">
       <AlertTriangle className="w-4 h-4 text-[#A86712] shrink-0" />
       <div className="flex-1 min-w-0">
         <span className="text-sm font-semibold text-[#A86712]">
@@ -95,7 +95,7 @@ export function OfflineBanner({ pendingCount = 0, lastSync, onSync }: OfflineBan
       {onSync && (
         <button
           onClick={onSync}
-          className="px-3 py-1 bg-[#A86712] text-white text-xs font-semibold rounded-[9999px] hover:bg-[#8A5410] transition-colors"
+          className="px-3 py-1 bg-[#A86712] text-white text-xs font-semibold rounded-[4px] hover:bg-[#8A5410] transition-colors"
         >
           Sinkronkan
         </button>

@@ -56,7 +56,7 @@ interface TimelineProps {
 export function Timeline({ events, className }: TimelineProps) {
   if (events.length === 0) {
     return (
-      <div className="flex items-center gap-2 py-6 text-[#66736D] text-sm">
+      <div className="flex items-center gap-2 py-6 text-[#55615B] text-sm">
         <Clock className="w-4 h-4" />
         Belum ada peristiwa tercatat
       </div>
@@ -66,14 +66,14 @@ export function Timeline({ events, className }: TimelineProps) {
   return (
     <ol className={cn("relative pl-6", className)}>
       {/* Vertical line */}
-      <div className="absolute left-3 top-3 bottom-3 w-px bg-[#E1E8E3]" aria-hidden />
+      <div className="absolute left-3 top-3 bottom-3 w-px bg-[#D2DCD5]" aria-hidden />
 
       {events.map((event, idx) => {
         const type = event.event_type as TimelineEventType
         const config = EVENT_CONFIG[type] ?? {
           label: event.event_type,
           icon: Clock,
-          color: "text-[#66736D]",
+          color: "text-[#55615B]",
           bg: "bg-[#F6F8F5]",
         }
         const Icon = config.icon
@@ -95,18 +95,18 @@ export function Timeline({ events, className }: TimelineProps) {
                   <span className={cn("text-xs font-semibold", config.color)}>
                     {config.label}
                   </span>
-                  <span className="text-xs text-[#66736D] ml-1.5">
+                  <span className="text-xs text-[#55615B] ml-1.5">
                     oleh {event.actor_org_name}
                     {event.actor_user_name && ` · ${event.actor_user_name}`}
                   </span>
                 </div>
-                <time className="text-[11px] text-[#66736D] shrink-0 whitespace-nowrap">
+                <time className="text-[11px] text-[#55615B] shrink-0 whitespace-nowrap">
                   {formatDateTime(event.occurred_at)}
                 </time>
               </div>
 
               {/* Details */}
-              <div className="mt-1 flex flex-wrap gap-3 text-xs text-[#66736D]">
+              <div className="mt-1 flex flex-wrap gap-3 text-xs text-[#55615B]">
                 {event.weight !== undefined && (
                   <span>Berat: <strong className="text-[#1E2925]">{event.weight} kg</strong></span>
                 )}
@@ -114,7 +114,7 @@ export function Timeline({ events, className }: TimelineProps) {
                   <span>Kualitas: <strong className="text-[#1E2925]">Grade {event.quality}</strong></span>
                 )}
                 {event.notes && (
-                  <span className="text-[#66736D] italic">{event.notes}</span>
+                  <span className="text-[#55615B] italic">{event.notes}</span>
                 )}
                 {event.evidence_url && (
                   <a

@@ -26,11 +26,11 @@ export function AnswerBanner({
   return (
     <div
       className={cn(
-        "relative rounded-[16px] overflow-hidden",
+        "relative rounded-[6px] overflow-hidden",
         compact ? "px-5 py-3.5" : "px-5 py-4",
         variant === "dark" && "bg-[#173F35] text-white brand-motif border-l-[3px] border-l-[#DDF3EC]",
         variant === "warning" && "bg-[#FBF1DF] border border-[#F3DFBD]",
-        variant === "calm" && "bg-white border border-[#E1E8E3]",
+        variant === "calm" && "bg-white border border-[#D2DCD5]",
         className
       )}
     >
@@ -44,7 +44,7 @@ export function AnswerBanner({
         )}>
           {Icon && (
             <div className={cn(
-              "p-1.5 rounded-xl shrink-0",
+              "p-1.5 rounded-[6px] shrink-0",
               variant === "dark" && "bg-white/10",
               variant === "warning" && "bg-[#A86712]/10",
               variant === "calm" && "bg-[#F6F8F5]",
@@ -72,7 +72,7 @@ export function AnswerBanner({
                 "mt-0.5 text-xs",
                 variant === "dark" && "text-[#DDF3EC]/70",
                 variant === "warning" && "text-[#A86712]/80",
-                variant === "calm" && "text-[#66736D]",
+                variant === "calm" && "text-[#55615B]",
               )}>
                 {subtext}
               </p>

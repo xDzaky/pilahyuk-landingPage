@@ -38,7 +38,7 @@ const STATUS_CONFIG: Record<BadgeStatus, {
   ditolak:      { label: "Ditolak",          bg: "bg-[#FCEBEB]",         text: "text-[#B54747]",            icon: XCircle },
   sengketa:     { label: "Sengketa",         bg: "bg-[#FCEBEB]",         text: "text-[#B54747]",            icon: AlertTriangle },
   pending_sync: { label: "Pending Sync",     bg: "bg-[#EBF3F9]",         text: "text-[#286A9B]",            icon: RefreshCw },
-  perkiraan:    { label: "Perkiraan",        bg: "bg-transparent",       text: "text-[#66736D]",            icon: Info, dashed: true },
+  perkiraan:    { label: "Perkiraan",        bg: "bg-transparent",       text: "text-[#55615B]",            icon: Info, dashed: true },
   berjalan:     { label: "Berjalan",         bg: "bg-[#EBF3F9]",         text: "text-[#286A9B]",            icon: RefreshCw },
   terlambat:    { label: "Terlambat",        bg: "bg-[#FCEBEB]",         text: "text-[#B54747]",            icon: AlertTriangle },
   belum:        { label: "Belum Dimulai",    bg: "bg-gray-100",          text: "text-gray-500",             icon: Clock },
@@ -106,7 +106,7 @@ export function StatusBadge({ status, className, size = "md", dot = false }: Sta
         "inline-flex items-center gap-1 font-semibold rounded-full border border-current/10",
         config.bg,
         config.text,
-        config.dashed && "border-dashed border-[#66736D]",
+        config.dashed && "border-dashed border-[#55615B]",
         size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-3 py-1 text-xs",
         className
       )}

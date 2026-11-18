@@ -33,7 +33,7 @@ const TASK_COLUMNS: Column<Task>[] = [
     cell: row => (
       <div>
         <div className="text-sm font-medium text-[#1E2925]">{row.title}</div>
-        <div className="text-xs text-[#66736D]">PIC: {row.pic}</div>
+        <div className="text-xs text-[#55615B]">PIC: {row.pic}</div>
       </div>
     )
   },
@@ -51,7 +51,7 @@ const TASK_COLUMNS: Column<Task>[] = [
   {
     key: "due_at", header: "Tenggat", sortable: true,
     cell: row => (
-      <span className={`text-xs ${row.status === "terlambat" ? "text-[#B54747] font-semibold" : "text-[#66736D]"}`}>
+      <span className={`text-xs ${row.status === "terlambat" ? "text-[#B54747] font-semibold" : "text-[#55615B]"}`}>
         {formatDate(row.due_at, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
       </span>
     )
@@ -68,11 +68,11 @@ const TASK_COLUMNS: Column<Task>[] = [
   {
     key: "actions", header: "Aksi",
     cell: row => row.status !== "selesai" ? (
-      <button className="px-2 py-1 text-xs font-medium border border-[#E1E8E3] rounded-[9999px] hover:border-[#246B56] hover:text-[#246B56] transition-colors">
+      <button className="px-2 py-1 text-xs font-medium border border-[#D2DCD5] rounded-[4px] hover:border-[#246B56] hover:text-[#246B56] transition-colors">
         Verifikasi
       </button>
     ) : (
-      <span className="text-xs text-[#66736D]">—</span>
+      <span className="text-xs text-[#55615B]">—</span>
     )
   },
 ]
@@ -108,7 +108,7 @@ export default function KomunitasPage() {
           icon={AlertTriangle}
           variant="dark"
           actions={
-            <button className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[12px] hover:bg-[#CBECE2] transition-colors">
+            <button className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[6px] hover:bg-[#CBECE2] transition-colors">
               Lihat semua
             </button>
           }
@@ -159,13 +159,13 @@ export default function KomunitasPage() {
           footer={
             lateTasks > 0
               ? <span className="text-[#B54747] font-semibold text-[11px]">⚠ {lateTasks} terlambat</span>
-              : <span className="text-[11px] text-[#66736D]">Semua on track</span>
+              : <span className="text-[11px] text-[#55615B]">Semua on track</span>
           }
         />
       </div>
 
       {/* ── METRIK KOMUNITAS ── */}
-      <div className="bg-white border border-[#E1E8E3] rounded-[16px] p-5">
+      <div className="bg-white border border-[#D2DCD5] rounded-[6px] p-5">
         <MetricList
           title="Statistik Keanggotaan"
           items={[
@@ -183,7 +183,7 @@ export default function KomunitasPage() {
 
         {/* Agenda mendatang (span 8) */}
         <div className="lg:col-span-8">
-          <div className="bg-white rounded-[16px] border border-[#E1E8E3] p-6">
+          <div className="bg-white rounded-[6px] border border-[#D2DCD5] p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-[#1E2925]">Agenda Mendatang</h2>
               <button className="text-xs text-[#246B56] font-semibold hover:underline">
@@ -203,13 +203,13 @@ export default function KomunitasPage() {
                   const pct = Math.round((evt.registered / evt.capacity) * 100)
                   const isCritical = pct > 80
                   return (
-                    <div key={evt.id} className="flex gap-4 p-4 rounded-[12px] border border-[#E1E8E3] hover:border-[#3D9274] transition-colors">
+                    <div key={evt.id} className="flex gap-4 p-4 rounded-[6px] border border-[#D2DCD5] hover:border-[#3D9274] transition-colors">
                       {/* Date block */}
                       <div className="text-center min-w-[48px]">
                         <div className="text-2xl font-black text-[#173F35] leading-none">
                           {new Date(evt.start_at).getDate()}
                         </div>
-                        <div className="text-[11px] text-[#66736D] font-medium mt-0.5">
+                        <div className="text-[11px] text-[#55615B] font-medium mt-0.5">
                           {new Date(evt.start_at).toLocaleDateString("id-ID", { month: "short" })}
                         </div>
                       </div>
@@ -223,7 +223,7 @@ export default function KomunitasPage() {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 mt-1 text-[11px] text-[#66736D]">
+                        <div className="flex items-center gap-3 mt-1 text-[11px] text-[#55615B]">
                           <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {new Date(evt.start_at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB
@@ -236,7 +236,7 @@ export default function KomunitasPage() {
 
                         {/* Quota progress */}
                         <div className="mt-2 flex items-center gap-2">
-                          <div className="flex-1 h-2 bg-[#E1E8E3] rounded-full overflow-hidden">
+                          <div className="flex-1 h-2 bg-[#D2DCD5] rounded-full overflow-hidden">
                             <div
                               className="h-full rounded-full transition-all"
                               style={{
@@ -245,7 +245,7 @@ export default function KomunitasPage() {
                               }}
                             />
                           </div>
-                          <span className="text-[11px] text-[#66736D] whitespace-nowrap">
+                          <span className="text-[11px] text-[#55615B] whitespace-nowrap">
                             {evt.registered}/{evt.capacity} terdaftar
                           </span>
                         </div>
@@ -260,7 +260,7 @@ export default function KomunitasPage() {
 
         {/* Permintaan anggota (span 4) */}
         <div className="lg:col-span-4">
-          <div className="bg-white rounded-[16px] border border-[#E1E8E3] p-6 h-full">
+          <div className="bg-white rounded-[6px] border border-[#D2DCD5] p-6 h-full">
             <h2 className="font-bold text-[#1E2925] mb-4">
               Permintaan Bergabung
               {pendingRequests.length > 0 && (
@@ -278,29 +278,29 @@ export default function KomunitasPage() {
             ) : (
               <div className="space-y-3">
                 {pendingRequests.map(req => (
-                  <div key={req.id} className="flex items-start gap-3 p-3 rounded-[12px] border border-[#E1E8E3]">
+                  <div key={req.id} className="flex items-start gap-3 p-3 rounded-[6px] border border-[#D2DCD5]">
                     <div className="w-9 h-9 bg-[#DDF3EC] rounded-full flex items-center justify-center shrink-0">
                       <span className="text-[#173F35] text-xs font-bold">{getInitials(req.name)}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold text-[#1E2925]">{req.name}</div>
-                      <div className="text-[11px] text-[#66736D]">
+                      <div className="text-[11px] text-[#55615B]">
                         {new Date(req.submitted_at).toLocaleDateString("id-ID", { day: "numeric", month: "long" })}
                       </div>
                       {req.message && (
-                        <div className="text-[11px] text-[#66736D] mt-1 italic truncate">&ldquo;{req.message}&rdquo;</div>
+                        <div className="text-[11px] text-[#55615B] mt-1 italic truncate">&ldquo;{req.message}&rdquo;</div>
                       )}
                       <div className="flex gap-2 mt-2">
                         <button
                           onClick={() => handleApprove(req.id)}
-                          className="flex items-center gap-1 px-2.5 py-1 bg-[#173F35] text-white text-xs font-semibold rounded-[9999px] hover:bg-[#246B56] transition-colors"
+                          className="flex items-center gap-1 px-2.5 py-1 bg-[#173F35] text-white text-xs font-semibold rounded-[4px] hover:bg-[#246B56] transition-colors"
                         >
                           <CheckCircle2 className="w-3 h-3" />
                           Setujui
                         </button>
                         <button
                           onClick={() => handleReject(req.id)}
-                          className="flex items-center gap-1 px-2.5 py-1 border border-[#B54747] text-[#B54747] text-xs font-semibold rounded-[9999px] hover:bg-[#FCEBEB] transition-colors"
+                          className="flex items-center gap-1 px-2.5 py-1 border border-[#B54747] text-[#B54747] text-xs font-semibold rounded-[4px] hover:bg-[#FCEBEB] transition-colors"
                         >
                           <XCircle className="w-3 h-3" />
                           Tolak
@@ -320,9 +320,9 @@ export default function KomunitasPage() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="font-bold text-[#1E2925]">Tugas Relawan</h2>
-            <p className="text-xs text-[#66736D]">{completedTasks} dari {totalTasks} selesai · dari tasks</p>
+            <p className="text-xs text-[#55615B]">{completedTasks} dari {totalTasks} selesai · dari tasks</p>
           </div>
-          <button className="px-3 py-1.5 bg-[#173F35] text-white text-xs font-semibold rounded-[12px] hover:bg-[#246B56] transition-colors">
+          <button className="px-3 py-1.5 bg-[#173F35] text-white text-xs font-semibold rounded-[6px] hover:bg-[#246B56] transition-colors">
             + Tambah Tugas
           </button>
         </div>

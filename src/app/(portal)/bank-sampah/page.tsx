@@ -89,39 +89,39 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
   }
 
   return (
-    <div className="bg-white rounded-[16px] border border-[#E1E8E3] p-6">
+    <div className="bg-white rounded-[6px] border border-[#D2DCD5] p-6">
       <h2 className="font-bold text-[#1E2925] mb-4">Penimbangan Baru</h2>
 
       {/* Member search */}
       <div className="mb-4">
-        <label className="block text-xs font-semibold text-[#66736D] mb-1.5">
+        <label className="block text-xs font-semibold text-[#55615B] mb-1.5">
           Anggota <span className="text-[#B54747]">*</span>
         </label>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#66736D]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#55615B]" />
           <input
             type="text"
             value={selectedMember ? selectedMember.name : memberQuery}
             onChange={e => { setMemberQuery(e.target.value); setSelectedMember(null) }}
             placeholder="Cari nama atau kode anggota..."
-            className="w-full pl-9 pr-3 h-10 text-sm border border-[#E1E8E3] rounded-[12px] focus:outline-none focus:border-[#246B56]"
+            className="w-full pl-9 pr-3 h-10 text-sm border border-[#D2DCD5] rounded-[6px] focus:outline-none focus:border-[#246B56]"
             aria-label="Cari anggota"
             data-error={errors.member ? "" : undefined}
           />
           {!selectedMember && memberQuery && filteredMembers.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#E1E8E3] rounded-[12px] shadow-sm z-10 overflow-hidden">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#D2DCD5] rounded-[6px] shadow-sm z-10 overflow-hidden">
               {filteredMembers.map(m => (
                 <button
                   key={m.id}
                   onClick={() => { setSelectedMember(m); setMemberQuery("") }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F6F8F5] text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#EDF1EC] text-left"
                 >
                   <div className="w-7 h-7 bg-[#DDF3EC] rounded-full flex items-center justify-center shrink-0">
                     <span className="text-[#173F35] text-[10px] font-bold">{getInitials(m.name)}</span>
                   </div>
                   <div>
                     <div className="text-sm font-medium text-[#1E2925]">{m.name}</div>
-                    <div className="text-[11px] text-[#66736D]">
+                    <div className="text-[11px] text-[#55615B]">
                       Saldo: {formatRupiah(getMemberBalance(m.id))}
                     </div>
                   </div>
@@ -135,7 +135,7 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
 
       {/* Items */}
       <div className="space-y-3 mb-4">
-        <label className="block text-xs font-semibold text-[#66736D]">
+        <label className="block text-xs font-semibold text-[#55615B]">
           Material & Berat <span className="text-[#B54747]">*</span>
         </label>
         {items.map((item, i) => {
@@ -143,13 +143,13 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
           const price = getPrice(item.material_id)
           const value = net * price
           return (
-            <div key={i} className="rounded-[12px] border border-[#E1E8E3] p-4 space-y-3">
+            <div key={i} className="rounded-[6px] border border-[#D2DCD5] p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-[#66736D]">Item {i+1}</span>
+                <span className="text-xs font-semibold text-[#55615B]">Item {i+1}</span>
                 {items.length > 1 && (
                   <button
                     onClick={() => setItems(items.filter((_, j) => j !== i))}
-                    className="p-1 hover:text-[#B54747] text-[#66736D]"
+                    className="p-1 hover:text-[#B54747] text-[#55615B]"
                     aria-label={`Hapus item ${i+1}`}
                   >
                     <X className="w-3.5 h-3.5" />
@@ -168,7 +168,7 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
                       updated[i] = { ...updated[i], material_id: e.target.value, material_name: mat?.name ?? "" }
                       setItems(updated)
                     }}
-                    className="w-full h-10 px-3 text-sm border border-[#E1E8E3] rounded-[12px] focus:outline-none focus:border-[#246B56] bg-white"
+                    className="w-full h-10 px-3 text-sm border border-[#D2DCD5] rounded-[6px] focus:outline-none focus:border-[#246B56] bg-white"
                     aria-label={`Pilih material item ${i+1}`}
                   >
                     <option value="">Pilih material...</option>
@@ -183,12 +183,12 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
 
                 {/* Bruto */}
                 <div>
-                  <label className="block text-[11px] text-[#66736D] mb-1">Bruto (kg)</label>
+                  <label className="block text-[11px] text-[#55615B] mb-1">Bruto (kg)</label>
                   <input
                     type="number" step="0.01" min="0"
                     value={item.gross}
                     onChange={e => { const u = [...items]; u[i] = {...u[i], gross: e.target.value}; setItems(u) }}
-                    className="w-full h-10 px-3 text-sm border border-[#E1E8E3] rounded-[12px] focus:outline-none focus:border-[#246B56]"
+                    className="w-full h-10 px-3 text-sm border border-[#D2DCD5] rounded-[6px] focus:outline-none focus:border-[#246B56]"
                     placeholder="0.00"
                     aria-label={`Berat bruto item ${i+1}`}
                   />
@@ -197,12 +197,12 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
 
                 {/* Tara */}
                 <div>
-                  <label className="block text-[11px] text-[#66736D] mb-1">Tara (kg)</label>
+                  <label className="block text-[11px] text-[#55615B] mb-1">Tara (kg)</label>
                   <input
                     type="number" step="0.01" min="0"
                     value={item.tare}
                     onChange={e => { const u = [...items]; u[i] = {...u[i], tare: e.target.value}; setItems(u) }}
-                    className="w-full h-10 px-3 text-sm border border-[#E1E8E3] rounded-[12px] focus:outline-none focus:border-[#246B56]"
+                    className="w-full h-10 px-3 text-sm border border-[#D2DCD5] rounded-[6px] focus:outline-none focus:border-[#246B56]"
                     placeholder="0.00"
                     aria-label={`Berat tara item ${i+1}`}
                   />
@@ -212,18 +212,18 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
 
               {/* Auto-calculated */}
               {item.material_id && (
-                <div className="flex gap-4 pt-2 border-t border-[#E1E8E3] text-xs">
+                <div className="flex gap-4 pt-2 border-t border-[#D2DCD5] text-xs">
                   <div>
-                    <span className="text-[#66736D]">Bersih: </span>
+                    <span className="text-[#55615B]">Bersih: </span>
                     <strong className="text-[#1E2925]">{net.toFixed(2)} kg</strong>
                   </div>
                   <div>
-                    <span className="text-[#66736D]">Harga: </span>
+                    <span className="text-[#55615B]">Harga: </span>
                     <strong className="text-[#1E2925]">{formatRupiah(price)}/kg</strong>
-                    <span className="text-[#66736D] ml-1 text-[10px]">(berlaku 1 Nov)</span>
+                    <span className="text-[#55615B] ml-1 text-[10px]">(berlaku 1 Nov)</span>
                   </div>
                   <div>
-                    <span className="text-[#66736D]">Nilai: </span>
+                    <span className="text-[#55615B]">Nilai: </span>
                     <strong className="text-[#246B56]">{formatRupiah(value)}</strong>
                   </div>
                 </div>
@@ -234,7 +234,7 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
 
         <button
           onClick={() => setItems([...items, { material_id: "", material_name: "", gross: "", tare: "" }])}
-          className="w-full h-10 border border-dashed border-[#E1E8E3] rounded-[12px] text-xs text-[#66736D] hover:border-[#246B56] hover:text-[#246B56] transition-colors flex items-center justify-center gap-1.5"
+          className="w-full h-10 border border-dashed border-[#D2DCD5] rounded-[6px] text-xs text-[#55615B] hover:border-[#246B56] hover:text-[#246B56] transition-colors flex items-center justify-center gap-1.5"
         >
           <Plus className="w-3.5 h-3.5" />
           Tambah Material
@@ -243,13 +243,13 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
 
       {/* Total summary */}
       {totalNet > 0 && (
-        <div className="rounded-[12px] bg-[#F6F8F5] p-3 mb-4 flex justify-between text-sm">
+        <div className="rounded-[6px] bg-[#F6F8F5] p-3 mb-4 flex justify-between text-sm">
           <div>
-            <span className="text-[#66736D]">Total Bersih: </span>
+            <span className="text-[#55615B]">Total Bersih: </span>
             <strong className="text-[#1E2925]">{formatKg(totalNet)}</strong>
           </div>
           <div>
-            <span className="text-[#66736D]">Total Nilai: </span>
+            <span className="text-[#55615B]">Total Nilai: </span>
             <strong className="text-[#246B56]">{formatRupiah(totalValue)}</strong>
           </div>
         </div>
@@ -259,13 +259,13 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
       <div className="flex gap-3">
         <button
           onClick={handleSaveDraft}
-          className="flex-1 h-10 border border-[#E1E8E3] rounded-[12px] text-sm font-semibold text-[#1E2925] hover:border-[#246B56] hover:text-[#246B56] transition-colors"
+          className="flex-1 h-10 border border-[#D2DCD5] rounded-[6px] text-sm font-semibold text-[#1E2925] hover:border-[#246B56] hover:text-[#246B56] transition-colors"
         >
           Simpan Draft
         </button>
         <button
           onClick={handleConfirm}
-          className="flex-1 h-10 bg-[#173F35] text-white rounded-[12px] text-sm font-semibold hover:bg-[#246B56] transition-colors"
+          className="flex-1 h-10 bg-[#173F35] text-white rounded-[6px] text-sm font-semibold hover:bg-[#246B56] transition-colors"
         >
           Konfirmasi
         </button>
@@ -274,9 +274,9 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
       {/* Confirmation modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="bg-white rounded-[16px] p-6 max-w-sm w-full border border-[#E1E8E3]">
+          <div className="bg-white rounded-[6px] p-6 max-w-sm w-full border border-[#D2DCD5]">
             <h3 className="font-bold text-[#1E2925] mb-2">Konfirmasi Transaksi</h3>
-            <p className="text-sm text-[#66736D] mb-4">
+            <p className="text-sm text-[#55615B] mb-4">
               Transaksi untuk <strong>{selectedMember?.name}</strong>:{" "}
               <strong>{formatKg(totalNet)}</strong> senilai <strong>{formatRupiah(totalValue)}</strong>.
               Transaksi yang dikonfirmasi tidak dapat dihapus.
@@ -284,14 +284,14 @@ function WeighingForm({ onClose }: { onClose?: () => void }) {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="flex-1 h-10 border border-[#E1E8E3] rounded-[12px] text-sm font-medium text-[#66736D] hover:border-[#246B56]"
+                className="flex-1 h-10 border border-[#D2DCD5] rounded-[6px] text-sm font-medium text-[#55615B] hover:border-[#246B56]"
               >
                 Batal
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="flex-1 h-10 bg-[#173F35] text-white rounded-[12px] text-sm font-semibold hover:bg-[#246B56] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 h-10 bg-[#173F35] text-white rounded-[6px] text-sm font-semibold hover:bg-[#246B56] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
               >
                 {submitting && <RefreshCw className="w-4 h-4 animate-spin" />}
                 {submitting ? "Menyimpan..." : "Ya, Konfirmasi"}
@@ -309,7 +309,7 @@ type Txn = typeof MOCK_WEIGHING_TRANSACTIONS[0]
 const TXN_COLUMNS: Column<Txn>[] = [
   {
     key: "transaction_at", header: "Waktu", sortable: true,
-    cell: row => <span className="text-xs text-[#66736D]">{formatDateTime(row.transaction_at)}</span>
+    cell: row => <span className="text-xs text-[#55615B]">{formatDateTime(row.transaction_at)}</span>
   },
   {
     key: "member_name", header: "Anggota", sortable: true,
@@ -372,14 +372,14 @@ export default function BankSampahPage() {
             {pendingSync > 0 && (
               <button
                 onClick={() => alert("Membuka drawer antrean sinkronisasi")}
-                className="px-3 py-1.5 bg-[#FBF1DF] text-[#A86712] border border-[#F3DFBD] hover:bg-[#F5E5C9] text-xs font-semibold rounded-[12px] flex items-center gap-1.5 transition-colors shadow-sm"
+                className="px-3 py-1.5 bg-[#FBF1DF] text-[#A86712] border border-[#F3DFBD] hover:bg-[#F5E5C9] text-xs font-semibold rounded-[6px] flex items-center gap-1.5 transition-colors shadow-sm"
                 title="Buka antrean sinkronisasi"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 {pendingSync} Menunggu Sinkron
               </button>
             )}
-            <button className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[12px] hover:bg-[#CBECE2] flex items-center gap-1.5 transition-colors shadow-sm">
+            <button className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[6px] hover:bg-[#CBECE2] flex items-center gap-1.5 transition-colors shadow-sm">
               <Download className="w-3.5 h-3.5" />
               Laporan
             </button>
@@ -414,7 +414,7 @@ export default function BankSampahPage() {
           icon={Wallet}
           source="dihitung dari ledger · bukan angka manual"
           footer={
-            <span className="text-[11px] text-[#66736D]">
+            <span className="text-[11px] text-[#55615B]">
               💡 dihitung dari ledger · bukan angka manual
             </span>
           }
@@ -443,20 +443,20 @@ export default function BankSampahPage() {
 
         {/* Transaction list (span 5) */}
         <div className="lg:col-span-5">
-          <div className="bg-white rounded-[16px] border border-[#E1E8E3] p-6">
+          <div className="bg-white rounded-[6px] border border-[#D2DCD5] p-6">
             <h2 className="font-bold text-[#1E2925] mb-4">Riwayat Transaksi</h2>
             <div className="space-y-2">
               {MOCK_WEIGHING_TRANSACTIONS.slice(0, 5).map(tx => {
                 const badge = tx.sync_status === "pending" ? "pending_sync" : mapWeighingStatus(tx.status)
                 return (
-                  <div key={tx.id} className="flex items-center gap-3 py-2.5 border-b border-[#E1E8E3] last:border-0">
+                  <div key={tx.id} className="flex items-center gap-3 py-2.5 border-b border-[#D2DCD5] last:border-0">
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-semibold text-[#1E2925]">{tx.member_name}</div>
-                      <div className="text-[11px] text-[#66736D]">{timeAgo(tx.transaction_at)}</div>
+                      <div className="text-[11px] text-[#55615B]">{timeAgo(tx.transaction_at)}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-xs font-semibold text-[#1E2925]">{formatKg(tx.total_net)}</div>
-                      <div className="text-[11px] text-[#66736D]">{formatRupiah(tx.total_value)}</div>
+                      <div className="text-[11px] text-[#55615B]">{formatRupiah(tx.total_value)}</div>
                     </div>
                     <StatusBadge status={badge} size="sm" />
                   </div>
@@ -471,7 +471,7 @@ export default function BankSampahPage() {
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-bold text-[#1E2925]">Semua Transaksi</h2>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 border border-[#E1E8E3] rounded-[12px] text-xs font-medium text-[#66736D] hover:border-[#246B56] hover:text-[#246B56] transition-colors">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 border border-[#D2DCD5] rounded-[6px] text-xs font-medium text-[#55615B] hover:border-[#246B56] hover:text-[#246B56] transition-colors">
             <Download className="w-3.5 h-3.5" />
             Ekspor CSV
           </button>

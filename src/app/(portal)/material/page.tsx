@@ -32,24 +32,24 @@ export default function MaterialPage() {
       cell: (row) => (
         <div>
           <div className="font-semibold text-[#1E2925]">{row.name}</div>
-          <div className="text-[11px] text-[#66736D]">{CATEGORY_LABEL[row.category] ?? row.category}</div>
+          <div className="text-[11px] text-[#55615B]">{CATEGORY_LABEL[row.category] ?? row.category}</div>
         </div>
       ),
     },
     {
       key: "prep_guide", header: "Cara menyiapkan", className: "max-w-[260px]",
-      cell: (row) => <span className="text-xs text-[#66736D] line-clamp-2">{row.prep_guide ?? "—"}</span>,
+      cell: (row) => <span className="text-xs text-[#55615B] line-clamp-2">{row.prep_guide ?? "—"}</span>,
     },
     {
       key: "current_price", header: "Harga aktif / kg", sortable: true,
       cell: (row) => row.current_price === null || row.current_price === undefined
-        ? <span className="text-xs text-[#66736D]">Belum diatur</span>
+        ? <span className="text-xs text-[#55615B]">Belum diatur</span>
         : <span className="font-semibold text-[#173F35]">Rp {formatNumber(row.current_price)}</span>,
     },
     {
       key: "accepted", header: "Diterima",
       cell: (row) => row.accepted === null || row.accepted === undefined
-        ? <span className="text-xs text-[#66736D]">—</span>
+        ? <span className="text-xs text-[#55615B]">—</span>
         : row.accepted
           ? <span className="rounded-full bg-[#DDF3EC] px-2 py-0.5 text-[11px] font-semibold text-[#173F35]">Diterima</span>
           : <span className="rounded-full bg-[#FCEBEB] px-2 py-0.5 text-[11px] font-semibold text-[#B54747]">Tidak diterima</span>,
@@ -70,8 +70,8 @@ export default function MaterialPage() {
         subtext="Harga diambil dari harga yang berlaku saat ini. Perubahan harga tidak mengubah transaksi lama karena setiap timbangan menyimpan snapshot harga."
       />
 
-      <div className="rounded-[16px] border border-[#E1E8E3] bg-white p-4">
-        <div className="mb-3 flex items-center gap-2 text-xs text-[#66736D]">
+      <div className="rounded-[6px] border border-[#D2DCD5] bg-white p-4">
+        <div className="mb-3 flex items-center gap-2 text-xs text-[#55615B]">
           <Search className="h-4 w-4" aria-hidden="true" />
           Cari material atau cara penyiapan. Data dari tabel <code className="rounded bg-[#F6F8F5] px-1">materials</code> + <code className="rounded bg-[#F6F8F5] px-1">material_prices</code>.
         </div>

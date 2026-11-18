@@ -41,12 +41,12 @@ export default function VerifikasiPage() {
 
   const columns: Column<Org>[] = [
     { key: "name", header: "Organisasi", sortable: true, cell: (row) => (
-      <div><div className="font-semibold text-[#1E2925]">{row.name}</div><div className="text-[11px] text-[#66736D]">{row.id}</div></div>
+      <div><div className="font-semibold text-[#1E2925]">{row.name}</div><div className="text-[11px] text-[#55615B]">{row.id}</div></div>
     )},
-    { key: "type", header: "Tipe", cell: (row) => <span className="text-xs text-[#66736D]">{TYPE_LABEL[row.type] ?? row.type}</span> },
-    { key: "area_name", header: "Wilayah", cell: (row) => <span className="text-xs text-[#66736D]">{row.area_name ?? "—"}</span> },
+    { key: "type", header: "Tipe", cell: (row) => <span className="text-xs text-[#55615B]">{TYPE_LABEL[row.type] ?? row.type}</span> },
+    { key: "area_name", header: "Wilayah", cell: (row) => <span className="text-xs text-[#55615B]">{row.area_name ?? "—"}</span> },
     { key: "member_count", header: "Anggota", sortable: true, cell: (row) => <span className="text-sm">{row.member_count}</span> },
-    { key: "created_at", header: "Diajukan", sortable: true, cell: (row) => <span className="text-xs text-[#66736D]">{formatDate(row.created_at)}</span> },
+    { key: "created_at", header: "Diajukan", sortable: true, cell: (row) => <span className="text-xs text-[#55615B]">{formatDate(row.created_at)}</span> },
     { key: "actions", header: "Aksi", className: "text-right", cell: (row) => (
       <div className="flex justify-end gap-1">
         <button disabled={busy === row.id} onClick={() => decide(row.id, "approve")} className="inline-flex items-center gap-1 rounded-lg bg-[#DDF3EC] px-2.5 py-1 text-[11px] font-semibold text-[#173F35] disabled:opacity-50"><Check className="h-3 w-3" />Verifikasi</button>
@@ -64,8 +64,8 @@ export default function VerifikasiPage() {
         answer={`${rows.length} organisasi menunggu verifikasi`}
         subtext="Periksa identitas, wilayah, dan kontak sebelum menyetujui. Setiap keputusan tercatat di audit log."
       />
-      {message ? <div className="rounded-xl border border-[#E1E8E3] bg-white px-4 py-2 text-sm text-[#246B56]">{message}</div> : null}
-      <div className="rounded-[16px] border border-[#E1E8E3] bg-white p-4">
+      {message ? <div className="rounded-[6px] border border-[#D2DCD5] bg-white px-4 py-2 text-sm text-[#246B56]">{message}</div> : null}
+      <div className="rounded-[6px] border border-[#D2DCD5] bg-white p-4">
         <DataTable columns={columns} data={rows} keyExtractor={(row) => row.id} isLoading={orgs.loading}
           searchPlaceholder="Cari organisasi..." searchKeys={["name", "area_name"]}
           emptyTitle="Tidak ada antrean verifikasi" emptyDescription="Semua organisasi sudah ditinjau." pageSize={20} />

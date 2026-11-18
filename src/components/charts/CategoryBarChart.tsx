@@ -37,11 +37,11 @@ function CustomTooltip({
   if (!active || !payload?.length) return null;
   const item = payload[0].payload;
   return (
-    <div className="bg-white border border-[#E1E8E3] rounded-xl px-3 py-2 shadow-sm text-sm">
-      <div className="text-[#66736D] mb-0.5">{item.label}</div>
+    <div className="bg-white border border-[#D2DCD5] rounded-[6px] px-3 py-2 shadow-sm text-sm">
+      <div className="text-[#55615B] mb-0.5">{item.label}</div>
       <div className="font-semibold text-[#1E2925]">
         {payload[0].value.toLocaleString("id-ID")}
-        {unit && <span className="text-[#66736D] ml-1 font-normal">{unit}</span>}
+        {unit && <span className="text-[#55615B] ml-1 font-normal">{unit}</span>}
       </div>
     </div>
   );
@@ -57,8 +57,8 @@ export function CategoryBarChart({
   const max = Math.max(...data.map((d) => d.value));
 
   return (
-    <div className="bg-white border border-[#E1E8E3] rounded-2xl p-4">
-      <div className="text-xs text-[#66736D] font-medium uppercase tracking-wide mb-0.5">
+    <div className="bg-white border border-[#D2DCD5] rounded-[6px] p-4">
+      <div className="text-xs text-[#55615B] font-medium uppercase tracking-wide mb-0.5">
         {title}
       </div>
       <div className="text-sm text-[#1E2925] font-semibold mb-4">{question}</div>
@@ -70,19 +70,19 @@ export function CategoryBarChart({
         >
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="#E1E8E3"
+            stroke="#D2DCD5"
             horizontal={false}
           />
           <XAxis
             type="number"
-            tick={{ fontSize: 11, fill: "#66736D" }}
+            tick={{ fontSize: 11, fill: "#55615B" }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             type="category"
             dataKey="label"
-            tick={{ fontSize: 11, fill: "#66736D" }}
+            tick={{ fontSize: 11, fill: "#55615B" }}
             axisLine={false}
             tickLine={false}
             width={80}

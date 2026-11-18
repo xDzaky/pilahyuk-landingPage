@@ -37,7 +37,7 @@ const TXN_COLUMNS: Column<WeighingTransaction>[] = [
   {
     key: "transaction_at", header: "Waktu", sortable: true,
     cell: row => (
-      <span className="text-xs text-[#66736D]">{formatDateTime(row.transaction_at)}</span>
+      <span className="text-xs text-[#55615B]">{formatDateTime(row.transaction_at)}</span>
     )
   },
   {
@@ -74,7 +74,7 @@ const TXN_COLUMNS: Column<WeighingTransaction>[] = [
 const COL_COLUMNS: Column<CollectionRequest>[] = [
   {
     key: "requested_at", header: "Waktu", sortable: true,
-    cell: row => <span className="text-xs text-[#66736D]">{timeAgo(row.requested_at)}</span>
+    cell: row => <span className="text-xs text-[#55615B]">{timeAgo(row.requested_at)}</span>
   },
   {
     key: "requester_name", header: "Peminta", sortable: true,
@@ -84,7 +84,7 @@ const COL_COLUMNS: Column<CollectionRequest>[] = [
     key: "method", header: "Metode",
     cell: row => {
       const labels = { individual: "Jemput", collective: "Kolektif", dropoff: "Setor" }
-      return <span className="text-xs text-[#66736D]">{labels[row.method]}</span>
+      return <span className="text-xs text-[#55615B]">{labels[row.method]}</span>
     }
   },
   {
@@ -158,7 +158,7 @@ export default function DashboardPage() {
               <button
                 onClick={handleSync}
                 disabled={isSyncing}
-                className="px-3 py-1.5 bg-[#FBF1DF] text-[#A86712] border border-[#F3DFBD] hover:bg-[#F5E5C9] text-xs font-semibold rounded-[12px] flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-60"
+                className="px-3 py-1.5 bg-[#FBF1DF] text-[#A86712] border border-[#F3DFBD] hover:bg-[#F5E5C9] text-xs font-semibold rounded-[6px] flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-60"
                 title="Klik untuk sinkronkan data lokal ke server"
               >
                 <RefreshCw className={cn("w-3.5 h-3.5", isSyncing && "animate-spin")} />
@@ -167,7 +167,7 @@ export default function DashboardPage() {
             )}
             <Link
               href="/bank-sampah"
-              className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[12px] hover:bg-[#CBECE2] flex items-center gap-1.5 transition-colors shadow-sm"
+              className="px-3 py-1.5 bg-[#DDF3EC] text-[#173F35] text-xs font-semibold rounded-[6px] hover:bg-[#CBECE2] flex items-center gap-1.5 transition-colors shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               Timbang Baru
@@ -229,7 +229,7 @@ export default function DashboardPage() {
           />
         </div>
         <div className="lg:col-span-4">
-          <div className="bg-white border border-[#E1E8E3] rounded-[16px] p-5 h-full">
+          <div className="bg-white border border-[#D2DCD5] rounded-[6px] p-5 h-full">
             <MetricList
               title="Ringkasan Operasional"
               items={[
@@ -249,11 +249,11 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="font-bold text-[#1E2925]">Riwayat Transaksi</h2>
-            <p className="text-xs text-[#66736D]">dari weighing_transactions · diperbarui tiap 30 detik</p>
+            <p className="text-xs text-[#55615B]">dari weighing_transactions · diperbarui tiap 30 detik</p>
           </div>
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-[#E1E8E3] rounded-[12px] text-xs font-medium text-[#66736D] hover:border-[#246B56] hover:text-[#246B56] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 border border-[#D2DCD5] rounded-[6px] text-xs font-medium text-[#55615B] hover:border-[#246B56] hover:text-[#246B56] transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
             Ekspor CSV
@@ -282,7 +282,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="font-bold text-[#1E2925]">Permintaan Pengumpulan</h2>
-            <p className="text-xs text-[#66736D]">dari collection_requests · semua status</p>
+            <p className="text-xs text-[#55615B]">dari collection_requests · semua status</p>
           </div>
           <Link
             href="/pengumpulan"
